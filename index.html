@@ -4560,26 +4560,18 @@ function makeBkCard(b){
     // Amount
     +amtHtml
 
-    // Action buttons - same layout as before but with animation styles
-    +'<div style="display:grid;grid-template-columns:1fr 1.4fr 1fr;gap:8px;align-items:stretch">'
-
-    // Left col: Mark Paid + Check-in + Small Check-in
-    +'<div style="display:flex;flex-direction:column;gap:6px">'
-    +(b.status!=='paid'?'<button onclick="bkBtnClick(this);markBkPaid(\''+b.id+'\')" class="bk-btn" style="width:100%;background:var(--gnb);color:var(--gn);border:1.5px solid #C3E0CE;border-radius:10px;padding:9px 10px;font-size:12px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;transition:all 0.15s">&#10003; Mark Paid</button>':'')
-    +'<button onclick="bkBtnClick(this);sendCheckinWA(\''+b.id+'\')" class="bk-btn" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:10px;padding:9px 10px;font-size:12px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;transition:all 0.15s">'+WA_SVG_S+' Check-in</button>'
-    +'<button onclick="bkBtnClick(this);sendShortCheckinWA(\''+b.id+'\')" class="bk-btn" style="width:100%;background:#f0faf4;color:#2E7D52;border:1.5px dashed #A8D5B5;border-radius:10px;padding:9px 10px;font-size:12px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;transition:all 0.15s">'+WA_SVG_S+' Small Check-In</button>'
+    // Action buttons — mobile-friendly 2-column grid
+    +(b.status!=='paid'?'<button onclick="bkBtnClick(this);markBkPaid(\''+b.id+'\')" class="bk-btn" style="width:100%;background:var(--gnb);color:var(--gn);border:1.5px solid #C3E0CE;border-radius:12px;padding:13px 10px;font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;transition:all 0.15s;margin-bottom:8px">&#10003; Mark Paid</button>':'')
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'
+    +'<button onclick="bkBtnClick(this);sendCheckinWA(\''+b.id+'\')" class="bk-btn" style="background:#25D366;color:#fff;border:none;border-radius:12px;padding:14px 8px;font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;transition:all 0.15s">'+WA_SVG_S+' Check-in</button>'
+    +'<button onclick="bkBtnClick(this);sendCheckoutWA(\''+b.id+'\')" class="bk-btn" style="background:#c44;color:#fff;border:none;border-radius:12px;padding:14px 8px;font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;transition:all 0.15s">'+WA_SVG_S+' Checkout</button>'
     +'</div>'
-
-    // Center: Cancel
-    +'<button onclick="bkBtnClick(this);cancelBk(\''+b.id+'\')" class="bk-btn" style="align-self:stretch;background:#FFF3E0;color:#c44;border:1.5px solid #FECBA1;border-radius:10px;padding:9px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap;display:flex;align-items:center;justify-content:center;transition:all 0.15s">&#10007; Cancel</button>'
-
-    // Right col: Checkout + Short Checkout
-    +'<div style="display:flex;flex-direction:column;gap:6px">'
-    +'<button onclick="bkBtnClick(this);sendCheckoutWA(\''+b.id+'\')" class="bk-btn" style="width:100%;background:#c44;color:#fff;border:none;border-radius:10px;padding:9px 10px;font-size:12px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;transition:all 0.15s">'+WA_SVG_S+' Checkout</button>'
-    +'<button onclick="bkBtnClick(this);sendShortCheckoutWA(\''+b.id+'\')" class="bk-btn" style="width:100%;background:#fff0f0;color:#c44;border:1.5px dashed #f5b8b8;border-radius:10px;padding:9px 10px;font-size:12px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;transition:all 0.15s">'+WA_SVG_S+' Short Checkout</button>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'
+    +'<button onclick="bkBtnClick(this);sendShortCheckinWA(\''+b.id+'\')" class="bk-btn" style="background:#f0faf4;color:#2E7D52;border:1.5px dashed #A8D5B5;border-radius:12px;padding:13px 8px;font-size:12px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;gap:4px;transition:all 0.15s">'+WA_SVG_S+' Short Check-in</button>'
+    +'<button onclick="bkBtnClick(this);sendShortCheckoutWA(\''+b.id+'\')" class="bk-btn" style="background:#fff0f0;color:#c44;border:1.5px dashed #f5b8b8;border-radius:12px;padding:13px 8px;font-size:12px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;gap:4px;transition:all 0.15s">'+WA_SVG_S+' Short Checkout</button>'
     +'</div>'
+    +'<button onclick="bkBtnClick(this);cancelBk(\''+b.id+'\')" class="bk-btn" style="width:100%;background:#FFF3E0;color:#c44;border:1.5px solid #FECBA1;border-radius:12px;padding:13px 10px;font-size:13px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;transition:all 0.15s">&#10007; Cancel Booking</button>'
 
-    +'</div>'  // end button grid
     +'</div>';  // end card
 }
 
@@ -8813,26 +8805,18 @@ function makeBkCard(b){
     // Amount
     +amtHtml
 
-    // Action buttons - same layout as before but with animation styles
-    +'<div style="display:grid;grid-template-columns:1fr 1.4fr 1fr;gap:8px;align-items:stretch">'
-
-    // Left col: Mark Paid + Check-in + Small Check-in
-    +'<div style="display:flex;flex-direction:column;gap:6px">'
-    +(b.status!=='paid'?'<button onclick="bkBtnClick(this);markBkPaid(\''+b.id+'\')" class="bk-btn" style="width:100%;background:var(--gnb);color:var(--gn);border:1.5px solid #C3E0CE;border-radius:10px;padding:9px 10px;font-size:12px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;transition:all 0.15s">&#10003; Mark Paid</button>':'')
-    +'<button onclick="bkBtnClick(this);sendCheckinWA(\''+b.id+'\')" class="bk-btn" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:10px;padding:9px 10px;font-size:12px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;transition:all 0.15s">'+WA_SVG_S+' Check-in</button>'
-    +'<button onclick="bkBtnClick(this);sendShortCheckinWA(\''+b.id+'\')" class="bk-btn" style="width:100%;background:#f0faf4;color:#2E7D52;border:1.5px dashed #A8D5B5;border-radius:10px;padding:9px 10px;font-size:12px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;transition:all 0.15s">'+WA_SVG_S+' Small Check-In</button>'
+    // Action buttons — mobile-friendly 2-column grid
+    +(b.status!=='paid'?'<button onclick="bkBtnClick(this);markBkPaid(\''+b.id+'\')" class="bk-btn" style="width:100%;background:var(--gnb);color:var(--gn);border:1.5px solid #C3E0CE;border-radius:12px;padding:13px 10px;font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;transition:all 0.15s;margin-bottom:8px">&#10003; Mark Paid</button>':'')
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'
+    +'<button onclick="bkBtnClick(this);sendCheckinWA(\''+b.id+'\')" class="bk-btn" style="background:#25D366;color:#fff;border:none;border-radius:12px;padding:14px 8px;font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;transition:all 0.15s">'+WA_SVG_S+' Check-in</button>'
+    +'<button onclick="bkBtnClick(this);sendCheckoutWA(\''+b.id+'\')" class="bk-btn" style="background:#c44;color:#fff;border:none;border-radius:12px;padding:14px 8px;font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;transition:all 0.15s">'+WA_SVG_S+' Checkout</button>'
     +'</div>'
-
-    // Center: Cancel
-    +'<button onclick="bkBtnClick(this);cancelBk(\''+b.id+'\')" class="bk-btn" style="align-self:stretch;background:#FFF3E0;color:#c44;border:1.5px solid #FECBA1;border-radius:10px;padding:9px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap;display:flex;align-items:center;justify-content:center;transition:all 0.15s">&#10007; Cancel</button>'
-
-    // Right col: Checkout + Short Checkout
-    +'<div style="display:flex;flex-direction:column;gap:6px">'
-    +'<button onclick="bkBtnClick(this);sendCheckoutWA(\''+b.id+'\')" class="bk-btn" style="width:100%;background:#c44;color:#fff;border:none;border-radius:10px;padding:9px 10px;font-size:12px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;transition:all 0.15s">'+WA_SVG_S+' Checkout</button>'
-    +'<button onclick="bkBtnClick(this);sendShortCheckoutWA(\''+b.id+'\')" class="bk-btn" style="width:100%;background:#fff0f0;color:#c44;border:1.5px dashed #f5b8b8;border-radius:10px;padding:9px 10px;font-size:12px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;transition:all 0.15s">'+WA_SVG_S+' Short Checkout</button>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'
+    +'<button onclick="bkBtnClick(this);sendShortCheckinWA(\''+b.id+'\')" class="bk-btn" style="background:#f0faf4;color:#2E7D52;border:1.5px dashed #A8D5B5;border-radius:12px;padding:13px 8px;font-size:12px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;gap:4px;transition:all 0.15s">'+WA_SVG_S+' Short Check-in</button>'
+    +'<button onclick="bkBtnClick(this);sendShortCheckoutWA(\''+b.id+'\')" class="bk-btn" style="background:#fff0f0;color:#c44;border:1.5px dashed #f5b8b8;border-radius:12px;padding:13px 8px;font-size:12px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;gap:4px;transition:all 0.15s">'+WA_SVG_S+' Short Checkout</button>'
     +'</div>'
+    +'<button onclick="bkBtnClick(this);cancelBk(\''+b.id+'\')" class="bk-btn" style="width:100%;background:#FFF3E0;color:#c44;border:1.5px solid #FECBA1;border-radius:12px;padding:13px 10px;font-size:13px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;transition:all 0.15s">&#10007; Cancel Booking</button>'
 
-    +'</div>'  // end button grid
     +'</div>';  // end card
 }
 
