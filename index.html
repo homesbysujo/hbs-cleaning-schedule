@@ -1,4 +1,4 @@
-<!-- build:1780749979 -->
+<!-- build:1780750197 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6050,7 +6050,7 @@ function buildWAMessage(g){
 function makeCompactBookingRow(g, idx, total){
   var id=g.id;
   var amt=parseFloat(g.amount)||0;
-  var displayName=g.name&&!/^\+?\d[\d\s-]{6,}$/.test(g.name.trim())?escH(g.name):(escH(g.phone)||'Guest');
+  var displayName=g.name&&!/^\+?\d[\d\s-]{6,}$/.test(g.name.trim())?escH(g.name):(escH((typeof fmtGuestPhone==="function"?fmtGuestPhone(g.phone):g.phone))||'Guest');
   var isLast=idx===total-1;
   // compute tier badge — use pre-computed cache for O(1) lookup
   var tierHtml='';
@@ -6117,7 +6117,7 @@ function makeGuestCard(g, opts){
   var tierBadgeHtml=_tierInfo?('<span class="'+_tierInfo.badgeClass+'" style="font-size:10px;padding:2px 8px;margin-left:6px;animation:badgeBounce .5s cubic-bezier(.34,1.56,.64,1) both">'+_tierInfo.emoji+' '+_tierInfo.label+'</span>'):'';
 
   // Name display — if name looks like a phone number, show phone instead
-  var displayName = g.name && !/^\+?\d[\d\s-]{6,}$/.test(g.name.trim()) ? escH(g.name) : (escH(g.phone)||'Guest');
+  var displayName = g.name && !/^\+?\d[\d\s-]{6,}$/.test(g.name.trim()) ? escH(g.name) : (escH((typeof fmtGuestPhone==="function"?fmtGuestPhone(g.phone):g.phone))||'Guest');
 
   // Amount display
   var amtHtml = '';
@@ -6220,7 +6220,7 @@ function _groupGuestsByIdentity(allGuests){
       if(!found&&phoneKey&&phoneKey.length>6&&grp.phoneKey===phoneKey){found=k;}
     });
     if(found){groups[found].stays.push(g);}
-    else{var key=nameKey||phoneKey||g.id;groups[key]={nameKey:nameKey,phoneKey:phoneKey,displayName:g.name||g.phone||'Unknown',stays:[g]};}
+    else{var key=nameKey||phoneKey||g.id;groups[key]={nameKey:nameKey,phoneKey:phoneKey,displayName:g.name||(g.phone?(typeof fmtGuestPhone==="function"?fmtGuestPhone(g.phone):g.phone):'')||'Unknown',stays:[g]};}
   });
   return groups;
 }
@@ -6587,7 +6587,7 @@ function renderRecurring(){
       groups[found].stays.push(g);
     } else {
       var key = nameKey || phoneKey || g.id;
-      groups[key] = {nameKey:nameKey, phoneKey:phoneKey, displayName:g.name||g.phone, stays:[g]};
+      groups[key] = {nameKey:nameKey, phoneKey:phoneKey, displayName:g.name||(typeof fmtGuestPhone==="function"?fmtGuestPhone(g.phone):g.phone), stays:[g]};
     }
   });
 
@@ -9860,7 +9860,7 @@ function makeGuestCard(g, opts){
   var badgeLabel = g.status==='paid-airbnb' ? AIRBNB_SVG+' Airbnb' : g.status==='paid-cash' ? '&#128176; Direct' : '&#8252; Pending';
 
   // Name display — if name looks like a phone number, show phone instead
-  var displayName = g.name && !/^\+?\d[\d\s-]{6,}$/.test(g.name.trim()) ? escH(g.name) : (escH(g.phone)||'Guest');
+  var displayName = g.name && !/^\+?\d[\d\s-]{6,}$/.test(g.name.trim()) ? escH(g.name) : (escH((typeof fmtGuestPhone==="function"?fmtGuestPhone(g.phone):g.phone))||'Guest');
 
   // Amount display
   var amtHtml = '';
@@ -10000,7 +10000,7 @@ function renderRecurring(){
       groups[found].stays.push(g);
     } else {
       var key = nameKey || phoneKey || g.id;
-      groups[key] = {nameKey:nameKey, phoneKey:phoneKey, displayName:g.name||g.phone, stays:[g]};
+      groups[key] = {nameKey:nameKey, phoneKey:phoneKey, displayName:g.name||(typeof fmtGuestPhone==="function"?fmtGuestPhone(g.phone):g.phone), stays:[g]};
     }
   });
 
@@ -11091,7 +11091,7 @@ function openGuestProfile(grpData){
   var stays=grpData.stays.length;
   var totalKD=grpData.stays.reduce(function(s,g){return s+(parseFloat(g.amount)||0);},0);
   var phone=''; grpData.stays.forEach(function(s){if(!phone&&s.phone&&s.phone.replace(/\D/g,'').length>=7)phone=s.phone;});
-  var displayName=(grpData.name&&grpData.name.replace(/\D/g,'').length<grpData.name.length)?grpData.name:(phone||grpData.name||'Guest');
+  var displayName=(grpData.name&&grpData.name.replace(/\D/g,'').length<grpData.name.length)?grpData.name:((phone?(typeof fmtGuestPhone==="function"?fmtGuestPhone(phone):phone):'')||grpData.name||'Guest');
   var phoneDig=phone.replace(/\D/g,'');
 
   // Tier config
@@ -11259,7 +11259,7 @@ function renderGuestLoyalty(){
       if(!found&&pk&&pk.length>6&&map[k].pk===pk)found=k;
     });
     var key=found||(nk||pk||g.id);
-    if(!map[key])map[key]={nk:nk,pk:pk,name:g.name||g.phone||'Unknown',stays:[]};
+    if(!map[key])map[key]={nk:nk,pk:pk,name:g.name||(g.phone?(typeof fmtGuestPhone==="function"?fmtGuestPhone(g.phone):g.phone):'')||'Unknown',stays:[]};
     map[key].stays.push(g);
   });
   var sorted=Object.keys(map).map(function(k){return map[k];});
