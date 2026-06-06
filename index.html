@@ -3731,7 +3731,7 @@ function parseDOR(){
     'Parsed DOR:\n\n'+
     'Apt: '+(apt||'NOT DETECTED')+'\n'+
     'Guest: '+(name||'-')+'\n'+
-    'Phone: '+(phone?(typeof fmtGuestPhone==\'function\'?fmtGuestPhone(phone):phone):'-')+'\n'+
+    'Phone: '+(phone?(typeof fmtGuestPhone==="function"?fmtGuestPhone(phone):phone):'-')+'\n'+
     (packageNote?'Package: '+packageNote+'\n':'')+
     'Booking: KD '+amount+'\n'+
     (paidAmount&&paidAmount!==amount?'Paid: KD '+paidAmount+' ✅\n':'')+
@@ -8130,7 +8130,7 @@ function parseDOR(){
     'Parsed DOR:\n\n'+
     'Apt: '+(apt||'NOT DETECTED')+'\n'+
     'Guest: '+(name||'-')+'\n'+
-    'Phone: '+(phone?(typeof fmtGuestPhone==\'function\'?fmtGuestPhone(phone):phone):'-')+'\n'+
+    'Phone: '+(phone?(typeof fmtGuestPhone==="function"?fmtGuestPhone(phone):phone):'-')+'\n'+
     (packageNote?'Package: '+packageNote+'\n':'')+
     'Booking: KD '+amount+'\n'+
     (paidAmount&&paidAmount!==amount?'Paid: KD '+paidAmount+' ✅\n':'')+
