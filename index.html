@@ -8134,31 +8134,9 @@ function parseDOR(){
   BOOKINGS.push(bk);
   saveBookings();
 
-  // 11. IF PENDING → push to GUESTS (Payment Pending tab)
-  if(isPending){
-    var pendAmt=pendingAmount>0?pendingAmount:amount;
-    var gLabel=name||(apt?apt:(phone||'Unknown'));
-    var gObj={
-      id:gid(),
-      name:gLabel,
-      phone:phone,
-      apt:apt,
-      amount:amount,
-      pendingAmount:pendAmt,
-      checkin:checkin||new Date().toDateString(),
-      status:'pending',
-      isCash:false,
-      packageNote:packageNote
-    };
-    loadGuests();
-    GUESTS.push(gObj);
-    saveGuests(); // triggers renderPending + badge
-    updateBkPendingBadge();
-    alert('\u2705 Reservation saved!\n\u26a0\ufe0f Payment Pending: KD '+pendAmt+'\n\nCheck the Payment Pending tab.');
-  } else {
-    updateBkPendingBadge();
-    alert('\u2705 Reservation saved!');
-  }
+  // 11. SAVE DONE — DOR only goes to Bookings, never to Guest Tracker
+  updateBkPendingBadge();
+  alert('\u2705 Reservation saved!' + (isPending ? '\n\u26a0\ufe0f Payment Pending: KD '+(pendingAmount>0?pendingAmount:amount) : ''));
 
   document.getElementById('bk-paste').value='';
   // Navigate calendar to the booking's month so the dot appears immediately
