@@ -4470,15 +4470,20 @@ function renderBookings(){
 
 function cpBkList(btn){
   var txt=window._bkGenList||'';
+  function fallback(){
+    var ta=document.createElement('textarea');ta.value=txt;ta.style.cssText='position:fixed;top:0;left:0;opacity:0.01';
+    document.body.appendChild(ta);ta.focus();ta.select();
+    try{document.execCommand('copy');}catch(e){}
+    document.body.removeChild(ta);
+    btn.textContent='\u2713 Copied!';setTimeout(function(){btn.textContent='Copy';},2000);
+  }
   if(navigator.clipboard&&navigator.clipboard.writeText){
     navigator.clipboard.writeText(txt).then(function(){
       btn.textContent='\u2713 Copied!';
       setTimeout(function(){btn.textContent='Copy';},2000);
-    });
+    }).catch(function(){fallback();});
   } else {
-    var ta=document.createElement('textarea');ta.value=txt;ta.style.cssText='position:fixed;opacity:0';
-    document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
-    btn.textContent='\u2713 Copied!';setTimeout(function(){btn.textContent='Copy';},2000);
+    fallback();
   }
 }
 
@@ -8700,15 +8705,20 @@ function renderBookings(){
 
 function cpBkList(btn){
   var txt=window._bkGenList||'';
+  function fallback(){
+    var ta=document.createElement('textarea');ta.value=txt;ta.style.cssText='position:fixed;top:0;left:0;opacity:0.01';
+    document.body.appendChild(ta);ta.focus();ta.select();
+    try{document.execCommand('copy');}catch(e){}
+    document.body.removeChild(ta);
+    btn.textContent='\u2713 Copied!';setTimeout(function(){btn.textContent='Copy';},2000);
+  }
   if(navigator.clipboard&&navigator.clipboard.writeText){
     navigator.clipboard.writeText(txt).then(function(){
       btn.textContent='\u2713 Copied!';
       setTimeout(function(){btn.textContent='Copy';},2000);
-    });
+    }).catch(function(){fallback();});
   } else {
-    var ta=document.createElement('textarea');ta.value=txt;ta.style.cssText='position:fixed;opacity:0';
-    document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
-    btn.textContent='\u2713 Copied!';setTimeout(function(){btn.textContent='Copy';},2000);
+    fallback();
   }
 }
 
@@ -10219,8 +10229,9 @@ function renderDORBanner(){
   unblocked.forEach(function(b){
     var row=document.createElement('div');row.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(196,68,68,.15);flex-wrap:wrap;gap:6px';
     var info=document.createElement('div');
+    var phoneDisp=b.phone?(typeof fmtGuestPhone==='function'?fmtGuestPhone(b.phone):b.phone):'';
     info.innerHTML='<div style="font-size:13px;font-weight:700;color:#5C3D1E">\u203C\uFE0F '+escH(b.apt||'Unknown')+'</div>'
-      +'<div style="font-size:11px;color:#c44;margin-top:2px">'+escH(b.name||b.phone||'Guest')+(b.checkin?' \u00b7 '+escH(b.checkin):'')+'</div>';
+      +'<div style="font-size:11px;color:#c44;margin-top:2px">'+escH(b.name||phoneDisp||'Guest')+(phoneDisp&&b.name?' \u00b7 '+escH(phoneDisp):'')+(b.checkin?' \u00b7 '+escH(b.checkin):'')+'</div>';
     var btn=document.createElement('button');btn.textContent='Block Now';
     btn.style.cssText='background:#c44;color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer';
     btn.addEventListener('click',(function(bid){return function(){markBkBlocked(bid);};})(b.id));
