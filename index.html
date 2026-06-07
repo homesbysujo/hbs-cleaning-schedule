@@ -1,3 +1,4 @@
+<!-- build:20260606-125719 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -3731,7 +3732,7 @@ function parseDOR(){
     'Parsed DOR:\n\n'+
     'Apt: '+(apt||'NOT DETECTED')+'\n'+
     'Guest: '+(name||'-')+'\n'+
-    'Phone: '+(phone||'-')+'\n'+
+    'Phone: '+(phone?(typeof fmtGuestPhone==="function"?fmtGuestPhone(phone):phone):'-')+'\n'+
     (packageNote?'Package: '+packageNote+'\n':'')+
     'Booking: KD '+amount+'\n'+
     (paidAmount&&paidAmount!==amount?'Paid: KD '+paidAmount+' ✅\n':'')+
@@ -5126,7 +5127,7 @@ function deleteDOR(id){
 }
 
 loadLocal();render();renderLog();
-loadGuests();renderGuests();renderPending();setTimeout(function(){if(typeof renderGuestLoyalty==="function")renderGuestLoyalty();},250);
+loadGuests();renderGuests();renderPending();setTimeout(function(){if(typeof renderGuestLoyalty==="function")renderGuestLoyalty();},250);setTimeout(function(){if(typeof renderRevSection==="function")renderRevSection();},100);
 loadCash();renderCash();
 loadExtraCharges();updateTotalsWithExtras();
 syncUI('ok','Ready');
@@ -5513,7 +5514,7 @@ function populatePendingDropdown(){
       prev.style.display='block';
       prev.innerHTML='<strong>'+escH(g.name)+'</strong> &middot; '+escH(g.apt)+'<br>'+
         '<span style="color:var(--gn);font-weight:600">KD '+_kd(parseFloat(g.amount)||0)+'</span>'+
-        (g.phone?' &middot; '+escH(g.phone):'');
+        (g.phone?' &middot; '+escH(typeof fmtGuestPhone==="function"?fmtGuestPhone(g.phone):g.phone):'');
       var col=document.getElementById('cash-collector');
       col.value=getDefaultCollector(g.apt);
     } else if(prev){ prev.style.display='none'; }
@@ -5834,7 +5835,7 @@ function pndExportPDF(){
   var pending=GUESTS.filter(function(g){return g.status==='pending';});
   var total=pending.reduce(function(s,g){return s+(parseFloat(g.amount)||0);},0);
   var rows=pending.map(function(g){
-    return '<tr><td>'+escH(g.name)+'</td><td>'+escH(g.phone)+'</td><td style="color:#5C3D1E;font-weight:700">'+escH(g.apt)+'</td><td style="font-weight:600;color:#E65100">KD '+(parseFloat(g.amount)||0).toFixed(1)+'</td><td>'+escH(g.checkin)+'</td></tr>';
+    return '<tr><td>'+escH(g.name)+'</td><td>'+escH(typeof fmtGuestPhone==='function'?fmtGuestPhone(g.phone):g.phone)+'</td><td style="color:#5C3D1E;font-weight:700">'+escH(g.apt)+'</td><td style="font-weight:600;color:#E65100">KD '+(parseFloat(g.amount)||0).toFixed(1)+'</td><td>'+escH(g.checkin)+'</td></tr>';
   }).join('');
   var w=window.open('','_blank');
   var today=new Date();
@@ -5990,7 +5991,7 @@ function guestSearch(q){
       +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px">'
         +'<div>'
           +'<div style="font-size:15px;font-weight:700;color:var(--br)">'+(flagEmoji?flagEmoji+' ':'')+escH(g.name||'Unknown')+'</div>'
-          +'<div style="font-size:11px;color:var(--t3);margin-top:2px">'+(g.apt||'')+(g.checkin?' · '+g.checkin:'')+(g.phone?' · '+escH(g.phone):'')+'</div>'
+          +'<div style="font-size:11px;color:var(--t3);margin-top:2px">'+(g.apt||'')+(g.checkin?' · '+g.checkin:'')+(g.phone?' · '+escH(typeof fmtGuestPhone==="function"?fmtGuestPhone(g.phone):g.phone):'')+'</div>'
           +'<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">'+waLink+'</div>'
         +'</div>'
         +'<div style="display:flex;gap:4px;flex-shrink:0">'
@@ -6049,7 +6050,7 @@ function buildWAMessage(g){
 function makeCompactBookingRow(g, idx, total){
   var id=g.id;
   var amt=parseFloat(g.amount)||0;
-  var displayName=g.name&&!/^\+?\d[\d\s-]{6,}$/.test(g.name.trim())?escH(g.name):(escH(g.phone)||'Guest');
+  var displayName=g.name&&!/^\+?\d[\d\s-]{6,}$/.test(g.name.trim())?escH(g.name):(escH((typeof fmtGuestPhone==="function"?fmtGuestPhone(g.phone):g.phone))||'Guest');
   var isLast=idx===total-1;
   // compute tier badge — use pre-computed cache for O(1) lookup
   var tierHtml='';
@@ -6116,7 +6117,7 @@ function makeGuestCard(g, opts){
   var tierBadgeHtml=_tierInfo?('<span class="'+_tierInfo.badgeClass+'" style="font-size:10px;padding:2px 8px;margin-left:6px;animation:badgeBounce .5s cubic-bezier(.34,1.56,.64,1) both">'+_tierInfo.emoji+' '+_tierInfo.label+'</span>'):'';
 
   // Name display — if name looks like a phone number, show phone instead
-  var displayName = g.name && !/^\+?\d[\d\s-]{6,}$/.test(g.name.trim()) ? escH(g.name) : (escH(g.phone)||'Guest');
+  var displayName = g.name && !/^\+?\d[\d\s-]{6,}$/.test(g.name.trim()) ? escH(g.name) : (escH((typeof fmtGuestPhone==="function"?fmtGuestPhone(g.phone):g.phone))||'Guest');
 
   // Amount display
   var amtHtml = '';
@@ -6154,7 +6155,7 @@ function makeGuestCard(g, opts){
     '<div class="gcard-top">'+
       '<div>'+
         '<div class="gcard-name" style="display:flex;align-items:center;flex-wrap:wrap;gap:4px">'+displayName+tierBadgeHtml+'</div>'+
-        (g.phone && g.name !== g.phone ? '<div class="gcard-sub">'+escH(g.phone)+'</div>' : '')+
+        (g.phone && g.name !== g.phone ? '<div class="gcard-sub">'+escH(typeof fmtGuestPhone==="function"?fmtGuestPhone(g.phone):g.phone)+'</div>' : '')+
       '</div>'+
       '<span class="gcard-badge '+badgeClass+'">'+badgeLabel+'</span>'+
     '</div>'+
@@ -6219,7 +6220,7 @@ function _groupGuestsByIdentity(allGuests){
       if(!found&&phoneKey&&phoneKey.length>6&&grp.phoneKey===phoneKey){found=k;}
     });
     if(found){groups[found].stays.push(g);}
-    else{var key=nameKey||phoneKey||g.id;groups[key]={nameKey:nameKey,phoneKey:phoneKey,displayName:g.name||g.phone||'Unknown',stays:[g]};}
+    else{var key=nameKey||phoneKey||g.id;groups[key]={nameKey:nameKey,phoneKey:phoneKey,displayName:g.name||(g.phone?(typeof fmtGuestPhone==="function"?fmtGuestPhone(g.phone):g.phone):'')||'Unknown',stays:[g]};}
   });
   return groups;
 }
@@ -6586,7 +6587,7 @@ function renderRecurring(){
       groups[found].stays.push(g);
     } else {
       var key = nameKey || phoneKey || g.id;
-      groups[key] = {nameKey:nameKey, phoneKey:phoneKey, displayName:g.name||g.phone, stays:[g]};
+      groups[key] = {nameKey:nameKey, phoneKey:phoneKey, displayName:g.name||(typeof fmtGuestPhone==="function"?fmtGuestPhone(g.phone):g.phone), stays:[g]};
     }
   });
 
@@ -6619,7 +6620,7 @@ function renderRecurring(){
       '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">'+
         '<div>'+
           '<div style="font-weight:600;font-size:15px;color:var(--br)">'+escH(grp.displayName)+'</div>'+
-          '<div style="font-size:12px;color:var(--t3);margin-top:2px">'+grp.stays.length+' stays &middot; '+escH(grp.stays[0]&&grp.stays[0].phone||'')+'</div>'+
+          '<div style="font-size:12px;color:var(--t3);margin-top:2px">'+grp.stays.length+' stays &middot; '+escH(typeof fmtGuestPhone=='function'?(fmtGuestPhone(grp.stays[0]&&grp.stays[0].phone||'')):( grp.stays[0]&&grp.stays[0].phone||''))+'</div>'+
         '</div>'+
         '<span style="background:var(--cr);color:var(--br);font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px">&#128257; '+grp.stays.length+'x</span>'+
       '</div>'+
@@ -8130,7 +8131,7 @@ function parseDOR(){
     'Parsed DOR:\n\n'+
     'Apt: '+(apt||'NOT DETECTED')+'\n'+
     'Guest: '+(name||'-')+'\n'+
-    'Phone: '+(phone||'-')+'\n'+
+    'Phone: '+(phone?(typeof fmtGuestPhone==="function"?fmtGuestPhone(phone):phone):'-')+'\n'+
     (packageNote?'Package: '+packageNote+'\n':'')+
     'Booking: KD '+amount+'\n'+
     (paidAmount&&paidAmount!==amount?'Paid: KD '+paidAmount+' ✅\n':'')+
@@ -9223,7 +9224,7 @@ function deleteDOR(id){
 }
 
 loadLocal();render();renderLog();
-loadGuests();renderGuests();renderPending();setTimeout(function(){if(typeof renderGuestLoyalty==="function")renderGuestLoyalty();},250);
+loadGuests();renderGuests();renderPending();setTimeout(function(){if(typeof renderGuestLoyalty==="function")renderGuestLoyalty();},250);setTimeout(function(){if(typeof renderRevSection==="function")renderRevSection();},100);
 loadCash();renderCash();
 loadExtraCharges();updateTotalsWithExtras();
 syncUI('ok','Ready');
@@ -9460,7 +9461,7 @@ function populatePendingDropdown(){
       prev.style.display='block';
       prev.innerHTML='<strong>'+escH(g.name)+'</strong> &middot; '+escH(g.apt)+'<br>'+
         '<span style="color:var(--gn);font-weight:600">KD '+_kd(parseFloat(g.amount)||0)+'</span>'+
-        (g.phone?' &middot; '+escH(g.phone):'');
+        (g.phone?' &middot; '+escH(typeof fmtGuestPhone==="function"?fmtGuestPhone(g.phone):g.phone):'');
       var col=document.getElementById('cash-collector');
       col.value=getDefaultCollector(g.apt);
     } else if(prev){ prev.style.display='none'; }
@@ -9733,7 +9734,7 @@ function pndExportPDF(){
   var pending=GUESTS.filter(function(g){return g.status==='pending';});
   var total=pending.reduce(function(s,g){return s+(parseFloat(g.amount)||0);},0);
   var rows=pending.map(function(g){
-    return '<tr><td>'+escH(g.name)+'</td><td>'+escH(g.phone)+'</td><td style="color:#5C3D1E;font-weight:700">'+escH(g.apt)+'</td><td style="font-weight:600;color:#E65100">KD '+(parseFloat(g.amount)||0).toFixed(1)+'</td><td>'+escH(g.checkin)+'</td></tr>';
+    return '<tr><td>'+escH(g.name)+'</td><td>'+escH(typeof fmtGuestPhone==='function'?fmtGuestPhone(g.phone):g.phone)+'</td><td style="color:#5C3D1E;font-weight:700">'+escH(g.apt)+'</td><td style="font-weight:600;color:#E65100">KD '+(parseFloat(g.amount)||0).toFixed(1)+'</td><td>'+escH(g.checkin)+'</td></tr>';
   }).join('');
   var w=window.open('','_blank');
   var today=new Date();
@@ -9859,7 +9860,7 @@ function makeGuestCard(g, opts){
   var badgeLabel = g.status==='paid-airbnb' ? AIRBNB_SVG+' Airbnb' : g.status==='paid-cash' ? '&#128176; Direct' : '&#8252; Pending';
 
   // Name display — if name looks like a phone number, show phone instead
-  var displayName = g.name && !/^\+?\d[\d\s-]{6,}$/.test(g.name.trim()) ? escH(g.name) : (escH(g.phone)||'Guest');
+  var displayName = g.name && !/^\+?\d[\d\s-]{6,}$/.test(g.name.trim()) ? escH(g.name) : (escH((typeof fmtGuestPhone==="function"?fmtGuestPhone(g.phone):g.phone))||'Guest');
 
   // Amount display
   var amtHtml = '';
@@ -9897,7 +9898,7 @@ function makeGuestCard(g, opts){
     '<div class="gcard-top">'+
       '<div>'+
         '<div class="gcard-name">'+displayName+'</div>'+
-        (g.phone && g.name !== g.phone ? '<div class="gcard-sub">'+escH(g.phone)+'</div>' : '')+
+        (g.phone && g.name !== g.phone ? '<div class="gcard-sub">'+escH(typeof fmtGuestPhone==="function"?fmtGuestPhone(g.phone):g.phone)+'</div>' : '')+
       '</div>'+
       '<span class="gcard-badge '+badgeClass+'">'+badgeLabel+'</span>'+
     '</div>'+
@@ -9927,14 +9928,26 @@ function togglePayType(id, type){
 
 function renderGuests(){
   loadGuests();
+  if(typeof loadBookings==='function') loadBookings();
   var el_direct = document.getElementById('g-direct-body');
   var el_airbnb = document.getElementById('g-airbnb-body');
   if(!el_direct) return;
 
-  // Only count PAID guests in tracker (pending stay in Pending tab until paid)
-  var airbnb  = GUESTS.filter(function(g){return g.status==='paid-airbnb'||(g.type==='airbnb'&&g.status!=='pending');});
-  var direct  = GUESTS.filter(function(g){return g.status!=='pending'&&airbnb.indexOf(g)===-1;});
-  var total   = direct.length + airbnb.length; // pending NOT counted here
+  // Merge BOOKINGS into display so newly added bookings show immediately
+  var seenIds={};
+  var allEntries = GUESTS.slice();
+  GUESTS.forEach(function(g){ seenIds[g.id]=1; });
+  if(typeof BOOKINGS!=='undefined') BOOKINGS.filter(function(b){
+    return b.status!=='cancelled' && !seenIds[b.id];
+  }).forEach(function(b){
+    allEntries.push({id:b.id,name:b.name||'',phone:b.phone||'',apt:b.apt||'',
+      amount:b.amount||0,checkin:b.checkin||'',status:b.status||'pending',
+      type:b.type||'direct',nights:b.nights||1});
+  });
+
+  var airbnb = allEntries.filter(function(g){return g.status==='paid-airbnb'||(g.type==='airbnb');});
+  var direct = allEntries.filter(function(g){return g.type!=='airbnb'&&airbnb.indexOf(g)===-1;});
+  var total  = direct.length + airbnb.length;
 
   var et=document.getElementById('g-total'); if(et){et.textContent=total;et.style.animation='none';void et.offsetWidth;et.style.animation='statNumPulse .4s ease';}
   var ed=document.getElementById('g-direct'); if(ed){ed.textContent=direct.length;ed.style.animation='none';void ed.offsetWidth;ed.style.animation='statNumPulse .4s ease .05s both';}
@@ -9947,6 +9960,9 @@ function renderGuests(){
   if(edk) edk.textContent=directTotal>0?_kd(directTotal)+' KD':'No KD logged';
   var etd=document.getElementById('g-total-direct-kd');
   if(etd){etd.textContent=directTotal>0?_kd(directTotal)+' KD':'—';etd.style.animation='none';void etd.offsetWidth;etd.style.animation='statPop .4s cubic-bezier(.34,1.56,.64,1) .15s both';}
+  // Update collapsible count badges
+  var dc=document.getElementById('g-direct-count'); if(dc){dc.textContent=direct.length;dc.style.transform='scale(1.3)';setTimeout(function(){if(dc)dc.style.transform='scale(1)';},200);}
+  var ac=document.getElementById('g-airbnb-count'); if(ac){ac.textContent=airbnb.length;ac.style.transform='scale(1.3)';setTimeout(function(){if(ac)ac.style.transform='scale(1)';},200);}
 
   el_direct.innerHTML = direct.length
     ? direct.map(function(g){return makeGuestCard(g,{showAmt:true,showPay:false,showRemind:false});}).join('')
@@ -9984,7 +10000,7 @@ function renderRecurring(){
       groups[found].stays.push(g);
     } else {
       var key = nameKey || phoneKey || g.id;
-      groups[key] = {nameKey:nameKey, phoneKey:phoneKey, displayName:g.name||g.phone, stays:[g]};
+      groups[key] = {nameKey:nameKey, phoneKey:phoneKey, displayName:g.name||(typeof fmtGuestPhone==="function"?fmtGuestPhone(g.phone):g.phone), stays:[g]};
     }
   });
 
@@ -10017,7 +10033,7 @@ function renderRecurring(){
       '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">'+
         '<div>'+
           '<div style="font-weight:600;font-size:15px;color:var(--br)">'+escH(grp.displayName)+'</div>'+
-          '<div style="font-size:12px;color:var(--t3);margin-top:2px">'+grp.stays.length+' stays &middot; '+escH(grp.stays[0]&&grp.stays[0].phone||'')+'</div>'+
+          '<div style="font-size:12px;color:var(--t3);margin-top:2px">'+grp.stays.length+' stays &middot; '+escH(typeof fmtGuestPhone=='function'?(fmtGuestPhone(grp.stays[0]&&grp.stays[0].phone||'')):( grp.stays[0]&&grp.stays[0].phone||''))+'</div>'+
         '</div>'+
         '<span style="background:var(--cr);color:var(--br);font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px">&#128257; '+grp.stays.length+'x</span>'+
       '</div>'+
@@ -10299,7 +10315,7 @@ function renderPending(){
     var aptEl=document.createElement('div');aptEl.style.cssText='font-size:15px;font-weight:700;color:#3D2208;margin-bottom:3px';
     aptEl.textContent=(g.apt||'Unknown')+(g.name?' \u2014 '+g.name:'');
     var subEl=document.createElement('div');subEl.style.cssText='font-size:11px;color:#C45400';
-    subEl.textContent=(g.checkin||'')+(g.phone?' \u00b7 '+g.phone:'');
+    subEl.textContent=(g.checkin||'')+(g.phone?' \u00b7 '+(typeof fmtGuestPhone==="function"?fmtGuestPhone(g.phone):g.phone):'');
     left.appendChild(aptEl);left.appendChild(subEl);
     var right=document.createElement('div');right.style.cssText='display:flex;align-items:center;gap:10px;flex-shrink:0';
     var kdEl=document.createElement('div');kdEl.style.cssText='font-size:17px;font-weight:800;color:#C45400';kdEl.textContent='KD '+fmt(amt);
@@ -11075,7 +11091,7 @@ function openGuestProfile(grpData){
   var stays=grpData.stays.length;
   var totalKD=grpData.stays.reduce(function(s,g){return s+(parseFloat(g.amount)||0);},0);
   var phone=''; grpData.stays.forEach(function(s){if(!phone&&s.phone&&s.phone.replace(/\D/g,'').length>=7)phone=s.phone;});
-  var displayName=(grpData.name&&grpData.name.replace(/\D/g,'').length<grpData.name.length)?grpData.name:(phone||grpData.name||'Guest');
+  var displayName=(grpData.name&&grpData.name.replace(/\D/g,'').length<grpData.name.length)?grpData.name:((phone?(typeof fmtGuestPhone==="function"?fmtGuestPhone(phone):phone):'')||grpData.name||'Guest');
   var phoneDig=phone.replace(/\D/g,'');
 
   // Tier config
@@ -11112,7 +11128,7 @@ function openGuestProfile(grpData){
         +'<div style="font-size:52px;margin-bottom:10px;animation:gpItemIn .35s cubic-bezier(.34,1.56,.64,1) .05s both;display:inline-block">'+tier.emoji+'</div>'
         +(flagBg?'<div style="display:inline-flex;align-items:center;gap:5px;background:'+flagBg+';color:#fff;border-radius:20px;padding:4px 14px;font-size:11px;font-weight:700;margin-bottom:10px;animation:gpItemIn .3s ease .08s both;box-shadow:0 2px 12px rgba(0,0,0,.3);vertical-align:middle;margin-left:10px">'+flagEmoji+' '+flagLabel+'</div>':'')
         +'<div style="font-family:\'DM Serif Display\',serif;font-size:30px;color:'+tier.tc+';line-height:1.1;animation:gpItemIn .35s ease .1s both;opacity:0">'+$h(displayName)+'</div>'
-        +(phone?'<div style="font-size:13px;color:'+tier.tc+';opacity:.65;margin-top:6px;animation:gpItemIn .3s ease .13s both;opacity:0">&#128222; '+$h(phone)+'</div>':'')
+        +(phone?'<div style="font-size:13px;color:'+tier.tc+';opacity:.65;margin-top:6px;animation:gpItemIn .3s ease .13s both;opacity:0">&#128222; '+$h(typeof fmtGuestPhone==='function'?fmtGuestPhone(phone):phone)+'</div>':'')
         // Stats strip
         +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:18px;animation:gpItemIn .3s ease .15s both;opacity:0">'
           +'<div style="background:rgba(255,255,255,.12);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:14px 10px;text-align:center">'
@@ -11243,7 +11259,7 @@ function renderGuestLoyalty(){
       if(!found&&pk&&pk.length>6&&map[k].pk===pk)found=k;
     });
     var key=found||(nk||pk||g.id);
-    if(!map[key])map[key]={nk:nk,pk:pk,name:g.name||g.phone||'Unknown',stays:[]};
+    if(!map[key])map[key]={nk:nk,pk:pk,name:g.name||(g.phone?(typeof fmtGuestPhone==="function"?fmtGuestPhone(g.phone):g.phone):'')||'Unknown',stays:[]};
     map[key].stays.push(g);
   });
   var sorted=Object.keys(map).map(function(k){return map[k];});
@@ -11325,7 +11341,7 @@ function renderGuestLoyalty(){
         +'<div class="gl-hkd">'+(parseFloat(s.amount)>0?'KD '+$kd(parseFloat(s.amount)):'&#8212;')+'</div>'
       +'</div>';
     }).join('');
-    var moreHTML=grp.stays[0]&&grp.stays[0].phone?'<div class="gl-more" style="color:'+tier.sc+'">📞 '+$h(grp.stays[0].phone)+'</div>':'';
+    var moreHTML=grp.stays[0]&&grp.stays[0].phone?'<div class="gl-more" style="color:'+tier.sc+'">📞 '+$h(typeof fmtGuestPhone==='function'?fmtGuestPhone(grp.stays[0].phone):grp.stays[0].phone)+'</div>':'';
 
     /* Count-up animation via CSS — display the real number, JS animates opacity+scale */
     body.innerHTML=
