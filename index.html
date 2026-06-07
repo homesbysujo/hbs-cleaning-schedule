@@ -1135,6 +1135,11 @@ input:focus,textarea:focus,select:focus{box-shadow:0 0 0 3px rgba(92,61,30,.1)!i
   <!-- Dynamic message cards rendered by generate() -->
   <div id="out-cards"></div>
 
+  <!-- SEND TO GUEST TRACKER -->
+  <div style="margin-top:20px;padding:18px;background:var(--brl);border:1.5px solid var(--gl);border-radius:16px;text-align:center">
+    <div style="font-size:12px;font-weight:600;color:var(--t3);margin-bottom:10px">🅰️ + 💰 guests only — runs once per date, no duplicates</div>
+    <button onclick="syncReservationToGuests()" style="width:100%;background:var(--br);color:#fff;border:none;border-radius:12px;padding:15px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:0.5px;transition:background .15s" onmouseover="this.style.background='var(--br2)'" onmouseout="this.style.background='var(--br)'">👥 Send to Guest Tracker</button>
+  </div>
 
 </div>
 </div>
@@ -3191,9 +3196,6 @@ try{
     }catch(ve){console.warn('Verifier:',ve);}
   })();
 
-  // ── AUTO-SYNC TO GUEST TRACKER ───────────────────────────
-  try{ if(typeof syncReservationToGuests==='function') syncReservationToGuests(); }catch(se){ console.warn('Auto-sync:',se); }
-
 outEl.style.display='block';
   outEl.scrollIntoView({behavior:'smooth'});
 }catch(err){
@@ -3755,31 +3757,9 @@ function parseDOR(){
   BOOKINGS.push(bk);
   saveBookings();
 
-  // 11. IF PENDING → push to GUESTS (Payment Pending tab)
-  if(isPending){
-    var pendAmt=pendingAmount>0?pendingAmount:amount;
-    var gLabel=name||(apt?apt:(phone||'Unknown'));
-    var gObj={
-      id:gid(),
-      name:gLabel,
-      phone:phone,
-      apt:apt,
-      amount:amount,
-      pendingAmount:pendAmt,
-      checkin:checkin||new Date().toDateString(),
-      status:'pending',
-      isCash:false,
-      packageNote:packageNote
-    };
-    loadGuests();
-    GUESTS.push(gObj);
-    saveGuests(); // triggers renderPending + badge
-    updateBkPendingBadge();
-    alert('\u2705 Reservation saved!\n\u26a0\ufe0f Payment Pending: KD '+pendAmt+'\n\nCheck the Payment Pending tab.');
-  } else {
-    updateBkPendingBadge();
-    alert('\u2705 Reservation saved!');
-  }
+  // 11. SAVE DONE — DOR only goes to Bookings, never to Guest Tracker
+  updateBkPendingBadge();
+  alert('\u2705 Reservation saved!' + (isPending ? '\n\u26a0\ufe0f Payment Pending: KD '+(pendingAmount>0?pendingAmount:amount) : ''));
 
   document.getElementById('bk-paste').value='';
   // Navigate calendar to the booking's month so the dot appears immediately
