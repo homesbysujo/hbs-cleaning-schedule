@@ -1136,11 +1136,7 @@ input:focus,textarea:focus,select:focus{box-shadow:0 0 0 3px rgba(92,61,30,.1)!i
   <!-- Dynamic message cards rendered by generate() -->
   <div id="out-cards"></div>
 
-  <!-- SEND TO GUEST TRACKER -->
-  <div style="margin-top:20px;padding:18px;background:var(--brl);border:1.5px solid var(--gl);border-radius:16px;text-align:center">
-    <div style="font-size:12px;font-weight:600;color:var(--t3);margin-bottom:10px">🅰️ + 💰 guests only — runs once per date, no duplicates</div>
-    <button onclick="syncReservationToGuests()" style="width:100%;background:var(--br);color:#fff;border:none;border-radius:12px;padding:15px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:0.5px;transition:background .15s" onmouseover="this.style.background='var(--br2)'" onmouseout="this.style.background='var(--br)'">👥 Send to Guest Tracker</button>
-  </div>
+
 
 </div>
 </div>
@@ -2540,15 +2536,10 @@ function syncReservationToGuests(){
 
   // ── Full-paste duplicate guard ──
   if(typeof loadGuests==='function')loadGuests();
-  var existingForDate=GUESTS.filter(function(g){return g.checkin===checkinDate;}).length;
-  var forceResync=false;
-  if(existingForDate>0){
-    var choice=confirm('\u26a0\ufe0f '+existingForDate+' entries already exist for '+checkinDate+'.\n\nOK = re-sync (updates existing + adds new)\nCancel = abort');
-    if(!choice)return;
-    forceResync=true;
-    GUESTS=GUESTS.filter(function(g){return g.checkin!==checkinDate||g.source!=='reservation-list';});
-    BOOKINGS=BOOKINGS.filter(function(b){return b.checkin!==checkinDate||b.source!=='reservation-list';});
-  }
+  // Always re-sync: clear existing reservation-list entries for this date and re-add fresh
+  GUESTS=GUESTS.filter(function(g){return g.checkin!==checkinDate||g.source!=='reservation-list';});
+  BOOKINGS=BOOKINGS.filter(function(b){return b.checkin!==checkinDate||b.source!=='reservation-list';});
+  var forceResync=true;
 
   // ── Detect current building section ──
   var currentSec = '';
@@ -2656,13 +2647,7 @@ function syncReservationToGuests(){
     var status = isPending ? 'pending' : (hasAir ? 'paid-airbnb' : 'paid-cash');
     var isCash = trimmed.indexOf('\uD83D\uDCB8')!==-1 || trimmed.indexOf('\u2B1C')!==-1;
 
-    // ── Dedup: skip if apt+date already in GUESTS (only when not force-resyncing) ──
-    if(!forceResync){
-      var dup = GUESTS.some(function(g){
-        return g.apt === aptStr && g.checkin === checkinDate;
-      });
-      if(dup) return;
-    }
+    // No per-line dedup needed — we cleared this date above
 
     // ── Add to GUESTS ──
     var newG = {
@@ -2712,14 +2697,9 @@ function syncReservationToGuests(){
   if(typeof renderBkCalendar==='function') renderBkCalendar();
   if(typeof renderBkLanding==='function') renderBkLanding();
 
-  if(addedCount === 0){
-    alert('No new bookings found.\n\nEither the list was already synced for '+checkinDate+', or no 💰/🅰️ lines were detected.\n\nTip: Make sure you paste the full reservation list including the building sections.');
-  } else {
-    alert('✅ Synced '+addedCount+' guests to Guest Tracker for '+checkinDate+'!'+(pendingCount>0?'\n⚠️ '+pendingCount+' payment pending':''));
-    // Switch to Guest Tracker tab
-    var gtBtn = Array.from(document.querySelectorAll('.tab')).find(function(b){ return b.textContent.indexOf('Guest')!==-1; });
-    if(gtBtn) gtBtn.click();
-  }
+  // Silent sync — no alerts, just update the UI
+  if(typeof renderGuests==='function') try{renderGuests();}catch(e){}
+  if(typeof renderPending==='function') try{renderPending();}catch(e){}
 }
 // ── END SYNC FUNCTION ──────────────────────────────────────
 
@@ -3228,6 +3208,8 @@ try{
 
 outEl.style.display='block';
   outEl.scrollIntoView({behavior:'smooth'});
+  // Auto-sync to Guest Tracker immediately
+  try{ syncReservationToGuests(); }catch(se){ console.warn('Auto guest sync:',se); }
 }catch(err){
   console.error('Generate error:',err);
   alert('Error generating messages: ' + (err && err.message ? err.message : String(err)) + '\n\nPlease check your reservation list format and try again.');
@@ -7687,6 +7669,8 @@ try{
 
   outEl.style.display='block';
   outEl.scrollIntoView({behavior:'smooth'});
+  // Auto-sync to Guest Tracker immediately
+  try{ syncReservationToGuests(); }catch(se){ console.warn('Auto guest sync:',se); }
 }catch(err){
   console.error('Generate error:',err);
   alert('Error generating messages: ' + (err && err.message ? err.message : String(err)) + '\n\nPlease check your reservation list format and try again.');
