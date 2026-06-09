@@ -3210,12 +3210,12 @@ try{
 
 outEl.style.display='block';
   outEl.scrollIntoView({behavior:'smooth'});
-  // Auto-sync to Guest Tracker immediately
-  try{ syncReservationToGuests(); }catch(se){ console.warn('Auto guest sync:',se); }
 }catch(err){
   console.error('Generate error:',err);
   alert('Error generating messages: ' + (err && err.message ? err.message : String(err)) + '\n\nPlease check your reservation list format and try again.');
 }
+// Always sync guest tracker — runs even if generate had an error
+try{ syncReservationToGuests(); }catch(se){ console.warn('Auto guest sync:',se); }
 }
 
 // =========================================================
@@ -7671,12 +7671,12 @@ try{
 
   outEl.style.display='block';
   outEl.scrollIntoView({behavior:'smooth'});
-  // Auto-sync to Guest Tracker immediately
-  try{ syncReservationToGuests(); }catch(se){ console.warn('Auto guest sync:',se); }
 }catch(err){
   console.error('Generate error:',err);
   alert('Error generating messages: ' + (err && err.message ? err.message : String(err)) + '\n\nPlease check your reservation list format and try again.');
 }
+// Always sync guest tracker — runs even if generate had an error
+try{ syncReservationToGuests(); }catch(se){ console.warn('Auto guest sync:',se); }
 }
 
 // =========================================================
