@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reset HBS Data</title>
+<style>
+  body { font-family: 'DM Sans', sans-serif; background: #FAF7F2; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+  .card { background: #fff; border-radius: 20px; padding: 32px; text-align: center; max-width: 340px; box-shadow: 0 4px 24px rgba(92,61,30,.12); }
+  h2 { color: #3D2208; margin: 0 0 8px; }
+  p { color: #8B6A4F; font-size: 14px; margin: 0 0 24px; }
+  button { width: 100%; padding: 15px; border-radius: 12px; border: none; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; }
+  .reset { background: #c44; color: #fff; margin-bottom: 10px; }
+  .cancel { background: #F0EAE2; color: #5C3D1E; }
+  .done { background: #1B7A40; color: #fff; display: none; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h2>🗑️ Clear All Data</h2>
+  <p>This will permanently delete all guests, bookings, payments and cash entries from this device.</p>
+  <button class="reset" onclick="doReset()">Yes, Clear Everything</button>
+  <button class="cancel" onclick="window.location='https://homesbysujo.github.io/hbs-cleaning-schedule/'">Cancel</button>
+  <button class="done" id="doneBtn" onclick="window.location='https://homesbysujo.github.io/hbs-cleaning-schedule/'">✅ Done — Open App</button>
+</div>
+<script>
+function doReset(){
+  ['hbs_s','hbs_l','hbs_guests','hbs_cash','hbs_cash_ver','hbs_bldg_cfg','hbs_incentive','hbs_bookings','hbs_cancellations','hbs_apt_notes','hbs_cohosts','hbs_apt_perf','hbs_guest_notes'].forEach(function(k){
+    try{ localStorage.removeItem(k); }catch(e){}
+  });
+  document.querySelector('.reset').style.display='none';
+  document.querySelector('.cancel').style.display='none';
+  document.querySelector('p').textContent='All data cleared. Ready for fresh start.';
+  document.getElementById('doneBtn').style.display='block';
+}
+</script>
+</body>
+</html>
