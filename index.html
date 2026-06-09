@@ -721,7 +721,6 @@ input:focus,textarea:focus,select:focus{box-shadow:0 0 0 3px rgba(92,61,30,.1)!i
   </div>
   <div class="hdr-right" style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
     <div style="display:flex;align-items:center;gap:8px">
-      <button class="dark-toggle" onclick="toggleDark()" id="darkBtn">🌙 Dark</button>
     </div>
     <div class="hdr-date" id="hdr-date"></div>
     <div class="hdr-meta" id="hbs-listings-meta">Salmiya, Kuwait &middot; <span id="hbs-listings-count">26</span> Listings</div>
@@ -790,24 +789,6 @@ input:focus,textarea:focus,select:focus{box-shadow:0 0 0 3px rgba(92,61,30,.1)!i
     <div style="height:1.5px;background:linear-gradient(90deg,rgba(212,174,94,.7),rgba(212,174,94,.2),transparent);border-radius:2px;margin-bottom:0;animation:h4GoldLine .8s ease both .3s;transform-origin:left"></div>
   </div>
 
-  <!-- QUICK STATS BAR -->
-  <div style="background:linear-gradient(90deg,#FAF4EC,#FDF8F2);border-bottom:1px solid #EDE0D0;padding:12px 18px;display:flex;gap:0;animation:h4Up .5s ease both .3s">
-    <div style="flex:1;text-align:center;border-right:1px solid #EDE0D0;padding:0 8px">
-      <div style="font-size:9px;font-weight:700;letter-spacing:2px;color:#B8913A;text-transform:uppercase;margin-bottom:3px">📅 Month</div>
-      <div id="bk-month-count" style="font-family:'DM Serif Display',serif;font-size:24px;color:#3D2208;line-height:1;animation:h4CountUp .6s ease both .45s">0</div>
-      <div style="font-size:9px;color:#C4A87A;margin-top:1px">bookings</div>
-    </div>
-    <div style="flex:1;text-align:center;border-right:1px solid #EDE0D0;padding:0 8px">
-      <div style="font-size:9px;font-weight:700;letter-spacing:2px;color:#2E7D52;text-transform:uppercase;margin-bottom:3px">🏆 Total</div>
-      <div id="bk-total-count" style="font-family:'DM Serif Display',serif;font-size:24px;color:#3D2208;line-height:1;animation:h4CountUp .6s ease both .5s">0</div>
-      <div style="font-size:9px;color:#6aaa88;margin-top:1px">all time</div>
-    </div>
-    <div style="flex:1;text-align:center;padding:0 8px">
-      <div style="font-size:9px;font-weight:700;letter-spacing:2px;color:#c44;text-transform:uppercase;margin-bottom:3px">⏳ Pending</div>
-      <div id="hub-pending-stat" style="font-family:'DM Serif Display',serif;font-size:24px;color:#3D2208;line-height:1;animation:h4CountUp .6s ease both .55s">0</div>
-      <div style="font-size:9px;color:#e88;margin-top:1px">unpaid</div>
-    </div>
-  </div>
 
   <!-- ACTION BUTTONS -->
   <div style="padding:16px 16px 0;display:grid;grid-template-columns:1fr 1fr;gap:12px;animation:h4Up .5s ease both .38s">
@@ -826,6 +807,19 @@ input:focus,textarea:focus,select:focus{box-shadow:0 0 0 3px rgba(92,61,30,.1)!i
       </div>
     </button>
   </div>
+  <!-- EXTRA RESERVATION BUTTON -->
+  <div style="padding:10px 16px 0;animation:h4Up .5s ease both .42s">
+    <button onclick="openAddExtraReservation()" class="h4-btn" style="width:100%;background:linear-gradient(145deg,#FFF3DC,#FFE8B8);color:#5C3D1E;border-radius:18px;padding:16px 18px;display:flex;align-items:center;gap:14px;box-shadow:0 8px 24px rgba(212,174,94,.25);border:1.5px solid #E8C97A;text-align:left">
+      <div style="width:40px;height:40px;border-radius:13px;background:rgba(255,255,255,.13);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">💵</div>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:700">Add Extra Reservation</div>
+        <div style="font-size:10px;opacity:.6;margin-top:2px;font-weight:400">Same-day turnover · fully booked apartments</div>
+      </div>
+      <span id="bk-extra-badge" style="display:none;background:#5C3D1E;color:#fff;border-radius:20px;padding:3px 11px;font-size:12px;font-weight:700"></span>
+    </button>
+  </div>
+  <!-- EXTRA RESERVATIONS LIST -->
+  <div id="bk-extra-list-section" style="display:none;padding:10px 16px 0;animation:h4Up .4s ease both"></div>
 
   <script>
   // Live clock for hero
@@ -852,9 +846,7 @@ input:focus,textarea:focus,select:focus{box-shadow:0 0 0 3px rgba(92,61,30,.1)!i
     setTimeout(updatePending,800);
   })();
   </script>
-  <div style="padding:16px 20px 0"><div id="bk-checkins-today-section" style="display:none;background:linear-gradient(135deg,#F0F8F3,#E8F5EE);border:1.5px solid #C3E0CE;border-radius:16px;padding:14px 16px">
-    <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:#2E7D52;text-transform:uppercase;margin-bottom:10px">&#9989; Today&apos;s Check-ins</div>
-    <div id="bk-checkins-today-list"></div></div></div>
+
   <div style="padding:10px 20px 0"><div id="bk-upcoming-list" style="display:none;background:var(--wh);border:1.5px solid var(--gl);border-radius:18px;padding:20px 20px 8px"></div></div>
   <div style="padding:16px 20px 0"><input type="text" id="bk-search" oninput="bkSearch()" placeholder="&#128269; Search..." style="width:100%;background:var(--cr);border:1.5px solid var(--gl);border-radius:12px;color:var(--t1);font-family:'DM Sans',sans-serif;font-size:13px;padding:11px 16px;outline:none;box-sizing:border-box"></div>
   <div id="bk-search-results" style="display:none;margin:8px 20px 0"></div>
@@ -945,9 +937,18 @@ input:focus,textarea:focus,select:focus{box-shadow:0 0 0 3px rgba(92,61,30,.1)!i
   </div>
 
   <!-- CANCELLATION HISTORY -->
-  <div style="margin-top:16px;background:var(--wh);border:1.5px solid var(--gl);border-radius:20px;padding:18px 16px">
-    <div style="font-family:'DM Serif Display',serif;font-size:15px;color:var(--br);margin-bottom:10px">&#10007; Cancellation History</div>
-    <div id="bk-cancellations"><div class="gempty">No cancellations yet</div></div>
+  <div style="margin-top:16px;background:var(--wh);border:1.5px solid var(--gl);border-radius:20px;overflow:hidden">
+    <button onclick="(function(){var b=document.getElementById('bk-cancel-body');var a=document.getElementById('bk-cancel-arrow');var open=b.style.display!=='none';b.style.display=open?'none':'block';a.style.transform=open?'':'rotate(180deg)';})()" style="width:100%;display:flex;align-items:center;justify-content:space-between;background:var(--wh);border:none;padding:14px 16px;cursor:pointer;font-family:'DM Sans',sans-serif;-webkit-tap-highlight-color:transparent">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:15px">&#10007;</span>
+        <span style="font-family:'DM Serif Display',serif;font-size:15px;color:var(--br)">Cancellation History</span>
+        <span id="bk-cancel-badge" style="background:var(--br);color:#fff;border-radius:20px;padding:1px 9px;font-size:11px;font-weight:700;display:none"></span>
+      </div>
+      <span id="bk-cancel-arrow" style="font-size:11px;color:var(--t3);transition:transform .25s">&#9660;</span>
+    </button>
+    <div id="bk-cancel-body" style="display:none;padding:0 16px 14px">
+      <div id="bk-cancellations"><div class="gempty">No cancellations yet</div></div>
+    </div>
   </div>
 
   </div>
@@ -3119,7 +3120,7 @@ try{
   var reservedM = raw.match(/Reserved\s*[-–]\s*(\d+)/i);
   if(!reservedM) reservedM = raw.match(/Reserved[^\d]*(\d+)/i);
   var reserved = reservedM ? parseInt(reservedM[1]) : 0;
-  var TOTAL_APTS = 26;
+  var TOTAL_APTS = (typeof ALL_APTS!=='undefined'?ALL_APTS.reduce(function(s,b){return s+b.apts.length;},0):0)||(function(){try{var _ca=JSON.parse(localStorage.getItem('hbs_custom_apts')||'[]');return 26+_ca.length;}catch(e){return 26;}}());
   var occupancyPct = reserved ? Math.round(reserved/TOTAL_APTS*100) : 0;
   updateSummaryCard(cd, totalCleans, alanKDtoday, pendingCount, incentiveResult, reserved, occupancyPct);
 
@@ -3617,6 +3618,26 @@ function parseDOR(){
       var _am=lines[li].match(_aptPats[pi]);
       if(_am){apt=normApt(_am[0].trim());}
     }
+  }
+  // Also check custom apartments from localStorage by matching apt label in text
+  if(!apt){
+    try{
+      var _caList=JSON.parse(localStorage.getItem('hbs_custom_apts')||'[]');
+      var _rawLow=raw.toLowerCase();
+      for(var _ci=0;_ci<_caList.length&&!apt;_ci++){
+        var _ca=_caList[_ci];
+        if(!_ca.apt) continue;
+        var _caLabel=(_ca.apt||'').toLowerCase();
+        var _caBldg=(_ca.building||_ca.buildingKey||'').toLowerCase();
+        // Match if the apt label appears in the raw text (e.g. "Hessah 31A")
+        if(_rawLow.indexOf(_caLabel)!==-1) apt=_ca.apt;
+        // Also match building+number combo (e.g. "hessah 31a")
+        else if(_caBldg&&_rawLow.indexOf(_caBldg)!==-1){
+          var _numM=raw.match(new RegExp(_caBldg+'\\s*([\\w\\d]+)','i'));
+          if(_numM) apt=_ca.apt;
+        }
+      }
+    }catch(e){}
   }
 
   // 2. PHONE — any country code (3-pass: +prefix line → local digits line → embedded +)
@@ -4191,6 +4212,8 @@ function renderCancellations(){
   loadCancellations();
   var el=document.getElementById('bk-cancellations');
   if(!el) return;
+  var badge=document.getElementById('bk-cancel-badge');
+  if(badge){if(CANCELLATIONS.length){badge.style.display='inline-block';badge.textContent=CANCELLATIONS.length;}else{badge.style.display='none';}}
   if(!CANCELLATIONS.length){
     el.innerHTML='<div class="gempty">No cancellations yet</div>';
     return;
@@ -4311,7 +4334,7 @@ function renderBookings(){
     var selStr=MSHORT2[_bkCalMonth]+' '+_bkSelDay+' '+_bkCalYear;
     var selDate=new Date(_bkCalYear,_bkCalMonth,_bkSelDay);
     var dayName=DAYS_FULL[selDate.getDay()];
-    var dayBks=BOOKINGS.filter(function(b){return b.checkin===selStr;});
+    var dayBks=BOOKINGS.filter(function(b){return b.checkin===selStr&&!b.isExtra;});
     // Find guests still staying on this day (multi-night, checked in earlier)
     var stayingBks=BOOKINGS.filter(function(b){
       if(b.checkin===selStr||b.status==='cancelled') return false;
@@ -4335,7 +4358,7 @@ function renderBookings(){
     if(dayTitle) dayTitle.textContent=selStr+' \u2014 '+titleStr;
 
     if(dayList){
-      if(!allDayBks.length){
+      if(false&&!allDayBks.length){
         dayList.innerHTML='<div class="gempty">No check-ins on this day</div>';
       } else {
         // Build lookup: aptKey → booking (use allDayBks to include continuing guests)
@@ -4391,6 +4414,8 @@ function renderBookings(){
         var list='Apartment update '+MSHORT2[_bkCalMonth]+' '+_bkSelDay+' ('+dayName+')\n';
         var totalDirect=0, totalAirbnb=0, totalAvail=0, totalReserved=0, totalKD=0;
 
+        var totalApts=ALL_APTS.reduce(function(s,b){return s+b.apts.length;},0);
+
         ALL_APTS.forEach(function(building){
           list+='*'+building.sec+'*\n';
           building.apts.forEach(function(apt){
@@ -4427,14 +4452,42 @@ function renderBookings(){
           list+='\n';
         });
 
+        // ── EXTRA RESERVATIONS ── compute before separator
+        var selDateStr = '';
+        try {
+          var _sd = new Date(_bkCalYear, _bkCalMonth, _bkSelDay);
+          selDateStr = _sd.getFullYear()+'-'+String(_sd.getMonth()+1).padStart(2,'0')+'-'+String(_sd.getDate()).padStart(2,'0');
+        } catch(e){}
+        loadBookings();
+        var _MSD=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        var dayExtras = BOOKINGS.filter(function(b){
+          if(!b.isExtra||b.status==='cancelled'||!b.checkin) return false;
+          var s=b.checkin, ds='';
+          if(/^\d{4}-\d{2}-\d{2}/.test(s)){ds=s.slice(0,10);}
+          else{var mx=s.match(/([A-Za-z]+)\s+(\d{1,2})\s+(\d{4})/);if(mx){var mo=_MSD.indexOf(mx[1].charAt(0).toUpperCase()+mx[1].slice(1).toLowerCase());if(mo>=0)ds=mx[3]+'-'+String(mo+1).padStart(2,'0')+'-'+String(parseInt(mx[2])).padStart(2,'0');}else{ds=s.slice(0,10);}}
+          return ds===selDateStr;
+        });
         list+='———\n';
+        if(dayExtras.length){
+          list+='\nADDITIONAL RESERVATION\n';
+          dayExtras.forEach(function(ex){
+            var kdAmt = ex.amount ? ex.amount+'kd' : '';
+            var phoneStr = ex.phone ? ' '+ex.phone : '';
+            list+='\uD83D\uDCB5 '+ex.apt+' -'+ex.name+(phoneStr?' '+phoneStr:'')+(kdAmt?' / '+kdAmt:'')+'\n';
+          });
+          list+='\n';
+        }
         list+='\uD83C\uDD70\uFE0F  -   '+totalAirbnb+'\n';
         list+='\uD83D\uDCB0 -   '+totalDirect+'\n';
         list+='\u2705 -   '+totalAvail+'\n';
+        list+=(dayExtras&&dayExtras.length?'\uD83D\uDCB5 -   '+dayExtras.length+'\n':'');
         list+='Today\'s incentive - NIL\n\n';
+        dayExtras.forEach(function(ex){totalKD+=(parseFloat(ex.amount)||0);});
         list+='Total \uD83D\uDCB0 :  '+_kd(totalKD)+' KD\n';
         list+='Reserved  -  '+totalReserved+' \uD83D\uDE0E\n';
-        list+='Available  -  '+totalAvail+' \u203C\uFE0F';
+        list+='Available  -  '+totalAvail+' ‼️';
+
+
 
         // Compact summary line instead of individual cards
         var directCount = allDayBks.filter(function(b){return b.type==='direct';}).length;
@@ -4444,7 +4497,7 @@ function renderBookings(){
           +'<span style="background:var(--gnb);color:var(--gn);font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;border:1px solid #C3E0CE">&#128176; '+directCount+' Direct</span>'
           +'<span style="background:#FFF3E0;color:#E65100;font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;border:1px solid #FFCC80">&#127344; '+airbnbCount+' Airbnb</span>'
           +(pendingCount2?'<span style="background:#FFF3E0;color:#c44;font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;border:1px solid #FECBA1">&#8252; '+pendingCount2+' Pending</span>':'')
-          +'<span style="background:var(--brl);color:var(--br);font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;border:1px solid var(--gl)">&#127968; '+totalReserved+'/28 ('+(Math.round(totalReserved/28*100))+'%)</span>'
+          +'<span style="background:var(--brl);color:var(--br);font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;border:1px solid var(--gl)">&#127968; '+totalReserved+'/'+totalApts+' ('+(Math.round(totalReserved/totalApts*100))+'%)</span>'
           +'</div>';
         var listHtml = '<div style="border:1.5px solid var(--gl);border-radius:14px;overflow:hidden">'
           +'<div style="background:var(--br);padding:12px 16px;display:flex;align-items:center;justify-content:space-between">'
@@ -4847,7 +4900,7 @@ function updateSummaryCard(cd, totalCleans, kdToday, pendingCount, incentiveResu
     else if(incentiveResult.total>0) si.textContent='KD '+incentiveResult.total.toFixed(1);
     else si.textContent='NIL';
   }
-  if(so) so.textContent = reserved ? reserved+'/26 ('+occupancyPct+'%)' : '—';
+  if(so) so.textContent = reserved ? reserved+'/'+TOTAL_APTS+' ('+occupancyPct+'%)' : '—';
   // Refresh leaderboard and history after generate
   renderLeaderboard();
   renderAlanHistory();
@@ -5126,6 +5179,7 @@ setTimeout(function(){
   try{if(typeof renderDORBanner==='function')renderDORBanner();}catch(e){}
   try{if(typeof renderCancellations==='function')renderCancellations();}catch(e){}
   try{if(typeof renderPending==='function')renderPending();}catch(e){}
+  try{if(typeof renderExtraReservations==='function')renderExtraReservations();}catch(e){}
 },0);
 setTimeout(function(){try{renderLeaderboard();renderAlanHistory();updateBkPendingBadge();renderCancellations();if(typeof renderSchedEarners==='function')renderSchedEarners();}catch(e){}},0);
 
@@ -5140,7 +5194,7 @@ function renderRevSection(){
   var byMonth = {};
   var MMAP = {Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
   GUESTS.forEach(function(g){
-    if(!g.checkin||(g.status!=='paid-cash'&&g.status!=='paid-airbnb'))return;
+    if(!g.checkin||(g.status!=='paid-cash'&&g.status!=='paid-airbnb'&&g.status!=='paid'))return;
     var parts = g.checkin.split(' ');
     var mo = parts[0], yr = parts[2]||new Date().getFullYear();
     var key = yr+'-'+(MMAP[mo]||'00');
@@ -5301,7 +5355,7 @@ function renderMonthlyRevenue(){
   var byMonth={};
   var MMAP={Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
   GUESTS.forEach(function(g){
-    if(!g.checkin||(g.status!=='paid-cash'&&g.status!=='paid-airbnb'))return;
+    if(!g.checkin||(g.status!=='paid-cash'&&g.status!=='paid-airbnb'&&g.status!=='paid'))return;
     var parts=g.checkin.split(' ');
     var mo=parts[0],yr=parts[2]||new Date().getFullYear();
     var key=yr+'-'+(MMAP[mo]||'00');
@@ -7573,7 +7627,7 @@ try{
   var reservedM = raw.match(/Reserved\s*[-–]\s*(\d+)/i);
   if(!reservedM) reservedM = raw.match(/Reserved[^\d]*(\d+)/i);
   var reserved = reservedM ? parseInt(reservedM[1]) : 0;
-  var TOTAL_APTS = 26;
+  var TOTAL_APTS = (typeof ALL_APTS!=='undefined'?ALL_APTS.reduce(function(s,b){return s+b.apts.length;},0):0)||(function(){try{var _ca=JSON.parse(localStorage.getItem('hbs_custom_apts')||'[]');return 26+_ca.length;}catch(e){return 26;}}());
   var occupancyPct = reserved ? Math.round(reserved/TOTAL_APTS*100) : 0;
   updateSummaryCard(cd, totalCleans, alanKDtoday, pendingCount, incentiveResult, reserved, occupancyPct);
 
@@ -7999,6 +8053,26 @@ function parseDOR(){
       var _am=lines[li].match(_aptPats[pi]);
       if(_am){apt=normApt(_am[0].trim());}
     }
+  }
+  // Also check custom apartments from localStorage by matching apt label in text
+  if(!apt){
+    try{
+      var _caList=JSON.parse(localStorage.getItem('hbs_custom_apts')||'[]');
+      var _rawLow=raw.toLowerCase();
+      for(var _ci=0;_ci<_caList.length&&!apt;_ci++){
+        var _ca=_caList[_ci];
+        if(!_ca.apt) continue;
+        var _caLabel=(_ca.apt||'').toLowerCase();
+        var _caBldg=(_ca.building||_ca.buildingKey||'').toLowerCase();
+        // Match if the apt label appears in the raw text (e.g. "Hessah 31A")
+        if(_rawLow.indexOf(_caLabel)!==-1) apt=_ca.apt;
+        // Also match building+number combo (e.g. "hessah 31a")
+        else if(_caBldg&&_rawLow.indexOf(_caBldg)!==-1){
+          var _numM=raw.match(new RegExp(_caBldg+'\\s*([\\w\\d]+)','i'));
+          if(_numM) apt=_ca.apt;
+        }
+      }
+    }catch(e){}
   }
 
   // 2. PHONE — any country code (3-pass: +prefix line → local digits line → embedded +)
@@ -8426,6 +8500,8 @@ function renderCancellations(){
   loadCancellations();
   var el=document.getElementById('bk-cancellations');
   if(!el) return;
+  var badge=document.getElementById('bk-cancel-badge');
+  if(badge){if(CANCELLATIONS.length){badge.style.display='inline-block';badge.textContent=CANCELLATIONS.length;}else{badge.style.display='none';}}
   if(!CANCELLATIONS.length){
     el.innerHTML='<div class="gempty">No cancellations yet</div>';
     return;
@@ -8546,7 +8622,7 @@ function renderBookings(){
     var selStr=MSHORT2[_bkCalMonth]+' '+_bkSelDay+' '+_bkCalYear;
     var selDate=new Date(_bkCalYear,_bkCalMonth,_bkSelDay);
     var dayName=DAYS_FULL[selDate.getDay()];
-    var dayBks=BOOKINGS.filter(function(b){return b.checkin===selStr;});
+    var dayBks=BOOKINGS.filter(function(b){return b.checkin===selStr&&!b.isExtra;});
     // Find guests still staying on this day (multi-night, checked in earlier)
     var stayingBks=BOOKINGS.filter(function(b){
       if(b.checkin===selStr||b.status==='cancelled') return false;
@@ -8570,7 +8646,7 @@ function renderBookings(){
     if(dayTitle) dayTitle.textContent=selStr+' \u2014 '+titleStr;
 
     if(dayList){
-      if(!allDayBks.length){
+      if(false&&!allDayBks.length){
         dayList.innerHTML='<div class="gempty">No check-ins on this day</div>';
       } else {
         // Build lookup: aptKey → booking (use allDayBks to include continuing guests)
@@ -8626,6 +8702,8 @@ function renderBookings(){
         var list='Apartment update '+MSHORT2[_bkCalMonth]+' '+_bkSelDay+' ('+dayName+')\n';
         var totalDirect=0, totalAirbnb=0, totalAvail=0, totalReserved=0, totalKD=0;
 
+        var totalApts=ALL_APTS.reduce(function(s,b){return s+b.apts.length;},0);
+
         ALL_APTS.forEach(function(building){
           list+='*'+building.sec+'*\n';
           building.apts.forEach(function(apt){
@@ -8662,14 +8740,42 @@ function renderBookings(){
           list+='\n';
         });
 
+        // ── EXTRA RESERVATIONS ── compute before separator
+        var selDateStr = '';
+        try {
+          var _sd = new Date(_bkCalYear, _bkCalMonth, _bkSelDay);
+          selDateStr = _sd.getFullYear()+'-'+String(_sd.getMonth()+1).padStart(2,'0')+'-'+String(_sd.getDate()).padStart(2,'0');
+        } catch(e){}
+        loadBookings();
+        var _MSD=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        var dayExtras = BOOKINGS.filter(function(b){
+          if(!b.isExtra||b.status==='cancelled'||!b.checkin) return false;
+          var s=b.checkin, ds='';
+          if(/^\d{4}-\d{2}-\d{2}/.test(s)){ds=s.slice(0,10);}
+          else{var mx=s.match(/([A-Za-z]+)\s+(\d{1,2})\s+(\d{4})/);if(mx){var mo=_MSD.indexOf(mx[1].charAt(0).toUpperCase()+mx[1].slice(1).toLowerCase());if(mo>=0)ds=mx[3]+'-'+String(mo+1).padStart(2,'0')+'-'+String(parseInt(mx[2])).padStart(2,'0');}else{ds=s.slice(0,10);}}
+          return ds===selDateStr;
+        });
         list+='———\n';
+        if(dayExtras.length){
+          list+='\nADDITIONAL RESERVATION\n';
+          dayExtras.forEach(function(ex){
+            var kdAmt = ex.amount ? ex.amount+'kd' : '';
+            var phoneStr = ex.phone ? ' '+ex.phone : '';
+            list+='\uD83D\uDCB5 '+ex.apt+' -'+ex.name+(phoneStr?' '+phoneStr:'')+(kdAmt?' / '+kdAmt:'')+'\n';
+          });
+          list+='\n';
+        }
         list+='\uD83C\uDD70\uFE0F  -   '+totalAirbnb+'\n';
         list+='\uD83D\uDCB0 -   '+totalDirect+'\n';
         list+='\u2705 -   '+totalAvail+'\n';
+        list+=(dayExtras&&dayExtras.length?'\uD83D\uDCB5 -   '+dayExtras.length+'\n':'');
         list+='Today\'s incentive - NIL\n\n';
+        dayExtras.forEach(function(ex){totalKD+=(parseFloat(ex.amount)||0);});
         list+='Total \uD83D\uDCB0 :  '+_kd(totalKD)+' KD\n';
         list+='Reserved  -  '+totalReserved+' \uD83D\uDE0E\n';
-        list+='Available  -  '+totalAvail+' \u203C\uFE0F';
+        list+='Available  -  '+totalAvail+' ‼️';
+
+
 
         // Compact summary line instead of individual cards
         var directCount = allDayBks.filter(function(b){return b.type==='direct';}).length;
@@ -8679,7 +8785,7 @@ function renderBookings(){
           +'<span style="background:var(--gnb);color:var(--gn);font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;border:1px solid #C3E0CE">&#128176; '+directCount+' Direct</span>'
           +'<span style="background:#FFF3E0;color:#E65100;font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;border:1px solid #FFCC80">&#127344; '+airbnbCount+' Airbnb</span>'
           +(pendingCount2?'<span style="background:#FFF3E0;color:#c44;font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;border:1px solid #FECBA1">&#8252; '+pendingCount2+' Pending</span>':'')
-          +'<span style="background:var(--brl);color:var(--br);font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;border:1px solid var(--gl)">&#127968; '+totalReserved+'/28 ('+(Math.round(totalReserved/28*100))+'%)</span>'
+          +'<span style="background:var(--brl);color:var(--br);font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;border:1px solid var(--gl)">&#127968; '+totalReserved+'/'+totalApts+' ('+(Math.round(totalReserved/totalApts*100))+'%)</span>'
           +'</div>';
         var listHtml = '<div style="border:1.5px solid var(--gl);border-radius:14px;overflow:hidden">'
           +'<div style="background:var(--br);padding:12px 16px;display:flex;align-items:center;justify-content:space-between">'
@@ -8927,7 +9033,7 @@ function updateSummaryCard(cd, totalCleans, kdToday, pendingCount, incentiveResu
     else if(incentiveResult.total>0) si.textContent='KD '+incentiveResult.total.toFixed(1);
     else si.textContent='NIL';
   }
-  if(so) so.textContent = reserved ? reserved+'/26 ('+occupancyPct+'%)' : '—';
+  if(so) so.textContent = reserved ? reserved+'/'+TOTAL_APTS+' ('+occupancyPct+'%)' : '—';
   // Refresh leaderboard and history after generate
   renderLeaderboard();
   renderAlanHistory();
@@ -9210,6 +9316,7 @@ setTimeout(function _initBookings(){
   try{if(typeof renderDORBanner==='function')renderDORBanner();}catch(e){}
   try{if(typeof renderCancellations==='function')renderCancellations();}catch(e){}
   try{if(typeof renderPending==='function')renderPending();}catch(e){}
+  try{if(typeof renderExtraReservations==='function')renderExtraReservations();}catch(e){}
 },0);
 setTimeout(function(){try{renderLeaderboard();renderAlanHistory();updateBkPendingBadge();renderCancellations();if(typeof renderSchedEarners==='function')renderSchedEarners();}catch(e){}},0);
 
@@ -9231,7 +9338,7 @@ function renderMonthlyRevenue(){
   var byMonth={};
   var MMAP={Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
   GUESTS.forEach(function(g){
-    if(!g.checkin||(g.status!=='paid-cash'&&g.status!=='paid-airbnb'))return;
+    if(!g.checkin||(g.status!=='paid-cash'&&g.status!=='paid-airbnb'&&g.status!=='paid'))return;
     var parts=g.checkin.split(' ');
     var mo=parts[0],yr=parts[2]||new Date().getFullYear();
     var key=yr+'-'+(MMAP[mo]||'00');
@@ -10170,6 +10277,269 @@ function toggleBkForm(){
   if(a)a.innerHTML=open?'&#9660;':'&#9650;';
 }
 
+// ── EXTRA RESERVATION ────────────────────────────────────────────────────
+var _erSelectedApt = '';
+
+function openAddExtraReservation(){
+  var old=document.getElementById('_extraResOv');if(old)old.remove();
+  _erSelectedApt='';
+  var ov=document.createElement('div');ov.id='_extraResOv';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn .2s ease';
+
+  var today=new Date();var yyyy=today.getFullYear(),mm=String(today.getMonth()+1).padStart(2,'0'),dd=String(today.getDate()).padStart(2,'0');
+  var todayVal=yyyy+'-'+mm+'-'+dd;
+
+  ov.innerHTML='<div style="background:var(--wh,#fff);border-radius:28px 28px 0 0;width:100%;max-width:520px;max-height:88vh;overflow-y:auto;padding:24px 20px 36px;box-shadow:0 -12px 48px rgba(0,0,0,.18)">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">'
+    +'<div style="display:flex;align-items:center;gap:10px">'
+    +'<span style="font-size:26px">💵</span>'
+    +'<div><div style="font-family:\'DM Serif Display\',serif;font-size:20px;color:#3D2208">Extra Reservation</div>'
+    +'<div style="font-size:11px;color:#888;margin-top:1px">Same-day turnover booking</div></div></div>'
+    +'<button onclick="document.getElementById(\'_extraResOv\').remove()" style="background:#f0ece6;border:none;border-radius:50%;width:34px;height:34px;font-size:18px;cursor:pointer;color:#5C3D1E;flex-shrink:0">✕</button>'
+    +'</div>'
+
+    // Apartment picker
+    +'<div style="margin-bottom:14px">'
+    +'<div style="font-size:10px;font-weight:700;color:#B8913A;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">Apartment</div>'
+    +'<div id="_er-apt-display" style="background:#FAF4EC;border:1.5px solid #E5D4BC;border-radius:12px;padding:12px 14px;font-size:14px;color:#aaa;margin-bottom:10px;min-height:44px;display:flex;align-items:center">Tap a building then pick apartment</div>'
+    +'<div id="_er-bldg-pills" style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px"></div>'
+    +'<div id="_er-apt-grid" style="display:none;display:flex;gap:8px;flex-wrap:wrap"></div>'
+    +'</div>'
+
+    // Guest name, phone, dates, amount
+    +'<div style="display:grid;gap:12px">'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'
+    +'<div><div style="font-size:10px;font-weight:700;color:#B8913A;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">Guest Name</div>'
+    +'<input id="_er-name" type="text" placeholder="Guest name (optional)" style="width:100%;background:#FAF4EC;border:1.5px solid #E5D4BC;border-radius:12px;color:#3D2208;font-family:\'DM Sans\',sans-serif;font-size:14px;padding:12px 14px;outline:none;box-sizing:border-box"></div>'
+    +'<div><div style="font-size:10px;font-weight:700;color:#B8913A;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">Phone Number</div>'
+    +'<input id="_er-phone" type="tel" placeholder="+965 ..." style="width:100%;background:#FAF4EC;border:1.5px solid #E5D4BC;border-radius:12px;color:#3D2208;font-family:\'DM Sans\',sans-serif;font-size:14px;padding:12px 14px;outline:none;box-sizing:border-box"></div>'
+    +'</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'
+    +'<div><div style="font-size:10px;font-weight:700;color:#B8913A;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">✈️ Check-in</div>'
+    +'<input id="_er-checkin" type="date" value="'+todayVal+'" style="width:100%;background:#FAF4EC;border:1.5px solid #E5D4BC;border-radius:12px;color:#3D2208;font-family:\'DM Sans\',sans-serif;font-size:14px;padding:11px 14px;outline:none;box-sizing:border-box"></div>'
+    +'<div><div style="font-size:10px;font-weight:700;color:#B8913A;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">🏁 Check-out</div>'
+    +'<input id="_er-checkout" type="date" value="'+todayVal+'" style="width:100%;background:#FAF4EC;border:1.5px solid #E5D4BC;border-radius:12px;color:#3D2208;font-family:\'DM Sans\',sans-serif;font-size:14px;padding:11px 14px;outline:none;box-sizing:border-box"></div>'
+    +'</div>'
+    +'<div><div style="font-size:10px;font-weight:700;color:#B8913A;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">Amount (KD)</div>'
+    +'<input id="_er-amount" type="number" min="0" step="0.5" placeholder="0" style="width:100%;background:#FAF4EC;border:1.5px solid #E5D4BC;border-radius:12px;color:#3D2208;font-family:\'DM Sans\',sans-serif;font-size:14px;padding:12px 14px;outline:none;box-sizing:border-box"></div>'
+    +'<div><div style="font-size:10px;font-weight:700;color:#888;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">Payment Status</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+    +'<button id="_er-s-paid" onclick="_erSetStatus(\'paid\')" style="padding:12px;border-radius:12px;border:2px solid #1B7A40;background:#EAF7EF;color:#1B7A40;font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif">✅ Paid</button>'
+    +'<button id="_er-s-pending" onclick="_erSetStatus(\'pending\')" style="padding:12px;border-radius:12px;border:2px solid #E5D4BC;background:#FAF4EC;color:#888;font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif">⏳ Pending</button>'
+    +'</div>'
+    +'<input type="hidden" id="_er-status" value="paid">'
+    +'</div>'
+    +'<button onclick="addExtraReservation()" style="width:100%;background:linear-gradient(145deg,#1A3A2A,#2A5C3E);color:#fff;border:none;border-radius:14px;padding:15px;font-size:15px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;margin-top:4px">💵 Save Extra Reservation</button>'
+    +'</div></div>';
+
+  document.body.appendChild(ov);
+  ov.addEventListener('click',function(e){if(e.target===ov)ov.remove();});
+
+  // Build building pills
+  _erBuildBldgPills();
+}
+
+function _erSetStatus(s){
+  var inp=document.getElementById('_er-status');if(inp)inp.value=s;
+  var bp=document.getElementById('_er-s-paid'),bpd=document.getElementById('_er-s-pending');
+  if(bp)bp.style.cssText='padding:12px;border-radius:12px;border:2px solid '+(s==='paid'?'#1B7A40':'#E5D4BC')+';background:'+(s==='paid'?'#EAF7EF':'#FAF4EC')+';color:'+(s==='paid'?'#1B7A40':'#888')+';font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif';
+  if(bpd)bpd.style.cssText='padding:12px;border-radius:12px;border:2px solid '+(s==='pending'?'#C45400':'#E5D4BC')+';background:'+(s==='pending'?'#FFF3E0':'#FAF4EC')+';color:'+(s==='pending'?'#C45400':'#888')+';font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif';
+}
+
+function _erBuildBldgPills(){
+  var wrap=document.getElementById('_er-bldg-pills');if(!wrap)return;wrap.innerHTML='';
+  // Known buildings
+  var bldgs=[
+    {k:'t60',l:'Tower 60',icon:'🏢'},
+    {k:'t62',l:'Tower 62',icon:'🏢'},
+    {k:'sel',l:'Seleena',icon:'🏠'},
+    {k:'rna',l:'R&A',icon:'🏠'},
+    {k:'jas',l:'Jassem',icon:'🏠'},
+    {k:'fat',l:'Fatema',icon:'🏠'}
+  ];
+  // Add custom buildings from BUILDINGS_CFG if available
+  if(typeof loadBldgCfg==='function'){
+    try{loadBldgCfg();}catch(e){}
+    if(typeof BUILDINGS_CFG!=='undefined'){
+      BUILDINGS_CFG.forEach(function(b){
+        if(!bldgs.some(function(x){return x.k===b.buildingKey;}))
+          bldgs.push({k:b.buildingKey,l:b.label||b.buildingKey,icon:'🏘️'});
+      });
+    }
+  }
+  bldgs.forEach(function(b){
+    var pill=document.createElement('button');
+    pill.setAttribute('data-bk',b.k);
+    pill.style.cssText='padding:8px 14px;border-radius:20px;border:1.5px solid #E5D4BC;background:#FAF4EC;color:#5C3D1E;font-size:12px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;transition:all .15s;white-space:nowrap';
+    pill.innerHTML=b.icon+' '+b.l;
+    pill.onclick=(function(bk,bl){return function(){_erSelectBldg(bk,bl);};})(b.k,b.l);
+    wrap.appendChild(pill);
+  });
+}
+
+function _erSelectBldg(bk,bl){
+  // Highlight selected pill
+  var pills=document.querySelectorAll('#_er-bldg-pills button');
+  pills.forEach(function(p){
+    var active=p.getAttribute('data-bk')===bk;
+    p.style.background=active?'#5C3D1E':'#FAF4EC';
+    p.style.color=active?'#fff':'#5C3D1E';
+    p.style.borderColor=active?'#5C3D1E':'#E5D4BC';
+  });
+  // Build apt buttons
+  var grid=document.getElementById('_er-apt-grid');if(!grid)return;
+  grid.style.display='flex';grid.innerHTML='';
+  var apts=(typeof KNOWN_APTS_PICKER!=='undefined'&&KNOWN_APTS_PICKER[bk])||[];
+  // Also try BUILDINGS_CFG for custom
+  if(!apts.length&&typeof BUILDINGS_CFG!=='undefined'){
+    var found=BUILDINGS_CFG.find(function(b){return b.buildingKey===bk;});
+    if(found&&found.apts)apts=found.apts.map(function(a){return a.apt||a;});
+  }
+  if(!apts.length){apts=['A','B','C','D'];}
+  apts.forEach(function(a){
+    var label=typeof buildAptLabel==='function'?buildAptLabel(bk,a):bl+' '+a;
+    var btn=document.createElement('button');
+    btn.setAttribute('data-apt',label);
+    btn.style.cssText='padding:9px 16px;border-radius:12px;border:1.5px solid #E5D4BC;background:#FAF4EC;color:#3D2208;font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;transition:all .15s;min-width:60px;text-align:center';
+    btn.textContent=a;
+    btn.onclick=(function(lbl){return function(){_erSelectApt(lbl);};})(label);
+    grid.appendChild(btn);
+  });
+}
+
+function _erSelectApt(label){
+  _erSelectedApt=label;
+  var disp=document.getElementById('_er-apt-display');
+  if(disp){disp.textContent='💵 '+label;disp.style.color='#3D2208';disp.style.fontWeight='700';disp.style.background='#EAF7EF';disp.style.borderColor='#1B7A40';}
+  // Highlight selected apt button
+  var btns=document.querySelectorAll('#_er-apt-grid button');
+  btns.forEach(function(b){
+    var active=b.getAttribute('data-apt')===label;
+    b.style.background=active?'#1A3A2A':'#FAF4EC';
+    b.style.color=active?'#fff':'#3D2208';
+    b.style.borderColor=active?'#1A3A2A':'#E5D4BC';
+  });
+}
+
+function addExtraReservation(){
+  var apt=(_erSelectedApt||'').trim();
+  var name=((document.getElementById('_er-name')||{}).value||'').trim();
+  var phone=((document.getElementById('_er-phone')||{}).value||'').trim();
+  var amount=parseFloat((document.getElementById('_er-amount')||{}).value)||0;
+  var cin=(document.getElementById('_er-checkin')||{}).value||'';
+  var cout=(document.getElementById('_er-checkout')||{}).value||'';
+  var status=(document.getElementById('_er-status')||{}).value||'paid';
+  if(!apt){alert('Please select an apartment first.');return;}
+  if(!cin){alert('Check-in date is required.');return;}
+  if(!amount){alert('Please enter the reservation amount (KD).');return;}
+  var MSHORT=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function fmtD(d){if(!d)return '';var dt=new Date(d+'T12:00:00');return isNaN(dt)?d:MSHORT[dt.getMonth()]+' '+dt.getDate()+' '+dt.getFullYear();}
+  var nights=0;
+  if(cin&&cout){var d1=new Date(cin+'T12:00:00'),d2=new Date(cout+'T12:00:00');if(!isNaN(d1)&&!isNaN(d2))nights=Math.max(0,Math.round((d2-d1)/86400000));}
+  // Warn if checkout before or same as checkin
+  if(cout&&nights<=0){if(!confirm('⚠️ Check-out is same as check-in (0 nights). This is a same-day turnover — continue?'))return;}
+  loadBookings();
+  var bk={id:bkid(),apt:apt,name:name,phone:phone,amount:amount,checkin:fmtD(cin),checkout:fmtD(cout),nights:nights,type:'direct',status:status,isExtra:true};
+  BOOKINGS.push(bk);
+  saveBookings();
+  if(typeof GUESTS!=='undefined'){
+    loadGuests();
+    if(status==='pending'){
+      GUESTS.push({id:bk.id,name:name||apt||'Guest',phone:phone,apt:apt,amount:amount,pendingAmount:amount,checkin:bk.checkin,status:'pending',isCash:false});
+      if(typeof renderPending==='function')renderPending();
+    } else {
+      GUESTS.push({id:bk.id,name:name||apt||'Guest',phone:phone,apt:apt,amount:amount,pendingAmount:0,checkin:bk.checkin,status:'paid-cash',isCash:true});
+    }
+    saveGuests();
+  }
+  var ov=document.getElementById('_extraResOv');if(ov)ov.remove();
+  if(typeof updateBkPendingBadge==='function')updateBkPendingBadge();
+  if(typeof renderBkCalendar==='function')renderBkCalendar();
+  renderExtraReservations();
+  if(typeof renderBkLanding==='function')renderBkLanding();
+}
+
+function renderExtraReservations(){
+  loadBookings();
+  var extras=BOOKINGS.filter(function(b){return b.isExtra&&b.status!=='cancelled';});
+  var section=document.getElementById('bk-extra-list-section');
+  var badge=document.getElementById('bk-extra-badge');
+  if(badge){if(extras.length){badge.style.display='inline-block';badge.textContent=extras.length;}else{badge.style.display='none';}}
+  if(!section)return;
+  if(!extras.length){section.style.display='none';return;}
+  section.style.display='block';
+  var fmt=typeof _kd==='function'?_kd:function(v){var n=parseFloat(v)||0,r=Math.round(n*10)/10;return r===0?'0':r===Math.round(r)?String(Math.round(r)):r.toFixed(1);};
+  var fmtPhone=typeof fmtGuestPhone==='function'?fmtGuestPhone:function(p){return p;};
+  section.innerHTML='<div style="background:linear-gradient(135deg,#F0FAF5,#E6F5EC);border:1.5px solid #B2DFCA;border-radius:20px;padding:16px 16px 10px">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'
+    +'<div style="font-size:10px;font-weight:700;letter-spacing:2px;color:#1A5C36;text-transform:uppercase">💵 Extra Reservations</div>'
+    +'<div style="background:#1A3A2A;color:#fff;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700">'+extras.length+'</div>'
+    +'</div>'
+    +extras.map(function(b,i){
+      var isPaid=b.status==='paid';
+      var nights=parseInt(b.nights)||0;
+      var nightsStr=nights===0?'Same-day':nights===1?'1 night':nights+' nights';
+      return '<div style="background:#fff;border-radius:16px;margin-bottom:10px;border:1.5px solid '+(isPaid?'#C3E0CE':'#FECBA1')+';border-left:4px solid '+(isPaid?'#1B7A40':'#FF9800')+';overflow:hidden">'
+        // Card header
+        +'<div style="padding:12px 14px 10px;border-bottom:1px solid #f0f0f0">'
+        +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">'
+        +'<div>'
+        +'<div style="font-size:15px;font-weight:800;color:#1A3A2A">💵 '+escH(b.apt||'?')+'</div>'
+        +(b.name?'<div style="font-size:13px;font-weight:600;color:#3D2208;margin-top:2px">👤 '+escH(b.name)+'</div>':'<div style="font-size:12px;color:#aaa;margin-top:2px;font-style:italic">No guest name</div>')
+        +(b.phone?'<div style="font-size:12px;color:#666;margin-top:1px">📞 '+escH(fmtPhone(b.phone))+'</div>':'')
+        +'</div>'
+        +'<span style="font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;white-space:nowrap;'+(isPaid?'background:#EAF7EF;color:#1B7A40':'background:#FFF3E0;color:#C45400')+'">'+(isPaid?'✓ Paid':'⏳ Pending')+'</span>'
+        +'</div>'
+        +'</div>'
+        // Dates grid
+        +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;background:#F8FBF9">'
+        +'<div style="padding:9px 10px;text-align:center;border-right:1px solid #E8F0EB">'
+        +'<div style="font-size:8px;font-weight:700;letter-spacing:1.5px;color:#1A5C36;text-transform:uppercase;margin-bottom:3px">✈️ Check-in</div>'
+        +'<div style="font-size:11px;font-weight:700;color:#1A3A2A">'+(b.checkin||'—')+'</div>'
+        +'</div>'
+        +'<div style="padding:9px 10px;text-align:center;border-right:1px solid #E8F0EB">'
+        +'<div style="font-size:8px;font-weight:700;letter-spacing:1.5px;color:#1A5C36;text-transform:uppercase;margin-bottom:3px">🏁 Check-out</div>'
+        +'<div style="font-size:11px;font-weight:700;color:#1A3A2A">'+(b.checkout||'—')+'</div>'
+        +'</div>'
+        +'<div style="padding:9px 10px;text-align:center">'
+        +'<div style="font-size:8px;font-weight:700;letter-spacing:1.5px;color:#1A5C36;text-transform:uppercase;margin-bottom:3px">🌙 Duration</div>'
+        +'<div style="font-size:11px;font-weight:700;color:#1A3A2A">'+nightsStr+'</div>'
+        +'</div>'
+        +'</div>'
+        // Amount + actions
+        +'<div style="padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px">'
+        +'<div style="font-family:\'DM Serif Display\',serif;font-size:18px;color:'+(isPaid?'#1B7A40':'#C45400')+';font-weight:900">'+(b.amount?'KD '+fmt(b.amount):'No amount')+'</div>'
+        +'<div style="display:flex;gap:6px;align-items:center">'
+        +((!isPaid)?'<button onclick="markExtraPaid(\''+b.id+'\')" style="background:#1B7A40;color:#fff;border:none;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif">✓ Mark Paid</button>':'')
+        +'<button onclick="deleteExtraReservation(\''+b.id+'\')" style="background:#ffeaea;color:#c44;border:none;border-radius:10px;width:32px;height:32px;font-size:16px;cursor:pointer;font-weight:700">✕</button>'
+        +'</div>'
+        +'</div>'
+        +'</div>';
+    }).join('')
+    +'</div>';
+}
+
+function markExtraPaid(id){
+  loadBookings();
+  var b=BOOKINGS.find(function(x){return x.id===id;});
+  if(b){b.status='paid';b.pendingAmount=0;saveBookings();}
+  renderExtraReservations();
+  if(typeof renderBkLanding==='function')renderBkLanding();
+  if(typeof updateBkPendingBadge==='function')updateBkPendingBadge();
+}
+
+function deleteExtraReservation(id){
+  loadBookings();
+  BOOKINGS=BOOKINGS.filter(function(b){return b.id!==id;});
+  saveBookings();
+  // Also remove from guests
+  if(typeof GUESTS!=='undefined'){loadGuests();GUESTS=GUESTS.filter(function(g){return g.id!==id;});saveGuests();}
+  renderExtraReservations();
+  if(typeof renderBkLanding==='function')renderBkLanding();
+  if(typeof updateBkPendingBadge==='function')updateBkPendingBadge();
+  if(typeof renderBkCalendar==='function')renderBkCalendar();
+}
+
 // ── renderBkLanding ───────────────────────────────────────────────────────
 function renderBkLanding(){
   var heroDate=document.getElementById('bk-hero-date');
@@ -10189,23 +10559,7 @@ function renderBkLanding(){
   var checkins=allActive.filter(function(b){return b.checkin===todayStr;});
   var _today=new Date();_today.setHours(0,0,0,0);
   var upcoming=allActive.filter(function(b){if(!b.checkin)return false;var d=new Date(b.checkin);return !isNaN(d)&&d>=_today;}).sort(function(a,b){return new Date(a.checkin)-new Date(b.checkin);});
-  var ciSection=document.getElementById('bk-checkins-today-section'),ciList=document.getElementById('bk-checkins-today-list');
-  if(ciSection&&ciList){
-    if(checkins.length){
-      ciSection.style.display='block';ciList.innerHTML='';
-      checkins.forEach(function(b){
-        var row=document.createElement('div');row.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(46,125,82,.12);gap:10px';
-        var info=document.createElement('div');info.style.flex='1';
-        info.innerHTML='<div style="font-size:14px;font-weight:700;color:#1B5E35">'+escH(b.apt||'Unknown')+'</div><div style="font-size:12px;color:#2E7D52;margin-top:3px">'+escH(b.name||b.phone||'Guest')+'</div>';
-        var right=document.createElement('div');right.style.cssText='display:flex;align-items:center;gap:8px;flex-shrink:0';
-        var amt=document.createElement('span');amt.style.cssText='font-size:12px;font-weight:700;color:#1B5E35;background:rgba(46,125,82,.1);border-radius:8px;padding:4px 10px';
-        amt.textContent=(b.type==='airbnb'?'\uD83C\uDD70\uFE0F':'\uD83D\uDCB0')+' '+(b.amount?'KD '+_kd(b.amount):'');
-        right.appendChild(amt);
-        if(b.phone){var waBtn=document.createElement('button');waBtn.style.cssText='background:#25D366;color:#fff;border:none;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer';waBtn.textContent='\uD83D\uDCF2 Check-in';waBtn.onclick=(function(bid){return function(){sendCheckinWA(bid);};})(b.id);right.appendChild(waBtn);}
-        row.appendChild(info);row.appendChild(right);ciList.appendChild(row);
-      });
-    } else {ciSection.style.display='none';}
-  }
+  
   var upEl=document.getElementById('bk-upcoming-list');
   if(upEl){
     if(upcoming.length){
@@ -10515,6 +10869,7 @@ if(_origMP){markBkPaid=function(id){_origMP(id);var c=['#B8913A','#25D366','#5C3
   try{if(typeof updateBkPendingBadge==='function')updateBkPendingBadge();}catch(e){}
   try{if(typeof renderDORBanner==='function')renderDORBanner();}catch(e){}
   try{if(typeof renderCancellations==='function')renderCancellations();}catch(e){}
+  try{if(typeof renderExtraReservations==='function')renderExtraReservations();}catch(e){}
 })();
 
 </script>
@@ -10644,8 +10999,11 @@ function openAddApartment(){
             badge.style.display=(bEntry.cleanerName||bEntry.supName)?'block':'none';
           }
         }
-        // Focus apt number
-        setTimeout(function(){var n=document.getElementById('_aa_n');if(n)n.focus();},300);
+        // Focus apt number; re-load APT_MSGS in case building changed
+        setTimeout(function(){
+          var n=document.getElementById('_aa_n');
+          if(n){n.focus();if(n.value&&typeof _loadAptMsgIntoForm==='function')_loadAptMsgIntoForm(n.value);}
+        },300);
       }
     },120);
   }
@@ -10704,12 +11062,97 @@ function openAddApartment(){
   var aptNumInp=document.createElement('input');
   aptNumInp.id='_aa_n';aptNumInp.placeholder='e.g. 1703';
   aptNumInp.style.cssText='width:100%;background:transparent;border:none;outline:none;font-size:28px;font-weight:800;color:#5C3D1E;font-family:inherit;letter-spacing:1px';
+  // Helper: compute APT_MSGS key (same normalization as save logic)
+  function _buildAptMsgKey(bk, aptNum){
+    var M={t60:'Tower 60',t62:'Tower 62',sel:'Seleena',rna:'R&A',jas:'Jassem',fat:'Fatema'};
+    var bldgE=getBldg(bk);
+    var bLabel=bldgE?bldgE.label:(M[bk]||bk);
+    return (bLabel+' '+aptNum).toLowerCase().trim()
+      .replace(/sel(e+)?(e?na?|a)?/gi,'sel')
+      .replace(/r[&n]?a\b|rna\b/gi,'rna')
+      .replace(/fat(e+)?(ma?|ema?)?/gi,'fat')
+      .replace(/jase*m/gi,'jassem')
+      .replace(/tower\s*/gi,'')
+      .replace(/#/g,'').replace(/-/g,' ').replace(/\s+/g,' ').trim();
+  }
+
+  // Helper: normalize apt key the same way CHECK_IN_DETAILS uses
+  function _normCiKey(bk, aptNum){
+    var _M={t60:'Tower 60',t62:'Tower 62',sel:'Seleena',rna:'R&A',jas:'Jassem',fat:'Fatema'};
+    var _bldgE=getBldg(bk);
+    var _bLabel=_bldgE?_bldgE.label:(_M[bk]||bk);
+    return (_bLabel+' '+aptNum).toLowerCase().trim()
+      .replace(/sel(e+)?(e?na?|a)?/gi,'sel')
+      .replace(/r[&n]?a\b|rna\b/gi,'rna')
+      .replace(/fat(e+)?(ma?|ema?)?/gi,'fat')
+      .replace(/jase*m/gi,'jassem')
+      .replace(/tower\s*/gi,'')
+      .replace(/#/g,'').replace(/-/g,' ').replace(/\s+/g,' ').trim();
+  }
+
+  // Helper: pre-fill WA message fields from CHECK_IN_DETAILS / SHORT_CHECKIN_DETAILS / APT_MSGS
+  function _loadAptMsgIntoForm(aptNum){
+    var waciEl=document.getElementById('_aa_waci');
+    var wasciEl=document.getElementById('_aa_wasci');
+    var badge=document.getElementById('_aa_msg_badge');
+    if(!aptNum||!aptNum.trim()){
+      if(waciEl) waciEl.value='';
+      if(wasciEl) wasciEl.value='';
+      if(badge) badge.style.display='none';
+      return;
+    }
+    var _checkin='', _shortCheckin='';
+    var _key=_normCiKey(_bk, aptNum.trim());
+    var _keyNoSp=_key.replace(/\s/g,'');
+    // 1) CHECK_IN_DETAILS (full message)
+    try{
+      if(typeof CHECK_IN_DETAILS!=='undefined'){
+        if(CHECK_IN_DETAILS[_key]) _checkin=CHECK_IN_DETAILS[_key];
+        else{ Object.keys(CHECK_IN_DETAILS).forEach(function(k){if(!_checkin&&k.replace(/\s/g,'')===_keyNoSp)_checkin=CHECK_IN_DETAILS[k];}); }
+      }
+    }catch(e){}
+    // 2) SHORT_CHECKIN_DETAILS (short message)
+    try{
+      if(typeof SHORT_CHECKIN_DETAILS!=='undefined'){
+        if(SHORT_CHECKIN_DETAILS[_key]) _shortCheckin=SHORT_CHECKIN_DETAILS[_key];
+        else{ Object.keys(SHORT_CHECKIN_DETAILS).forEach(function(k){if(!_shortCheckin&&k.replace(/\s/g,'')===_keyNoSp)_shortCheckin=SHORT_CHECKIN_DETAILS[k];}); }
+      }
+    }catch(e){}
+    // 3) APT_MSGS from localStorage (overrides if present)
+    try{
+      var _msgs=JSON.parse(localStorage.getItem('hbs_apt_msgs')||'{}');
+      if(_msgs[_key]){if(_msgs[_key].checkin)_checkin=_msgs[_key].checkin;if(_msgs[_key].shortCheckin)_shortCheckin=_msgs[_key].shortCheckin;}
+      else{Object.keys(_msgs).forEach(function(k){if(k.replace(/\s/g,'')===_keyNoSp){if(_msgs[k].checkin)_checkin=_msgs[k].checkin;if(_msgs[k].shortCheckin)_shortCheckin=_msgs[k].shortCheckin;}});}
+    }catch(e){}
+    if(_checkin||_shortCheckin){
+      if(waciEl){waciEl.value=_checkin;waciEl.dispatchEvent(new Event('input'));}
+      if(wasciEl){wasciEl.value=_shortCheckin;wasciEl.dispatchEvent(new Event('input'));}
+      if(badge){
+        var bt=badge.querySelector('span');
+        if(bt) bt.textContent='Check-in details loaded for "'+aptNum.trim()+'" — edit or save as-is';
+        badge.style.display='flex';
+      }
+    } else {
+      if(waciEl) waciEl.value='';
+      if(wasciEl) wasciEl.value='';
+      if(badge) badge.style.display='none';
+    }
+  }
+
   aptNumInp.addEventListener('input',function(){
     aptNumWrap.style.borderColor=this.value?'#5C3D1E':'#FFD699';
     aptNumWrap.style.background=this.value?'linear-gradient(135deg,#FFF3E8,#FFE8CC)':'linear-gradient(135deg,#FFF8F0,#FFF3E0)';
+    _loadAptMsgIntoForm(this.value);
   });
   aptNumWrap.appendChild(aptNumLbl);aptNumWrap.appendChild(aptNumInp);
   aptSection.appendChild(aptNumWrap);
+
+  // Pre-fill indicator badge (shown when APT_MSGS has data for selected apt)
+  var aptMsgBadge=document.createElement('div');
+  aptMsgBadge.id='_aa_msg_badge';
+  aptMsgBadge.style.cssText='display:none;background:linear-gradient(135deg,#E8F5E9,#F1F8E9);border:1px solid #A5D6A7;border-radius:10px;padding:7px 12px;margin-bottom:10px;font-size:11px;font-weight:600;color:#1B7A40;align-items:center;gap:6px';
+  aptMsgBadge.innerHTML='✅ <span>Check-in details loaded from saved data</span>';
+  aptSection.appendChild(aptMsgBadge);
 
   // Building info badge (shows current cleaner/supervisor)
   var bldgBadge=document.createElement('div');
