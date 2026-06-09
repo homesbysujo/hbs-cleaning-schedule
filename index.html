@@ -2231,7 +2231,15 @@ function detectSection(lo, rawLine){
   // Auto-detect from bold header *Building Name*
   var bm=rawLine.match(/^\*([^*]+)\*\s*$/);
   if(bm){
-    var bkey='custom_'+bm[1].trim().toLowerCase().replace(/\s+/g,'_');
+    var bmlo=bm[1].trim().toLowerCase();
+    // Re-check known buildings before creating a custom key
+    if(bmlo.indexOf('tower 60')!==-1||bmlo==='t60') return 't60';
+    if(bmlo.indexOf('tower 62')!==-1||bmlo==='t62') return 't62';
+    if(bmlo.indexOf('selena')!==-1||bmlo.indexOf('seleena')!==-1) return 'sel';
+    if(bmlo.indexOf('r&a')!==-1||bmlo.indexOf('r and a')!==-1) return 'rna';
+    if(bmlo.indexOf('jassem')!==-1||bmlo.indexOf('jaseem')!==-1) return 'jas';
+    if(bmlo.indexOf('fatema')!==-1||bmlo.indexOf('fatima')!==-1) return 'fat';
+    var bkey='custom_'+bmlo.replace(/\s+/g,'_');
     return bkey;
   }
   return null;
@@ -4900,7 +4908,8 @@ function updateSummaryCard(cd, totalCleans, kdToday, pendingCount, incentiveResu
     else if(incentiveResult.total>0) si.textContent='KD '+incentiveResult.total.toFixed(1);
     else si.textContent='NIL';
   }
-  if(so) so.textContent = reserved ? reserved+'/'+TOTAL_APTS+' ('+occupancyPct+'%)' : '—';
+  var _tot=(typeof ALL_APTS!=='undefined'?ALL_APTS.reduce(function(s,b){return s+b.apts.length;},0):0)||(function(){try{var _ca=JSON.parse(localStorage.getItem('hbs_custom_apts')||'[]');return 26+_ca.length;}catch(e){return 26;}}());
+  if(so) so.textContent = reserved ? reserved+'/'+_tot+' ('+occupancyPct+'%)' : '—';
   // Refresh leaderboard and history after generate
   renderLeaderboard();
   renderAlanHistory();
@@ -7088,7 +7097,15 @@ function detectSection(lo, rawLine){
   // Auto-detect from bold header *Building Name*
   var bm=rawLine.match(/^\*([^*]+)\*\s*$/);
   if(bm){
-    var bkey='custom_'+bm[1].trim().toLowerCase().replace(/\s+/g,'_');
+    var bmlo=bm[1].trim().toLowerCase();
+    // Re-check known buildings before creating a custom key
+    if(bmlo.indexOf('tower 60')!==-1||bmlo==='t60') return 't60';
+    if(bmlo.indexOf('tower 62')!==-1||bmlo==='t62') return 't62';
+    if(bmlo.indexOf('selena')!==-1||bmlo.indexOf('seleena')!==-1) return 'sel';
+    if(bmlo.indexOf('r&a')!==-1||bmlo.indexOf('r and a')!==-1) return 'rna';
+    if(bmlo.indexOf('jassem')!==-1||bmlo.indexOf('jaseem')!==-1) return 'jas';
+    if(bmlo.indexOf('fatema')!==-1||bmlo.indexOf('fatima')!==-1) return 'fat';
+    var bkey='custom_'+bmlo.replace(/\s+/g,'_');
     return bkey;
   }
   return null;
@@ -9033,7 +9050,8 @@ function updateSummaryCard(cd, totalCleans, kdToday, pendingCount, incentiveResu
     else if(incentiveResult.total>0) si.textContent='KD '+incentiveResult.total.toFixed(1);
     else si.textContent='NIL';
   }
-  if(so) so.textContent = reserved ? reserved+'/'+TOTAL_APTS+' ('+occupancyPct+'%)' : '—';
+  var _tot=(typeof ALL_APTS!=='undefined'?ALL_APTS.reduce(function(s,b){return s+b.apts.length;},0):0)||(function(){try{var _ca=JSON.parse(localStorage.getItem('hbs_custom_apts')||'[]');return 26+_ca.length;}catch(e){return 26;}}());
+  if(so) so.textContent = reserved ? reserved+'/'+_tot+' ('+occupancyPct+'%)' : '—';
   // Refresh leaderboard and history after generate
   renderLeaderboard();
   renderAlanHistory();
