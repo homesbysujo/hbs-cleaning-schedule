@@ -2537,8 +2537,10 @@ function syncReservationToGuests(){
   // ── Full-paste duplicate guard ──
   if(typeof loadGuests==='function')loadGuests();
   // Always re-sync: clear existing reservation-list entries for this date and re-add fresh
-  GUESTS=GUESTS.filter(function(g){return g.checkin!==checkinDate||g.source!=='reservation-list';});
-  BOOKINGS=BOOKINGS.filter(function(b){return b.checkin!==checkinDate||b.source!=='reservation-list';});
+  // Clear reservation-list entries for this date (source='reservation-list' OR no source = old data)
+  // Keep DOR bookings (they have b.raw set)
+  GUESTS=GUESTS.filter(function(g){if(g.checkin!==checkinDate)return true;return g.source&&g.source!=='reservation-list';});
+  BOOKINGS=BOOKINGS.filter(function(b){if(b.checkin!==checkinDate)return true;if(b.raw)return true;return b.source&&b.source!=='reservation-list';});
   var forceResync=true;
 
   // ── Detect current building section ──
