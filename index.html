@@ -3705,8 +3705,16 @@ function parseDOR(){
         pendingAmount=parseFloat(pendLineM[1]);
         amount=paidAmount+pendingAmount;
       } else {
-        var amtM=raw.match(/(?:KD|kd)\s*([\d.]+)|([\d.]+)\s*(?:KD|kd)/i);
-        if(amtM){amount=parseFloat(amtM[1]||amtM[2]);paidAmount=amount;}
+        // Format: "35kd / ‼️ 5 KD" — paid / pending split via ‼️
+        var slashPendM=raw.match(/([\d.]+)\s*[Kk][Dd][^\d]*\u203C[^\d]*([\d.]+)\s*[Kk][Dd]/);
+        if(slashPendM){
+          paidAmount=parseFloat(slashPendM[1]);
+          pendingAmount=parseFloat(slashPendM[2]);
+          amount=paidAmount+pendingAmount;
+        } else {
+          var amtM=raw.match(/(?:KD|kd)\s*([\d.]+)|([\d.]+)\s*(?:KD|kd)/i);
+          if(amtM){amount=parseFloat(amtM[1]||amtM[2]);paidAmount=amount;}
+        }
       }
     }
   }
@@ -5963,11 +5971,18 @@ function autoPullGuests(dateStr,apts){
     var amount = a.kd || 0;
     var pendingAmount = 0;
     var kdMatches = rawLine.match(/\/\s*(\d+(?:\.\d+)?)\s*[Kk][Dd]/g);
+    // Also check for "/ ‼️ Y KD" pending format
+    var pendHazardM = rawLine.match(/\u203C[\uFE0F\u20E3]?\s*(\d+(?:\.\d+)?)\s*[Kk][Dd]/);
     if(kdMatches && kdMatches.length >= 2){
       var paid = parseFloat(kdMatches[0].match(/(\d+(?:\.\d+)?)/)[1]);
       var pend = parseFloat(kdMatches[1].match(/(\d+(?:\.\d+)?)/)[1]);
       amount = paid + pend;
       pendingAmount = pend;
+    } else if(kdMatches && kdMatches.length === 1 && pendHazardM){
+      var paid2 = parseFloat(kdMatches[0].match(/(\d+(?:\.\d+)?)/)[1]);
+      var pend2 = parseFloat(pendHazardM[1]);
+      amount = paid2 + pend2;
+      pendingAmount = pend2;
     }
     var gObj={id:gid(),name:name||rawName,phone:phone,apt:a.label,amount:amount,pendingAmount:pendingAmount,checkin:dateStr,status:status,isCash:isCashEntry,isMonthly:!!(a.monthly)};
     GUESTS.push(gObj);
@@ -8149,8 +8164,16 @@ function parseDOR(){
         pendingAmount=parseFloat(pendLineM[1]);
         amount=paidAmount+pendingAmount;
       } else {
-        var amtM=raw.match(/(?:KD|kd)\s*([\d.]+)|([\d.]+)\s*(?:KD|kd)/i);
-        if(amtM){amount=parseFloat(amtM[1]||amtM[2]);paidAmount=amount;}
+        // Format: "35kd / ‼️ 5 KD" — paid / pending split via ‼️
+        var slashPendM=raw.match(/([\d.]+)\s*[Kk][Dd][^\d]*\u203C[^\d]*([\d.]+)\s*[Kk][Dd]/);
+        if(slashPendM){
+          paidAmount=parseFloat(slashPendM[1]);
+          pendingAmount=parseFloat(slashPendM[2]);
+          amount=paidAmount+pendingAmount;
+        } else {
+          var amtM=raw.match(/(?:KD|kd)\s*([\d.]+)|([\d.]+)\s*(?:KD|kd)/i);
+          if(amtM){amount=parseFloat(amtM[1]||amtM[2]);paidAmount=amount;}
+        }
       }
     }
   }
@@ -9907,11 +9930,18 @@ function autoPullGuests(dateStr,apts){
     var amount = a.kd || 0;
     var pendingAmount = 0;
     var kdMatches = rawLine.match(/\/\s*(\d+(?:\.\d+)?)\s*[Kk][Dd]/g);
+    // Also check for "/ ‼️ Y KD" pending format
+    var pendHazardM = rawLine.match(/\u203C[\uFE0F\u20E3]?\s*(\d+(?:\.\d+)?)\s*[Kk][Dd]/);
     if(kdMatches && kdMatches.length >= 2){
       var paid = parseFloat(kdMatches[0].match(/(\d+(?:\.\d+)?)/)[1]);
       var pend = parseFloat(kdMatches[1].match(/(\d+(?:\.\d+)?)/)[1]);
       amount = paid + pend;
       pendingAmount = pend;
+    } else if(kdMatches && kdMatches.length === 1 && pendHazardM){
+      var paid2 = parseFloat(kdMatches[0].match(/(\d+(?:\.\d+)?)/)[1]);
+      var pend2 = parseFloat(pendHazardM[1]);
+      amount = paid2 + pend2;
+      pendingAmount = pend2;
     }
     var gObj={id:gid(),name:name||rawName,phone:phone,apt:a.label,amount:amount,pendingAmount:pendingAmount,checkin:dateStr,status:status,isCash:isCashEntry,isMonthly:!!(a.monthly)};
     GUESTS.push(gObj);
