@@ -5385,16 +5385,18 @@ function renderMonthlyRevenue(){
   var byMonth={};
   var MMAP={Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
   GUESTS.forEach(function(g){
-    if(!g.checkin||(g.status!=='paid-cash'&&g.status!=='paid-airbnb'&&g.status!=='paid'))return;
+    if(!g.checkin||(g.status!=='paid-cash'&&g.status!=='paid-airbnb'&&g.status!=='paid'&&g.status!=='partial'))return;
     var parts=g.checkin.split(' ');
     var mo=parts[0],yr=parts[2]||new Date().getFullYear();
     var key=yr+'-'+(MMAP[mo]||'00');
     var label=mo+' '+yr;
     if(!byMonth[key])byMonth[key]={label:label,total:0,direct:0,airbnb:0,count:0};
-    byMonth[key].total+=(parseFloat(g.amount)||0);
+    // For partial guests, only count what was actually paid
+    var gAmt=parseFloat(g.status==='partial'?(g.paidAmount||g.amount):g.amount)||0;
+    byMonth[key].total+=gAmt;
     byMonth[key].count++;
-    if(g.status==='paid-airbnb'||g.type==='airbnb')byMonth[key].airbnb+=(parseFloat(g.amount)||0);
-    else byMonth[key].direct+=(parseFloat(g.amount)||0);
+    if(g.status==='paid-airbnb'||g.type==='airbnb')byMonth[key].airbnb+=gAmt;
+    else byMonth[key].direct+=gAmt;
   });
   var keys=Object.keys(byMonth).sort().reverse();
   if(!keys.length){revEl.innerHTML='<div class="gempty">No payments recorded yet</div>';return;}
@@ -9397,16 +9399,18 @@ function renderMonthlyRevenue(){
   var byMonth={};
   var MMAP={Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
   GUESTS.forEach(function(g){
-    if(!g.checkin||(g.status!=='paid-cash'&&g.status!=='paid-airbnb'&&g.status!=='paid'))return;
+    if(!g.checkin||(g.status!=='paid-cash'&&g.status!=='paid-airbnb'&&g.status!=='paid'&&g.status!=='partial'))return;
     var parts=g.checkin.split(' ');
     var mo=parts[0],yr=parts[2]||new Date().getFullYear();
     var key=yr+'-'+(MMAP[mo]||'00');
     var label=mo+' '+yr;
     if(!byMonth[key])byMonth[key]={label:label,total:0,direct:0,airbnb:0,count:0};
-    byMonth[key].total+=(parseFloat(g.amount)||0);
+    // For partial guests, only count what was actually paid
+    var gAmt=parseFloat(g.status==='partial'?(g.paidAmount||g.amount):g.amount)||0;
+    byMonth[key].total+=gAmt;
     byMonth[key].count++;
-    if(g.status==='paid-airbnb'||g.type==='airbnb')byMonth[key].airbnb+=(parseFloat(g.amount)||0);
-    else byMonth[key].direct+=(parseFloat(g.amount)||0);
+    if(g.status==='paid-airbnb'||g.type==='airbnb')byMonth[key].airbnb+=gAmt;
+    else byMonth[key].direct+=gAmt;
   });
   var keys=Object.keys(byMonth).sort().reverse();
   if(!keys.length){revEl.innerHTML='<div class="gempty">No payments recorded yet</div>';return;}
