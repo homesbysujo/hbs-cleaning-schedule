@@ -2657,11 +2657,10 @@ function syncReservationToGuests(){
     }
     var isCash = trimmed.indexOf('\uD83D\uDCB8')!==-1 || trimmed.indexOf('\u2B1C')!==-1;
 
-    // No per-line dedup needed — we cleared this date above
-
-    // ── Add to GUESTS ──
+    // ── Add to GUESTS (dedup by apt+date — never double-count same stay) ──
+    var existIdx = GUESTS.findIndex(function(x){ return x.apt===aptStr && x.checkin===checkinDate; });
     var newG = {
-      id: gid(),
+      id: existIdx>=0 ? GUESTS[existIdx].id : gid(),
       name: guestName,
       phone: guestPhone,
       apt: aptStr,
@@ -2674,15 +2673,21 @@ function syncReservationToGuests(){
       isCash: isCash,
       source: 'reservation-list'
     };
-    GUESTS.push(newG);
+    if(existIdx>=0){ GUESTS[existIdx]=newG; } else { GUESTS.push(newG); }
     addedCount++;
     if(isPending) pendingCount++;
 
-    // ── Mirror into BOOKINGS ──
-    var dupBk = BOOKINGS.some(function(b){
+    // ── Mirror into BOOKINGS (dedup by apt+date) ──
+    var dupBkIdx = BOOKINGS.findIndex(function(b){
       return b.apt === aptStr && b.checkin === checkinDate;
     });
-    if(!dupBk){
+    if(dupBkIdx>=0){
+      // Update existing booking
+      BOOKINGS[dupBkIdx].amount = kd;
+      BOOKINGS[dupBkIdx].paidAmount = kdPaid;
+      BOOKINGS[dupBkIdx].pendingAmount = kdPending;
+      BOOKINGS[dupBkIdx].status = status;
+    } else {
       BOOKINGS.push({
         id: newG.id,
         apt: aptStr,
