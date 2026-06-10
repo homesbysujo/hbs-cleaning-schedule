@@ -706,6 +706,27 @@ input:focus,textarea:focus,select:focus{box-shadow:0 0 0 3px rgba(92,61,30,.1)!i
   transform: translateY(-1px);
 }
 </style>
+<style id="hbs-mobile-opt">
+/* ── MOBILE OPTIMIZATION (iOS + Android) ─────────────────── */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+*{-webkit-tap-highlight-color:transparent}
+button,a,.tab{touch-action:manipulation}
+@media (max-width:768px){
+  /* 16px stops iOS Safari auto-zooming when a field is tapped */
+  input[type=text],input[type=tel],input[type=number],input[type=search],input[type=date],textarea,select{font-size:16px !important}
+  /* comfortable thumb targets */
+  .tab{padding-top:12px;padding-bottom:12px}
+  /* keep popups inside the screen with safe-area room (notch devices) */
+  #_erHistOv,#_ciEdOv{padding:10px !important;padding-bottom:calc(10px + env(safe-area-inset-bottom)) !important}
+  #_erHistOv>div,#_ciEdOv>div{width:100% !important;max-height:92vh !important;border-radius:20px !important}
+  /* bottom sheets respect the home-indicator area */
+  #_dorSheet>div:last-child,#_addApt>div:last-child{padding-bottom:calc(28px + env(safe-area-inset-bottom)) !important}
+}
+/* momentum scrolling everywhere it matters */
+.tab-pane,#_er-hist-list,#_ci-list{-webkit-overflow-scrolling:touch}
+/* prevent long-press text selection on action buttons (feels app-like) */
+button{-webkit-user-select:none;user-select:none}
+</style>
 </head>
 <body>
 <div class="page">
@@ -871,7 +892,7 @@ input:focus,textarea:focus,select:focus{box-shadow:0 0 0 3px rgba(92,61,30,.1)!i
   </script>
 
   <div style="padding:10px 20px 0"><div id="bk-upcoming-list" style="display:none;background:var(--wh);border:1.5px solid var(--gl);border-radius:18px;padding:20px 20px 8px"></div></div>
-  <div style="padding:16px 20px 0"><input type="text" id="bk-search" oninput="bkSearch()" placeholder="&#128269; Search..." style="width:100%;background:var(--cr);border:1.5px solid var(--gl);border-radius:12px;color:var(--t1);font-family:'DM Sans',sans-serif;font-size:13px;padding:11px 16px;outline:none;box-sizing:border-box"></div>
+  <div style="padding:16px 20px 0"><input type="text" id="bk-search" oninput="bkSearch()" placeholder="Search guest, apartment or date..." style="width:100%;background:var(--cr);border:1.5px solid var(--gl);border-radius:12px;color:var(--t1);font-family:'DM Sans',sans-serif;font-size:13px;padding:11px 16px;outline:none;box-sizing:border-box"></div>
   <div id="bk-search-results" style="display:none;margin:8px 20px 0"></div>
   <div style="padding:8px 20px 0"><div id="dor-unblocked-banner" style="display:none;background:#FFF0F0;border:1.5px solid #FFCDD2;border-radius:14px;padding:14px 16px"></div></div>
   <div style="padding:8px 20px 0"><div id="bk-pending-banner" style="display:none;background:#FFF3E0;border:1.5px solid #FECBA1;border-radius:14px;padding:14px 16px"></div></div>
@@ -1176,8 +1197,8 @@ input:focus,textarea:focus,select:focus{box-shadow:0 0 0 3px rgba(92,61,30,.1)!i
 
   <!-- GUEST SEARCH BAR -->
   <div style="position:relative;margin-bottom:20px">
-    <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none">&#128269;</span>
-    <input id="guest-search-input" type="text" oninput="guestSearch(this.value)" placeholder="Search by name or phone number..." style="width:100%;background:var(--wh);border:1.5px solid var(--gl);border-radius:14px;color:var(--t1);font-family:'DM Sans',sans-serif;font-size:14px;padding:13px 16px 13px 42px;outline:none;box-sizing:border-box;transition:border-color .2s" onfocus="this.style.borderColor='var(--br)'" onblur="this.style.borderColor='var(--gl)'">
+    <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;display:flex;align-items:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A89478" stroke-width="2.2" stroke-linecap="round" style="display:block"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg></span>
+    <input id="guest-search-input" type="text" oninput="guestSearch(this.value)" placeholder="Search by name or phone..." style="width:100%;background:var(--wh);border:1.5px solid var(--gl);border-radius:14px;color:var(--t1);font-family:'DM Sans',sans-serif;font-size:16px;padding:13px 16px 13px 44px;outline:none;box-sizing:border-box;transition:border-color .2s" onfocus="this.style.borderColor='var(--br)'" onblur="this.style.borderColor='var(--gl)'">
   </div>
   <!-- GUEST SEARCH RESULTS -->
   <div id="guest-search-results" style="display:none;margin-bottom:20px"></div>
@@ -11099,6 +11120,18 @@ function renderExtraReservations(){
         +((!isPaid)?'<button onclick="markExtraPaid(\''+b.id+'\')" style="background:#1B7A40;color:#fff;border:none;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif">✓ Mark Paid</button>':'')
         +'<button onclick="deleteExtraReservation(\''+b.id+'\')" style="background:#ffeaea;color:#c44;border:none;border-radius:10px;width:32px;height:32px;font-size:16px;cursor:pointer;font-weight:700">✕</button>'
         +'</div>'
+        +'</div>'
+        // WhatsApp + cancel actions (same as regular booking cards)
+        +'<div style="padding:0 14px 12px">'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'
+        +'<button onclick="sendCheckinWA(\''+b.id+'\')" style="background:#25D366;color:#fff;border:none;border-radius:12px;padding:12px 8px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px">'+WA_SVG_S+' Check-in</button>'
+        +'<button onclick="sendCheckoutWA(\''+b.id+'\')" style="background:#c44;color:#fff;border:none;border-radius:12px;padding:12px 8px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px">'+WA_SVG_S+' Checkout</button>'
+        +'</div>'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'
+        +'<button onclick="sendShortCheckinWA(\''+b.id+'\')" style="background:#f0faf4;color:#2E7D52;border:1.5px dashed #A8D5B5;border-radius:12px;padding:11px 8px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;gap:4px">'+WA_SVG_S+' Short Check-in</button>'
+        +'<button onclick="sendShortCheckoutWA(\''+b.id+'\')" style="background:#fff0f0;color:#c44;border:1.5px dashed #f5b8b8;border-radius:12px;padding:11px 8px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;gap:4px">'+WA_SVG_S+' Short Checkout</button>'
+        +'</div>'
+        +'<button onclick="cancelBk(\''+b.id+'\');setTimeout(function(){if(typeof renderExtraReservations===\'function\')renderExtraReservations();},600)" style="width:100%;background:#FFF8EC;color:#c44;border:1.5px solid #FECBA1;border-radius:12px;padding:11px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif">\u2717 Cancel Booking</button>'
         +'</div>'
         +'</div>';
     }).join('')
