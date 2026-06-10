@@ -755,7 +755,7 @@ button{-webkit-user-select:none;user-select:none}
 </div>
 
 
-<div class="tabs"><button class="tab active" onclick="switchTab('bookings',this)" id="tab-btn-bookings">&#128205; Bookings</button><button class="tab" onclick="switchTab('schedule',this)">&#128197; Schedule</button><button class="tab" onclick="switchTab('pending',this)" id="tab-btn-pending">&#8252;&#65039; Payment Pending</button><button class="tab" onclick="switchTab('guests',this)">&#128101; Guest Tracker</button><button class="tab" onclick="switchTab('cash',this)">&#128176; Cash in Hand</button><button class="tab" onclick="switchTab('guidebook',this)">&#128214; Guidebook</button></div>
+<div class="tabs" onmousedown="if(event.target.tagName==='BUTTON')event.preventDefault()"><button class="tab active" onclick="switchTab('bookings',this)" id="tab-btn-bookings">&#128205; Bookings</button><button class="tab" onclick="switchTab('schedule',this)">&#128197; Schedule</button><button class="tab" onclick="switchTab('pending',this)" id="tab-btn-pending">&#8252;&#65039; Payment Pending</button><button class="tab" onclick="switchTab('guests',this)">&#128101; Guest Tracker</button><button class="tab" onclick="switchTab('cash',this)">&#128176; Cash in Hand</button><button class="tab" onclick="switchTab('guidebook',this)">&#128214; Guidebook</button></div>
 <div id="tab-bookings" class="tab-pane active">
 <div class="gsec" style="padding:0">
   <style>
@@ -5667,7 +5667,7 @@ function renderMonthlyRevenue(){
     });
   },50);
 }
-function switchTab(tab,el){document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});document.querySelectorAll('.tab-pane').forEach(function(p){p.classList.remove('active');});document.getElementById('tab-'+tab).classList.add('active');el.classList.add('active');if(tab==='guests'){if(!window._allTabsReady){setTimeout(function(){try{renderGuests();}catch(e){}setTimeout(function(){try{renderLeaderboard();}catch(e){}},30);},0);}}if(tab==='pending')renderPending();if(tab==='cash')renderCash();if(tab==='bookings'){renderBkCalendar();updateBkPendingBadge();renderCancellations();if(typeof renderBkLanding==='function')renderBkLanding();if(typeof renderDORBanner==='function')renderDORBanner();if(typeof renderPending==='function')renderPending();}if(tab==='schedule'){renderCheckinBanner();if(typeof renderSchedEarners==='function')renderSchedEarners();}}
+function switchTab(tab,el){document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});document.querySelectorAll('.tab-pane').forEach(function(p){p.classList.remove('active');});document.getElementById('tab-'+tab).classList.add('active');el.classList.add('active');if(tab==='guests'){if(!window._allTabsReady){setTimeout(function(){try{renderGuests();}catch(e){}setTimeout(function(){try{renderLeaderboard();}catch(e){}},30);},0);}}if(tab==='pending')renderPending();if(tab==='cash')renderCash();if(tab==='bookings'){renderBkCalendar();updateBkPendingBadge();renderCancellations();if(typeof renderBkLanding==='function')renderBkLanding();if(typeof renderDORBanner==='function')renderDORBanner();if(typeof renderPending==='function')renderPending();}if(tab==='schedule'){renderCheckinBanner();if(typeof renderSchedEarners==='function')renderSchedEarners();}try{window.scrollTo({top:0,left:0,behavior:'instant'});}catch(e){window.scrollTo(0,0);}}
 
 // =========================================================
 //  CASH IN HAND
@@ -9990,7 +9990,7 @@ function renderMonthlyRevenue(){
     });
   },50);
 }
-function switchTab(tab,el){document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});document.querySelectorAll('.tab-pane').forEach(function(p){p.classList.remove('active');});document.getElementById('tab-'+tab).classList.add('active');el.classList.add('active');if(tab==='guests'){if(!window._allTabsReady){setTimeout(function(){try{renderGuests();}catch(e){}setTimeout(function(){try{renderLeaderboard();}catch(e){}},30);},0);}}if(tab==='pending')renderPending();if(tab==='cash')renderCash();if(tab==='bookings'){renderBkCalendar();updateBkPendingBadge();renderCancellations();}if(tab==='schedule'){renderCheckinBanner();if(typeof renderSchedEarners==='function')renderSchedEarners();}}
+function switchTab(tab,el){document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});document.querySelectorAll('.tab-pane').forEach(function(p){p.classList.remove('active');});document.getElementById('tab-'+tab).classList.add('active');el.classList.add('active');if(tab==='guests'){if(!window._allTabsReady){setTimeout(function(){try{renderGuests();}catch(e){}setTimeout(function(){try{renderLeaderboard();}catch(e){}},30);},0);}}if(tab==='pending')renderPending();if(tab==='cash')renderCash();if(tab==='bookings'){renderBkCalendar();updateBkPendingBadge();renderCancellations();}if(tab==='schedule'){renderCheckinBanner();if(typeof renderSchedEarners==='function')renderSchedEarners();}try{window.scrollTo({top:0,left:0,behavior:'instant'});}catch(e){window.scrollTo(0,0);}}
 
 // =========================================================
 //  CASH IN HAND
@@ -11118,7 +11118,6 @@ function renderExtraReservations(){
         +'<div style="font-family:\'DM Serif Display\',serif;font-size:18px;color:'+(isPaid?'#1B7A40':'#C45400')+';font-weight:900">'+(b.amount?'KD '+fmt(b.amount):'No amount')+'</div>'
         +'<div style="display:flex;gap:6px;align-items:center">'
         +((!isPaid)?'<button onclick="markExtraPaid(\''+b.id+'\')" style="background:#1B7A40;color:#fff;border:none;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif">✓ Mark Paid</button>':'')
-        +'<button onclick="deleteExtraReservation(\''+b.id+'\')" style="background:#ffeaea;color:#c44;border:none;border-radius:10px;width:32px;height:32px;font-size:16px;cursor:pointer;font-weight:700">✕</button>'
         +'</div>'
         +'</div>'
         // WhatsApp + cancel actions (same as regular booking cards)
