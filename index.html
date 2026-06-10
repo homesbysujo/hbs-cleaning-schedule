@@ -2575,8 +2575,10 @@ function syncReservationToGuests(){
 
     var lo = trimmed.toLowerCase();
 
-    // Check for building header
-    var detected = detectSec(lo, trimmed);
+    // Check for building header — only if line is NOT itself a booking line
+    var _hasBkEmoji = (trimmed.indexOf('💰')!==-1||trimmed.indexOf('‼')!==-1||
+      trimmed.indexOf('✅')!==-1||trimmed.indexOf('🅰')!==-1);
+    var detected = !_hasBkEmoji && detectSec(lo, trimmed);
     if(detected){ secInfo = detected; return; }
 
     // Skip summary / footer lines
@@ -2629,9 +2631,14 @@ function syncReservationToGuests(){
 
     // ── Parse KD amount — handle "35kd / ‼️ 5 KD" split format ──
     var kd = 0, kdPaid = 0, kdPending = 0;
-    // Split pay: "Xkd / ‼️ Y KD" or "Xkd ‼️ Y kd"
-    var splitPayM = trimmed.match(/(\d+(?:\.\d+)?)\s*[Kk][Dd][^\d]*‼[^\d]*(\d+(?:\.\d+)?)\s*[Kk][Dd]/);
-    if(splitPayM){
+    // Split pay: "X kd paid Y kd pending" or "Xkd / ‼️ Y KD"
+    var splitPayPaid = trimmed.match(/(\d+(?:\.\d+)?)\s*[Kk][Dd]\s*paid\s*(\d+(?:\.\d+)?)\s*[Kk][Dd]\s*pending/i);
+    var splitPayM = !splitPayPaid && trimmed.match(/(\d+(?:\.\d+)?)\s*[Kk][Dd][^\d]*\u203C[^\d]*(\d+(?:\.\d+)?)\s*[Kk][Dd]/);
+    if(splitPayPaid){
+      kdPaid = parseFloat(splitPayPaid[1]);
+      kdPending = parseFloat(splitPayPaid[2]);
+      kd = kdPaid + kdPending;
+    } else if(splitPayM){
       kdPaid = parseFloat(splitPayM[1]);
       kdPending = parseFloat(splitPayM[2]);
       kd = kdPaid + kdPending;
@@ -3724,8 +3731,13 @@ function parseDOR(){
         amount=paidAmount+pendingAmount;
       } else {
         // Format: "35kd / ‼️ 5 KD" — paid / pending split via ‼️
-        var slashPendM=raw.match(/([\d.]+)\s*[Kk][Dd][^\d]*\u203C[^\d]*([\d.]+)\s*[Kk][Dd]/);
-        if(slashPendM){
+        var slashPendPaid=raw.match(/([\d.]+)\s*[Kk][Dd]\s*paid\s*([\d.]+)\s*[Kk][Dd]\s*pending/i);
+        var slashPendM=!slashPendPaid&&raw.match(/([\d.]+)\s*[Kk][Dd][^\d]*\u203C[^\d]*([\d.]+)\s*[Kk][Dd]/);
+        if(slashPendPaid){
+          paidAmount=parseFloat(slashPendPaid[1]);
+          pendingAmount=parseFloat(slashPendPaid[2]);
+          amount=paidAmount+pendingAmount;
+        } else if(slashPendM){
           paidAmount=parseFloat(slashPendM[1]);
           pendingAmount=parseFloat(slashPendM[2]);
           amount=paidAmount+pendingAmount;
@@ -8190,8 +8202,13 @@ function parseDOR(){
         amount=paidAmount+pendingAmount;
       } else {
         // Format: "35kd / ‼️ 5 KD" — paid / pending split via ‼️
-        var slashPendM=raw.match(/([\d.]+)\s*[Kk][Dd][^\d]*\u203C[^\d]*([\d.]+)\s*[Kk][Dd]/);
-        if(slashPendM){
+        var slashPendPaid=raw.match(/([\d.]+)\s*[Kk][Dd]\s*paid\s*([\d.]+)\s*[Kk][Dd]\s*pending/i);
+        var slashPendM=!slashPendPaid&&raw.match(/([\d.]+)\s*[Kk][Dd][^\d]*\u203C[^\d]*([\d.]+)\s*[Kk][Dd]/);
+        if(slashPendPaid){
+          paidAmount=parseFloat(slashPendPaid[1]);
+          pendingAmount=parseFloat(slashPendPaid[2]);
+          amount=paidAmount+pendingAmount;
+        } else if(slashPendM){
           paidAmount=parseFloat(slashPendM[1]);
           pendingAmount=parseFloat(slashPendM[2]);
           amount=paidAmount+pendingAmount;
