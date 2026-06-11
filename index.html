@@ -83,6 +83,22 @@ body.dark #tab-guidebook [style*="background:var(--wh)"]{background:#2A1E0F!impo
 body.dark #tab-guidebook [style*="background:var(--cr)"]{background:#1E1508!important}
 body.dark #tab-guidebook [style*="background:var(--brl)"]{background:#3D2E1A!important}
 body.dark #tab-guidebook .gb-section-body{border-color:#3D2E1A!important}
+
+/* ── Add Manually form animations ── */
+@keyframes bkSlideDown{0%{opacity:0;transform:translateY(-10px) scale(.98)}100%{opacity:1;transform:none}}
+@keyframes bkSlideUp{0%{opacity:1;transform:none}100%{opacity:0;transform:translateY(-8px)}}
+@keyframes bkFieldIn{0%{opacity:0;transform:translateY(12px)}100%{opacity:1;transform:none}}
+#bk-form input,#bk-form select{transition:border-color .2s,box-shadow .2s,transform .15s}
+#bk-form input:focus,#bk-form select:focus{border-color:var(--br)!important;box-shadow:0 0 0 3px rgba(92,61,30,.13);transform:scale(1.012)}
+#bk-form button{transition:transform .13s,box-shadow .2s,filter .2s}
+#bk-form button:hover{box-shadow:0 6px 18px rgba(92,61,30,.28);filter:brightness(1.06)}
+#bk-form button:active{transform:scale(.965)}
+#add-manually-section>div>div:first-child:active{opacity:.65}
+
+@media(max-width:560px){.widgets-row{grid-template-columns:1fr!important}}
+
+@keyframes earnTapPulse{0%{transform:scale(1)}35%{transform:scale(1.045)}100%{transform:scale(1)}}
+@keyframes medalSpin{0%{transform:rotate(0) scale(1)}50%{transform:rotate(180deg) scale(1.35)}100%{transform:rotate(360deg) scale(1)}}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
@@ -1197,8 +1213,7 @@ button{-webkit-user-select:none;user-select:none}
 
   <!-- GUEST SEARCH BAR -->
   <div style="position:relative;margin-bottom:20px">
-    <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;display:flex;align-items:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A89478" stroke-width="2.2" stroke-linecap="round" style="display:block"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg></span>
-    <input id="guest-search-input" type="text" oninput="guestSearch(this.value)" placeholder="Search by name or phone..." style="width:100%;background:var(--wh);border:1.5px solid var(--gl);border-radius:14px;color:var(--t1);font-family:'DM Sans',sans-serif;font-size:16px;padding:13px 16px 13px 44px;outline:none;box-sizing:border-box;transition:border-color .2s" onfocus="this.style.borderColor='var(--br)'" onblur="this.style.borderColor='var(--gl)'">
+    <input id="guest-search-input" type="text" oninput="guestSearch(this.value)" placeholder="Search by name or phone..." style="width:100%;background:var(--wh);border:1.5px solid var(--gl);border-radius:14px;color:var(--t1);font-family:'DM Sans',sans-serif;font-size:16px;padding:13px 16px;outline:none;box-sizing:border-box;transition:border-color .2s" onfocus="this.style.borderColor='var(--br)'" onblur="this.style.borderColor='var(--gl)'">
   </div>
   <!-- GUEST SEARCH RESULTS -->
   <div id="guest-search-results" style="display:none;margin-bottom:20px"></div>
@@ -2598,9 +2613,7 @@ function saveBldgModal(){
 loadBldgCfg(); // init on page load
 function updateListingsCount(){
   try{
-    var customCount=BUILDINGS_CFG.filter(function(b){return b.key.indexOf('custom_')===0;}).length;
-    var customApts=JSON.parse(localStorage.getItem('hbs_custom_apts')||'[]').length;
-    var total=28+customApts;
+    var total=(typeof hbsTotalApts==='function')?hbsTotalApts():28;
     var el1=document.getElementById('hbs-listings-count');if(el1)el1.textContent=total;
     var el2=document.getElementById('hbs-listings-count2');if(el2)el2.textContent=total;
   }catch(e){}
@@ -2871,7 +2884,8 @@ try{
   }
   var cdFoundInPaste=!!cd;
   if(!cd){var n2=kwNow();cd=MSHORT[n2.getMonth()]+' '+n2.getDate()+' '+n2.getFullYear();}
-  if(_dateMode!=='today'&&!cdFoundInPaste){
+  /* Cleaners work the morning AFTER the list date, so schedule shows list date + 1 */
+  if(_dateMode!=='today'){
     var cdDateObj=new Date(cd);
     if(!isNaN(cdDateObj.getTime())){
       cdDateObj.setDate(cdDateObj.getDate()+1);
@@ -3003,7 +3017,7 @@ try{
 
   // Alan — Tower 62
   var bc62=bCfg('t62');
-  var a62txt='Tower 62( '+cd+' )\nToday\'s Schedule\n\n';
+  var a62txt='Tower 62 ( '+cd+' )\nToday\'s Schedule\n\n';
   if(b62.order.length){
     a62txt+=numSort(b62.order).map(function(a){
       var booked=b62.apts[a]&&b62.apts[a].status==='booked';
@@ -3015,7 +3029,7 @@ try{
 
   // Alan — Tower 60
   var bc60=bCfg('t60');
-  var a60txt='Tower 60( '+cd+' )\nToday\'s Schedule\n\n';
+  var a60txt='Tower 60 ( '+cd+' )\nToday\'s Schedule\n\n';
   if(b60.order.length){
     a60txt+=numSort(b60.order).map(function(a){
       var booked=b60.apts[a]&&b60.apts[a].status==='booked';
@@ -3026,14 +3040,14 @@ try{
   msgCards.push({id:'mA60',title:(bc60.cleanerName||'Alan')+' \u2014 Tower 60',phone:bc60.cleanerPhone||'96594116095',text:a60txt});
 
   // Vipin — Both Towers (supervisor)
-  var viptxt='Tower 60( '+cd+' )\nToday\'s Schedule\n\n';
+  var viptxt='Tower 60 ( '+cd+' )\nToday\'s Schedule\n\n';
   if(b60.order.length){
     viptxt+=numSort(b60.order).map(function(a){
       var booked=b60.apts[a]&&b60.apts[a].status==='booked';
       return '60-'+a+' - '+(booked?R:X);
     }).join('\n');
   } else { viptxt+='No cleans today \u2705'; }
-  viptxt+='\n\nTower 62( '+cd+' )\nToday\'s Schedule\n\n';
+  viptxt+='\n\nTower 62 ( '+cd+' )\nToday\'s Schedule\n\n';
   if(b62.order.length){
     viptxt+=numSort(b62.order).map(function(a){
       var booked=b62.apts[a]&&b62.apts[a].status==='booked';
@@ -3052,9 +3066,9 @@ try{
   if(brna.list.length||bjas.list.length){
     var rnaMp={};brna.list.forEach(function(e){rnaMp[e.label]=e;});
     var jasMp={};bjas.list.forEach(function(e){jasMp[e.label]=e;});
-    gaytxt=(bcRna.label||'R&A Apartments')+'( '+cd+' )\nToday\'s Schedule\n\n';
+    gaytxt=(bcRna.label||'R&A Apartments')+' ( '+cd+' )\nToday\'s Schedule\n\n';
     gaytxt+=numSort(brna.order).map(function(a){return a+' - '+(rnaMp[a]?R:X);}).join('\n');
-    gaytxt+='\n\n'+(bcJas.label||'Jassem Apartments')+'( '+cd+' )\nToday\'s Schedule\n\n';
+    gaytxt+='\n\n'+(bcJas.label||'Jassem Apartments')+' ( '+cd+' )\nToday\'s Schedule\n\n';
     gaytxt+=numSort(bjas.order).map(function(a){return a+' - '+(jasMp[a]?R:X);}).join('\n');
   } else { gaytxt='No cleans today \u2705'; }
   msgCards.push({id:'mGay',title:(bcRna.cleanerName||'Gayani')+' \u2014 R&A + Jassem',phone:bcRna.cleanerPhone||'96565591476',text:gaytxt});
@@ -3064,7 +3078,7 @@ try{
   var bfat=BUILDINGS['fat']||{list:[],order:[]};
   var fatMp={};bfat.list.forEach(function(e){fatMp[e.label]=e;});
   var bistxt=bfat.list.length
-    ?((bcFat.label||'Fatema Apartments')+'( '+cd+' )\nToday\'s Schedule\n\n'+strSort(bfat.order).map(function(a){return a+' - '+(fatMp[a]?R:X);}).join('\n'))
+    ?((bcFat.label||'Fatema Apartments')+' ( '+cd+' )\nToday\'s Schedule\n\n'+strSort(bfat.order).map(function(a){return a+' - '+(fatMp[a]?R:X);}).join('\n'))
     :'No cleans today \u2705';
   msgCards.push({id:'mBis',title:(bcFat.cleanerName||'Biswa')+' \u2014 Fatema',phone:bcFat.cleanerPhone||'96555127880',text:bistxt});
 
@@ -3073,13 +3087,13 @@ try{
   var bsel=BUILDINGS['sel']||{list:[],order:[]};
   var selMp={};bsel.list.forEach(function(e){selMp[e.label]=e;});
   var shatxt=bsel.list.length
-    ?((bcSel.label||'Selena Apartments')+'( '+cd+' )\nToday\'s Schedule\n\n'+numSort(bsel.order).map(function(a){return a+' - '+(selMp[a]?R:X);}).join('\n'))
+    ?((bcSel.label||'Selena Apartments')+' ( '+cd+' )\nToday\'s Schedule\n\n'+numSort(bsel.order).map(function(a){return a+' - '+(selMp[a]?R:X);}).join('\n'))
     :'No cleans today \u2705';
   msgCards.push({id:'mSha',title:(bcSel.cleanerName||'Kanthi')+' \u2014 Selena',phone:bcSel.cleanerPhone||'96597936588',text:shatxt});
 
   // Samyuktha — Selena Supervisor
   var samtxt=bsel.list.length
-    ?((bcSel.label||'Selena Apartments')+' Supervisor Update( '+cd+' )\nToday\'s Schedule\n\n'+numSort(bsel.order).map(function(a){return a+' - '+(selMp[a]?R:X);}).join('\n'))
+    ?((bcSel.label||'Selena Apartments')+' ( '+cd+' )\nToday\'s Schedule\n\n'+numSort(bsel.order).map(function(a){return a+' - '+(selMp[a]?R:X);}).join('\n'))
     :'No cleans today at Selena \u2705';
   var samyName=bcSel.supName||'Samyuktha'; var samyPhone=bcSel.supPhone||'96551765790';
   if(samyName) msgCards.push({id:'mSamy',title:samyName+' \u2014 Selena Supervisor',phone:samyPhone,text:samtxt});
@@ -3093,7 +3107,7 @@ try{
     var sup=getSupCfg(sk);
     var bEntry=getOrCreateBldg(sk, cfg.label); // ensure it exists in BUILDINGS_CFG
     var cardId='mCustom_'+sk;
-    var custTxt=cfg.label+'( '+cd+' )\n\n';
+    var custTxt=cfg.label+' ( '+cd+' )\n\n';
     if(bld.isTower){
       bld.order.forEach(function(a){custTxt+=cfg.prefix+a+' - '+(bld.apts[a]&&bld.apts[a].status==='booked'?R:X)+'\n';});
     } else {
@@ -3106,7 +3120,7 @@ try{
     } else {
       msgCards.push({id:cardId,title:cfg.name+' \u2014 '+cfg.label,phone:cfg.phone||'',text:custTxt,isCustom:true});
       if(sup){
-        msgCards.push({id:cardId+'_sup',title:sup.name+' \u2014 '+cfg.label+' Supervisor',phone:sup.phone||'',text:cfg.label+' Supervisor Update( '+cd+' )\n\n'+custTxt.split('\n').slice(2).join('\n'),isCustom:true});
+        msgCards.push({id:cardId+'_sup',title:sup.name+' \u2014 '+cfg.label+' Supervisor',phone:sup.phone||'',text:cfg.label+' ( '+cd+' )\n\n'+custTxt.split('\n').slice(2).join('\n'),isCustom:true});
       }
     }
   });
@@ -3206,7 +3220,7 @@ try{
         waBtn='<button class="cpbtn" onclick="cp(\''+mc.id+'\',this)">Copy</button>';
       }
       // 📝 Note button
-      var noteBtn='<button onclick="openNoteModal(\''+escH(mc.title)+'\')" title="Add note" style="background:none;border:1.5px solid var(--gl);border-radius:8px;padding:5px 10px;font-size:13px;cursor:pointer;color:var(--t3);margin-left:4px">&#128221;</button>';
+      var noteBtn='<button onclick="cp(\''+mc.id+'\',this)" title="Copy message" style="background:#FAF7F2;border:1.5px solid var(--gl);border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;color:var(--br);margin-left:4px;font-family:\'DM Sans\',sans-serif">Copy</button>';
       var card=document.createElement('div');
       card.className='mcard';
       if(isUnassigned) card.style.border='1.5px solid #FECBA1';
@@ -3227,7 +3241,7 @@ try{
       if(bld.apts){
         Object.keys(bld.apts).forEach(function(num){
           var a=bld.apts[num];
-          if(a.status==='booked'&&(a.kd>0||a.guest)){
+          if(a.status==='booked'||a.status==='monthly'){
             var key=sec+'-'+num;
             var humanLbl=(secLbl[sec]||sec)+'-'+num;
             if(!APT_PERF[key]) APT_PERF[key]={bookings:0,kd:0,lastDate:'',label:humanLbl};
@@ -3243,10 +3257,13 @@ try{
         });
       }
       if(bld.list){
+        var bldName=(secLbl[sec]||((getCleanerCfg&&getCleanerCfg(sec)||{}).label)||sec);
         bld.list.forEach(function(e){
           if(e.guest){
-            var key=e.label;
-            if(!APT_PERF[key]) APT_PERF[key]={bookings:0,kd:0,lastDate:'',label:key};
+            var lblHuman=(String(e.label||'').toLowerCase().indexOf(String(bldName).toLowerCase())===0)?e.label:(bldName+' '+e.label);
+            var key=sec+'|'+e.label;
+            if(!APT_PERF[key]) APT_PERF[key]={bookings:0,kd:0,lastDate:'',label:lblHuman};
+            if(APT_PERF[key].label===key) APT_PERF[key].label=lblHuman;
             if(APT_PERF[key].lastDate!==date){
               APT_PERF[key].bookings++;
               APT_PERF[key].kd+=e.kd||0;
@@ -3273,7 +3290,7 @@ try{
   var reservedM = raw.match(/Reserved\s*[-–]\s*(\d+)/i);
   if(!reservedM) reservedM = raw.match(/Reserved[^\d]*(\d+)/i);
   var reserved = reservedM ? parseInt(reservedM[1]) : 0;
-  var TOTAL_APTS = (typeof ALL_APTS!=='undefined'?ALL_APTS.reduce(function(s,b){return s+b.apts.length;},0):0)||(function(){try{var _ca=JSON.parse(localStorage.getItem('hbs_custom_apts')||'[]');return 26+_ca.length;}catch(e){return 26;}}());
+  var TOTAL_APTS = (typeof hbsTotalApts==='function'?hbsTotalApts():28);
   var occupancyPct = reserved ? Math.round(reserved/TOTAL_APTS*100) : 0;
   updateSummaryCard(cd, totalCleans, alanKDtoday, pendingCount, incentiveResult, reserved, occupancyPct);
 
@@ -3705,12 +3722,32 @@ function saveBookings(){ try{localStorage.setItem('hbs_bookings',JSON.stringify(
 function bkid(){ return 'bk'+Date.now()+Math.floor(Math.random()*9999); }
 
 function toggleBkForm(){
-  var f=document.getElementById('bk-form');
-  var a=document.getElementById('bk-form-arrow');
-  if(!f) return;
-  var open=f.style.display!=='none';
-  f.style.display=open?'none':'block';
-  if(a) a.innerHTML=open?'&#9660;':'&#9650;';
+  var f=document.getElementById('bk-form'),a=document.getElementById('bk-form-arrow');
+  if(!f)return;
+  var open=f.getAttribute('data-open')==='1'||(f.getAttribute('data-open')===null&&f.style.display!=='none');
+  f.setAttribute('data-open',open?'0':'1');
+  if(open){
+    f.style.animation='bkSlideUp .2s ease forwards';
+    setTimeout(function(){if(f.getAttribute('data-open')==='0'){f.style.display='none';f.style.animation='';}},190);
+  } else {
+    f.style.display='block';
+    f.style.animation='bkSlideDown .3s cubic-bezier(.34,1.3,.64,1)';
+    try{
+      var kids=f.children;
+      for(var i=0;i<kids.length;i++){kids[i].style.animation='bkFieldIn .38s cubic-bezier(.34,1.56,.64,1) '+(i*0.06)+'s both';}
+    }catch(e){}
+  }
+  if(a){a.innerHTML='&#9660;';a.style.display='inline-block';a.style.transition='transform .28s cubic-bezier(.34,1.56,.64,1)';a.style.transform=open?'rotate(0deg)':'rotate(180deg)';}
+  /* Pre-fill empty date fields with today (Kuwait time) for faster entry */
+  if(!open){
+    try{
+      var n=(typeof kwNow==='function')?kwNow():new Date();
+      var iso=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');
+      var ci=document.getElementById('bk-checkin'),co=document.getElementById('bk-checkout');
+      if(ci&&!ci.value)ci.value=iso;
+      if(co&&!co.value)co.value=iso;
+    }catch(e){}
+  }
 }
 
 // ── DOR PARSER ───────────────────────────────────────────
@@ -4349,18 +4386,22 @@ function addBookingManual(){
   var nights=0;
   if(cin&&cout){ var d1=new Date(cin+'T12:00:00'),d2=new Date(cout+'T12:00:00'); if(!isNaN(d1)&&!isNaN(d2)) nights=Math.round((d2-d1)/(86400000)); }
 
-  var bk={id:bkid(),apt:apt.trim(),name:name.trim(),phone:phone.trim(),amount:amount,checkin:checkin,checkout:checkout,nights:nights,type:type,status:initialStatus};
+  var bk={id:bkid(),apt:apt.trim(),name:name.trim(),phone:phone.trim(),amount:amount,checkin:checkin,checkout:checkout,nights:nights,type:type,status:initialStatus,blocked:false,blockedBy:'',notYetBlocked:type==='direct'};
   var _dupM=BOOKINGS.filter(function(b){return b.apt===bk.apt&&b.checkin===bk.checkin&&b.status!=='cancelled';});
   if(_dupM.length){if(!confirm('⚠️ Duplicate!\n'+bk.apt+' already has a booking on '+bk.checkin+'.\n\nAdd anyway?'))return;}
   BOOKINGS.push(bk);
   saveBookings();
-  if(typeof initialStatus!=='undefined'&&initialStatus==='pending'){
-    loadGuests();
-    GUESTS.push({id:gid(),name:bk.name||bk.apt||'Guest',phone:bk.phone,apt:bk.apt,
-      amount:bk.amount,pendingAmount:bk.amount,checkin:bk.checkin,status:'pending',isCash:false});
-    saveGuests();
-    if(typeof renderPending==='function')renderPending();
+  // Sync to Guest Tracker (same flow as DOR): paid -> tracker, pending -> Payment Pending, airbnb -> tracker as airbnb
+  loadGuests();
+  if(initialStatus==='pending'){
+    GUESTS.push({id:bk.id,name:bk.name||bk.apt||'Guest',phone:bk.phone,apt:bk.apt,
+      amount:bk.amount,pendingAmount:bk.amount,checkin:bk.checkin,status:'pending',type:'direct',isCash:false});
+  } else {
+    GUESTS.push({id:bk.id,name:bk.name||bk.apt||'Guest',phone:bk.phone,apt:bk.apt,
+      amount:bk.amount,pendingAmount:0,checkin:bk.checkin,status:(type==='airbnb'?'paid-airbnb':'paid-cash'),type:type,isCash:type!=='airbnb'});
   }
+  saveGuests();
+  if(typeof renderPending==='function')renderPending();
   updateBkPendingBadge();
   if(typeof renderDORBanner==='function')renderDORBanner();
   if(typeof renderBkLanding==='function')renderBkLanding();
@@ -4413,7 +4454,7 @@ function cancelBk(id){
     apt:b.apt,name:b.name,phone:b.phone,
     checkin:b.checkin,amount:b.amount,
     refundType:refundType,refundAmt:refundAmt,
-    cancelDate:cancelDate
+    cancelDate:cancelDate,synced:true
   });
   saveCancellations();
 
@@ -4426,7 +4467,22 @@ function cancelBk(id){
   //  Partial refund -> refunded amount subtracted from the guest entry
   //  No refund      -> money kept, guest entry stays as revenue
   loadGuests();
-  function _cxMatch(g){return g.id===id||((g.apt||'')===(b.apt||'')&&(g.checkin||'')===(b.checkin||''));}
+  function _cxN(s){return String(s||'').toLowerCase().replace(/[^a-z0-9]/g,'');}
+  function _cxD(s){var m=String(s||'').toLowerCase().match(/(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*[^0-9]*(\d{1,2})(?:[^0-9]+(\d{4}))?/);return m?{mo:m[1],d:parseInt(m[2],10),y:m[3]||''}:null;}
+  function _cxDEq(a,b2){var da=_cxD(a),db=_cxD(b2);if(da&&db){if(da.mo!==db.mo||da.d!==db.d)return false;if(da.y&&db.y&&da.y!==db.y)return false;return true;}return _cxN(a)!==''&&_cxN(a)===_cxN(b2);}
+  function _cxPh(s){return String(s||'').replace(/[^0-9]/g,'');}
+  function _cxMatch(g){
+    if(g.id===id)return true;
+    var aptEq=_cxN(g.apt)!==''&&_cxN(g.apt)===_cxN(b.apt);
+    var dateEq=_cxDEq(g.checkin,b.checkin);
+    if(aptEq&&dateEq)return true;
+    var nameEq=_cxN(g.name)!==''&&_cxN(g.name)===_cxN(b.name);
+    if(nameEq&&(aptEq||dateEq))return true;
+    var pg=_cxPh(g.phone),pb=_cxPh(b.phone);
+    var phEq=pg.length>=8&&(pg===pb||pg.slice(-8)===pb.slice(-8));
+    if(phEq&&(aptEq||dateEq))return true;
+    return false;
+  }
   if(refundType==='Full'){
     GUESTS=GUESTS.filter(function(g){return !_cxMatch(g);});
   } else if(refundType==='Partial'&&refundAmt>0){
@@ -4819,7 +4875,7 @@ function makeBkCard(b){
   var nightsBar='<div class="night-pill-wrap"><div class="night-tooltip">'+nights+' night stay</div><span class="night-pill" onclick="this.style.animation=\'none\';void this.offsetWidth;this.style.animation=\'pillPop 0.4s cubic-bezier(.34,1.56,.64,1)\'"><span class="npshimmer"></span>'+nights+' nights</span></div>';
 
   // Status color for left border
-  var borderColor=isPaid?'#4CAF50':'#FF9800';
+  var borderColor=(b.type==='airbnb')?'#FF385C':(isPaid?'#4CAF50':'#FF9800');
   var cardId='bkcard_'+b.id;
 
   return '<div id="'+cardId+'" class="bk-card-anim" style="border:1.5px solid var(--gl);border-left:4px solid '+borderColor+';border-radius:16px;padding:16px;margin-bottom:12px;background:var(--wh);position:relative;overflow:hidden;transition:box-shadow 0.2s,transform 0.15s;cursor:default" '
@@ -4917,7 +4973,7 @@ function _renderSchedAlan(){
     return;
   }
   var grandKD = _alanSchedKeys.reduce(function(s,mk){ var e=LOG[mk]; return s+((e&&e.t60Total||0)+(e&&e.t62Total||0)); },0);
-  if(totEl) totEl.textContent = grandKD>0 ? 'KD '+grandKD.toFixed(1)+' total' : '';
+  if(totEl) totEl.textContent = grandKD>0 ? 'KD '+grandKD.toFixed(1)+' Total' : '';
   var pages = Math.max(1, Math.ceil(_alanSchedKeys.length / 3));
   _alanSchedPage = Math.min(_alanSchedPage, pages-1);
   var slice = _alanSchedKeys.slice(_alanSchedPage*3, _alanSchedPage*3+3);
@@ -4981,19 +5037,11 @@ function renderSchedEarners(){
     merged[k].bookings+=e.bookings;
     merged[k].kd+=e.kd||0;
   });
-  // 2) From GUESTS paid-cash (guest tracker)
-  if(typeof GUESTS!=='undefined'){
-    GUESTS.filter(function(g){return g.status==='paid-cash'&&g.apt;}).forEach(function(g){
-      var k='guest-'+g.apt;
-      if(!merged[k]) merged[k]={label:g.apt,bookings:0,kd:0};
-      merged[k].bookings++;
-      merged[k].kd+=parseFloat(g.amount)||0;
-    });
-  }
+  // (Schedule-tab data only \u2014 guest tracker entries intentionally excluded)
 
   var sorted=Object.values(merged).filter(function(e){return e.bookings>0;});
-  // Sort by KD earned primary, bookings secondary
-  sorted.sort(function(a,b){return b.kd-a.kd||b.bookings-a.bookings;});
+  // Sort by bookings primary (most-booked apartments), KD secondary
+  sorted.sort(function(a,b){return b.bookings-a.bookings||b.kd-a.kd;});
   sorted=sorted.slice(0,3);
 
   var subEl = document.getElementById('sched-earn-sub');
@@ -5002,9 +5050,9 @@ function renderSchedEarners(){
     if(subEl) subEl.textContent='';
     return;
   }
-  if(subEl){ var totalKD=sorted.reduce(function(s,e){return s+e.kd;},0); subEl.textContent='KD '+fmt(totalKD)+' earned total'; }
+  if(subEl){ var totalKD=sorted.reduce(function(s,e){return s+e.kd;},0); var totalBk=sorted.reduce(function(s,e){return s+e.bookings;},0);subEl.textContent=totalBk+' Bookings Tallied'+(totalKD>0?' \u00b7 KD '+fmt(totalKD):''); }
 
-  var maxKD=sorted[0].kd||1;
+  var maxBk=sorted[0].bookings||1;
   var medals=['🥇','🥈','🥉'];
   var barGrad=['linear-gradient(90deg,#B8913A,#FFD54F)','linear-gradient(90deg,#78909C,#B0BEC5)','linear-gradient(90deg,#A0522D,#D2956A)'];
   var rowBg=['#FFF8E1','#F5F7FA','#FFF3EC'];
@@ -5013,31 +5061,45 @@ function renderSchedEarners(){
   var kdColor=['#B8913A','#546E7A','#A0522D'];
 
   el.innerHTML=sorted.map(function(e,i){
-    var pct=Math.round(e.kd/maxKD*100);
+    var pct=Math.round(e.bookings/maxBk*100);
     var isGold=i===0;
-    return '<div style="padding:9px 11px;margin-bottom:'+(i<2?'8px':'0')+';border-radius:12px;background:'+rowBg[i]+';border:1.5px solid '+rowBorder[i]+';position:relative;overflow:hidden;animation:earnPop .36s cubic-bezier(.34,1.56,.64,1) '+(i*0.1)+'s both;transition:transform .15s,box-shadow .15s" '
+    return '<div style="padding:9px 11px;margin-bottom:'+(i<2?'8px':'0')+';border-radius:12px;background:'+rowBg[i]+';border:1.5px solid '+rowBorder[i]+';position:relative;overflow:hidden;animation:earnPop .36s cubic-bezier(.34,1.56,.64,1) '+(i*0.1)+'s both;transition:transform .15s,box-shadow .15s;cursor:pointer;-webkit-tap-highlight-color:transparent" '
       +'onmouseenter="this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 4px 14px rgba(184,145,58,.15)\'" '
-      +'onmouseleave="this.style.transform=\'\';this.style.boxShadow=\'\'">'
+      +'onmouseleave="this.style.transform=\'\';this.style.boxShadow=\'\'" '
+      +'onclick="this.style.animation=\'none\';void this.offsetWidth;this.style.animation=\'earnTapPulse .45s cubic-bezier(.34,1.56,.64,1)\';var m=this.querySelector(\'.earn-medal\');if(m){m.style.animation=\'none\';void m.offsetWidth;m.style.animation=\'medalSpin .6s cubic-bezier(.34,1.3,.64,1)\';}">'
       +(isGold?'<div style="position:absolute;top:0;left:-80%;width:50%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);animation:earnerShine 3s ease-in-out 1s infinite;pointer-events:none"></div>':'')
       +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">'
         +'<div style="display:flex;align-items:center;gap:5px;flex:1;min-width:0">'
-          +'<span style="font-size:'+(isGold?'16px':'13px')+';flex-shrink:0;'+(isGold?'animation:trophyBob 2s ease-in-out infinite':'')+'">'+medals[i]+'</span>'
-          +'<span style="color:'+nameColor[i]+';font-weight:700;font-size:'+(isGold?'13px':'11px')+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:85px">'+escH(e.label)+'</span>'
+          +'<span class="earn-medal" style="display:inline-block;font-size:'+(isGold?'16px':'13px')+';flex-shrink:0;'+(isGold?'animation:trophyBob 2s ease-in-out infinite':'')+'">'+medals[i]+'</span>'
+          +'<span style="color:'+nameColor[i]+';font-weight:700;font-size:'+(isGold?'13px':'11px')+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px">'+escH(e.label)+'</span>'
         +'</div>'
-        +'<span style="font-size:'+(isGold?'12px':'11px')+';font-weight:900;color:'+kdColor[i]+';flex-shrink:0;animation:alanAmtPop .38s ease '+(i*0.1+0.12)+'s both">KD '+fmt(e.kd)+'</span>'
+        +'<span class="earn-kd-'+i+'" style="font-size:'+(isGold?'13px':'11px')+';font-weight:900;color:'+kdColor[i]+';flex-shrink:0;animation:alanAmtPop .38s ease '+(i*0.1+0.12)+'s both">'+(e.kd>0?'KD 0':e.bookings+'\u00d7')+'</span>'
       +'</div>'
       +'<div style="height:4px;background:rgba(0,0,0,.06);border-radius:4px;overflow:hidden">'
         +'<div class="earn-bar-'+i+'" style="height:100%;width:0%;background:'+barGrad[i]+';border-radius:4px;transition:width .9s cubic-bezier(.25,.46,.45,.94) '+(i*0.13)+'s"></div>'
       +'</div>'
-      +'<div style="font-size:8px;color:#999;margin-top:3px;text-align:right">'+e.bookings+' day'+(e.bookings!==1?'s':'')+' booked</div>'
+      +'<div style="font-size:8px;color:#999;margin-top:3px;text-align:right">'+e.bookings+' Day'+(e.bookings!==1?'s':'')+' Booked'+(e.kd>0&&e.bookings>1?' \u00b7 KD '+fmt(e.kd/e.bookings)+'/Day':'')+'</div>'
     +'</div>';
   }).join('');
 
-  // Animate bars after paint
+  // Animate bars + KD count-up after paint
   setTimeout(function(){
     sorted.forEach(function(e,i){
       var bar=el.querySelector('.earn-bar-'+i);
-      if(bar){var pct=Math.round(e.kd/maxKD*100);bar.style.width=pct+'%';}
+      if(bar){var pct=Math.round(e.bookings/maxBk*100);bar.style.width=pct+'%';}
+      if(e.kd>0){
+        var span=el.querySelector('.earn-kd-'+i);
+        if(span){
+          var t0=null,dur=750,target=e.kd;
+          (function step(ts){
+            if(!t0)t0=ts;
+            var p=Math.min(1,(ts-t0)/dur);
+            var ease=1-Math.pow(1-p,3);
+            span.textContent='KD '+fmt(target*ease);
+            if(p<1)requestAnimationFrame(step);else span.textContent='KD '+fmt(target);
+          })(performance.now());
+        }
+      }
     });
   },40);
 }
@@ -5150,7 +5212,7 @@ function updateSummaryCard(cd, totalCleans, kdToday, pendingCount, incentiveResu
     else if(incentiveResult.total>0) si.textContent='KD '+incentiveResult.total.toFixed(1);
     else si.textContent='NIL';
   }
-  var _tot=(typeof ALL_APTS!=='undefined'?ALL_APTS.reduce(function(s,b){return s+b.apts.length;},0):0)||(function(){try{var _ca=JSON.parse(localStorage.getItem('hbs_custom_apts')||'[]');return 26+_ca.length;}catch(e){return 26;}}());
+  var _tot=(typeof hbsTotalApts==='function'?hbsTotalApts():28);
   if(so) so.textContent = reserved ? reserved+'/'+_tot+' ('+occupancyPct+'%)' : '—';
   // Refresh leaderboard and history after generate
   renderLeaderboard();
@@ -5172,12 +5234,16 @@ function cp(id,btn){
   var el=document.getElementById(id);
   var txt=el?el.textContent:'';
   if(!txt){var c=document.getElementById('out-cards');if(c){var b=c.querySelector('#'+id);if(b)txt=b.textContent;}}
-  if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(txt).then(function(){flash(btn);});
-  } else {
-    var ta=document.createElement('textarea');ta.value=txt;ta.style.cssText='position:fixed;opacity:0';
-    document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);flash(btn);
+  function _legacyCp(){
+    try{
+      var ta=document.createElement('textarea');ta.value=txt;ta.setAttribute('readonly','');ta.style.cssText='position:fixed;top:0;left:0;opacity:0;font-size:16px';
+      document.body.appendChild(ta);ta.focus();ta.select();ta.setSelectionRange(0,txt.length);
+      document.execCommand('copy');document.body.removeChild(ta);flash(btn);
+    }catch(e){}
   }
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(function(){flash(btn);}).catch(_legacyCp);
+  } else { _legacyCp(); }
 }
 function flash(btn){
   btn.textContent='\u2713 Copied!';btn.classList.add('done');
@@ -7792,7 +7858,8 @@ try{
   }
   var cdFoundInPaste=!!cd;
   if(!cd){var n2=kwNow();cd=MSHORT[n2.getMonth()]+' '+n2.getDate()+' '+n2.getFullYear();}
-  if(_dateMode!=='today'&&!cdFoundInPaste){
+  /* Cleaners work the morning AFTER the list date, so schedule shows list date + 1 */
+  if(_dateMode!=='today'){
     var cdDateObj=new Date(cd);
     if(!isNaN(cdDateObj.getTime())){
       cdDateObj.setDate(cdDateObj.getDate()+1);
@@ -7924,7 +7991,7 @@ try{
 
   // Alan — Tower 62
   var bc62=bCfg('t62');
-  var a62txt='Tower 62( '+cd+' )\nToday\'s Schedule\n\n';
+  var a62txt='Tower 62 ( '+cd+' )\nToday\'s Schedule\n\n';
   if(b62.order.length){
     a62txt+=numSort(b62.order).map(function(a){
       var booked=b62.apts[a]&&b62.apts[a].status==='booked';
@@ -7936,7 +8003,7 @@ try{
 
   // Alan — Tower 60
   var bc60=bCfg('t60');
-  var a60txt='Tower 60( '+cd+' )\nToday\'s Schedule\n\n';
+  var a60txt='Tower 60 ( '+cd+' )\nToday\'s Schedule\n\n';
   if(b60.order.length){
     a60txt+=numSort(b60.order).map(function(a){
       var booked=b60.apts[a]&&b60.apts[a].status==='booked';
@@ -7947,14 +8014,14 @@ try{
   msgCards.push({id:'mA60',title:(bc60.cleanerName||'Alan')+' \u2014 Tower 60',phone:bc60.cleanerPhone||'96594116095',text:a60txt});
 
   // Vipin — Both Towers (supervisor)
-  var viptxt='Tower 60( '+cd+' )\nToday\'s Schedule\n\n';
+  var viptxt='Tower 60 ( '+cd+' )\nToday\'s Schedule\n\n';
   if(b60.order.length){
     viptxt+=numSort(b60.order).map(function(a){
       var booked=b60.apts[a]&&b60.apts[a].status==='booked';
       return '60-'+a+' - '+(booked?R:X);
     }).join('\n');
   } else { viptxt+='No cleans today \u2705'; }
-  viptxt+='\n\nTower 62( '+cd+' )\nToday\'s Schedule\n\n';
+  viptxt+='\n\nTower 62 ( '+cd+' )\nToday\'s Schedule\n\n';
   if(b62.order.length){
     viptxt+=numSort(b62.order).map(function(a){
       var booked=b62.apts[a]&&b62.apts[a].status==='booked';
@@ -7973,9 +8040,9 @@ try{
   if(brna.list.length||bjas.list.length){
     var rnaMp={};brna.list.forEach(function(e){rnaMp[e.label]=e;});
     var jasMp={};bjas.list.forEach(function(e){jasMp[e.label]=e;});
-    gaytxt=(bcRna.label||'R&A Apartments')+'( '+cd+' )\nToday\'s Schedule\n\n';
+    gaytxt=(bcRna.label||'R&A Apartments')+' ( '+cd+' )\nToday\'s Schedule\n\n';
     gaytxt+=numSort(brna.order).map(function(a){return a+' - '+(rnaMp[a]?R:X);}).join('\n');
-    gaytxt+='\n\n'+(bcJas.label||'Jassem Apartments')+'( '+cd+' )\nToday\'s Schedule\n\n';
+    gaytxt+='\n\n'+(bcJas.label||'Jassem Apartments')+' ( '+cd+' )\nToday\'s Schedule\n\n';
     gaytxt+=numSort(bjas.order).map(function(a){return a+' - '+(jasMp[a]?R:X);}).join('\n');
   } else { gaytxt='No cleans today \u2705'; }
   msgCards.push({id:'mGay',title:(bcRna.cleanerName||'Gayani')+' \u2014 R&A + Jassem',phone:bcRna.cleanerPhone||'96565591476',text:gaytxt});
@@ -7985,7 +8052,7 @@ try{
   var bfat=BUILDINGS['fat']||{list:[],order:[]};
   var fatMp={};bfat.list.forEach(function(e){fatMp[e.label]=e;});
   var bistxt=bfat.list.length
-    ?((bcFat.label||'Fatema Apartments')+'( '+cd+' )\nToday\'s Schedule\n\n'+strSort(bfat.order).map(function(a){return a+' - '+(fatMp[a]?R:X);}).join('\n'))
+    ?((bcFat.label||'Fatema Apartments')+' ( '+cd+' )\nToday\'s Schedule\n\n'+strSort(bfat.order).map(function(a){return a+' - '+(fatMp[a]?R:X);}).join('\n'))
     :'No cleans today \u2705';
   msgCards.push({id:'mBis',title:(bcFat.cleanerName||'Biswa')+' \u2014 Fatema',phone:bcFat.cleanerPhone||'96555127880',text:bistxt});
 
@@ -7994,13 +8061,13 @@ try{
   var bsel=BUILDINGS['sel']||{list:[],order:[]};
   var selMp={};bsel.list.forEach(function(e){selMp[e.label]=e;});
   var shatxt=bsel.list.length
-    ?((bcSel.label||'Selena Apartments')+'( '+cd+' )\nToday\'s Schedule\n\n'+numSort(bsel.order).map(function(a){return a+' - '+(selMp[a]?R:X);}).join('\n'))
+    ?((bcSel.label||'Selena Apartments')+' ( '+cd+' )\nToday\'s Schedule\n\n'+numSort(bsel.order).map(function(a){return a+' - '+(selMp[a]?R:X);}).join('\n'))
     :'No cleans today \u2705';
   msgCards.push({id:'mSha',title:(bcSel.cleanerName||'Kanthi')+' \u2014 Selena',phone:bcSel.cleanerPhone||'96597936588',text:shatxt});
 
   // Samyuktha — Selena Supervisor
   var samtxt=bsel.list.length
-    ?((bcSel.label||'Selena Apartments')+' Supervisor Update( '+cd+' )\nToday\'s Schedule\n\n'+numSort(bsel.order).map(function(a){return a+' - '+(selMp[a]?R:X);}).join('\n'))
+    ?((bcSel.label||'Selena Apartments')+' ( '+cd+' )\nToday\'s Schedule\n\n'+numSort(bsel.order).map(function(a){return a+' - '+(selMp[a]?R:X);}).join('\n'))
     :'No cleans today at Selena \u2705';
   var samyName=bcSel.supName||'Samyuktha'; var samyPhone=bcSel.supPhone||'96551765790';
   if(samyName) msgCards.push({id:'mSamy',title:samyName+' \u2014 Selena Supervisor',phone:samyPhone,text:samtxt});
@@ -8014,7 +8081,7 @@ try{
     var sup=getSupCfg(sk);
     var bEntry=getOrCreateBldg(sk, cfg.label); // ensure it exists in BUILDINGS_CFG
     var cardId='mCustom_'+sk;
-    var custTxt=cfg.label+'( '+cd+' )\n\n';
+    var custTxt=cfg.label+' ( '+cd+' )\n\n';
     if(bld.isTower){
       bld.order.forEach(function(a){custTxt+=cfg.prefix+a+' - '+(bld.apts[a]&&bld.apts[a].status==='booked'?R:X)+'\n';});
     } else {
@@ -8027,7 +8094,7 @@ try{
     } else {
       msgCards.push({id:cardId,title:cfg.name+' \u2014 '+cfg.label,phone:cfg.phone||'',text:custTxt,isCustom:true});
       if(sup){
-        msgCards.push({id:cardId+'_sup',title:sup.name+' \u2014 '+cfg.label+' Supervisor',phone:sup.phone||'',text:cfg.label+' Supervisor Update( '+cd+' )\n\n'+custTxt.split('\n').slice(2).join('\n'),isCustom:true});
+        msgCards.push({id:cardId+'_sup',title:sup.name+' \u2014 '+cfg.label+' Supervisor',phone:sup.phone||'',text:cfg.label+' ( '+cd+' )\n\n'+custTxt.split('\n').slice(2).join('\n'),isCustom:true});
       }
     }
   });
@@ -8127,7 +8194,7 @@ try{
         waBtn='<button class="cpbtn" onclick="cp(\''+mc.id+'\',this)">Copy</button>';
       }
       // 📝 Note button
-      var noteBtn='<button onclick="openNoteModal(\''+escH(mc.title)+'\')" title="Add note" style="background:none;border:1.5px solid var(--gl);border-radius:8px;padding:5px 10px;font-size:13px;cursor:pointer;color:var(--t3);margin-left:4px">&#128221;</button>';
+      var noteBtn='<button onclick="cp(\''+mc.id+'\',this)" title="Copy message" style="background:#FAF7F2;border:1.5px solid var(--gl);border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;color:var(--br);margin-left:4px;font-family:\'DM Sans\',sans-serif">Copy</button>';
       var card=document.createElement('div');
       card.className='mcard';
       if(isUnassigned) card.style.border='1.5px solid #FECBA1';
@@ -8139,6 +8206,47 @@ try{
     });
   }
   _lastGen={cd:cd,buildings:BUILDINGS,t60d:t60d,t62d:t62d};
+  // ── ACCUMULATE PERSISTENT APT PERFORMANCE ───────────────
+  (function(){
+    var date=cd;
+    var secLbl={t60:'T60',t62:'T62',sel:'Sel',rna:'R&A',jas:'Jas',fat:'Fat'};
+    Object.keys(BUILDINGS).forEach(function(sec){
+      var bld=BUILDINGS[sec];
+      if(bld.apts){
+        Object.keys(bld.apts).forEach(function(num){
+          var a=bld.apts[num];
+          if(a.status==='booked'||a.status==='monthly'){
+            var key=sec+'-'+num;
+            var humanLbl=(secLbl[sec]||sec)+'-'+num;
+            if(!APT_PERF[key]) APT_PERF[key]={bookings:0,kd:0,lastDate:'',label:humanLbl};
+            if(APT_PERF[key].label===key) APT_PERF[key].label=humanLbl;
+            if(APT_PERF[key].lastDate!==date){
+              APT_PERF[key].bookings++;
+              APT_PERF[key].kd+=a.kd||0;
+              APT_PERF[key].lastDate=date;
+            }
+          }
+        });
+      }
+      if(bld.list){
+        var bldName=(secLbl[sec]||((getCleanerCfg&&getCleanerCfg(sec)||{}).label)||sec);
+        bld.list.forEach(function(e){
+          if(e.guest){
+            var lblHuman=(String(e.label||'').toLowerCase().indexOf(String(bldName).toLowerCase())===0)?e.label:(bldName+' '+e.label);
+            var key=sec+'|'+e.label;
+            if(!APT_PERF[key]) APT_PERF[key]={bookings:0,kd:0,lastDate:'',label:lblHuman};
+            if(APT_PERF[key].label===key) APT_PERF[key].label=lblHuman;
+            if(APT_PERF[key].lastDate!==date){
+              APT_PERF[key].bookings++;
+              APT_PERF[key].kd+=e.kd||0;
+              APT_PERF[key].lastDate=date;
+            }
+          }
+        });
+      }
+    });
+    saveAptPerf();
+  })();
   if(typeof renderSchedEarners==='function') renderSchedEarners();
 
   // ── INCENTIVE PARSING ────────────────────────────────────
@@ -8154,7 +8262,7 @@ try{
   var reservedM = raw.match(/Reserved\s*[-–]\s*(\d+)/i);
   if(!reservedM) reservedM = raw.match(/Reserved[^\d]*(\d+)/i);
   var reserved = reservedM ? parseInt(reservedM[1]) : 0;
-  var TOTAL_APTS = (typeof ALL_APTS!=='undefined'?ALL_APTS.reduce(function(s,b){return s+b.apts.length;},0):0)||(function(){try{var _ca=JSON.parse(localStorage.getItem('hbs_custom_apts')||'[]');return 26+_ca.length;}catch(e){return 26;}}());
+  var TOTAL_APTS = (typeof hbsTotalApts==='function'?hbsTotalApts():28);
   var occupancyPct = reserved ? Math.round(reserved/TOTAL_APTS*100) : 0;
   updateSummaryCard(cd, totalCleans, alanKDtoday, pendingCount, incentiveResult, reserved, occupancyPct);
 
@@ -8514,12 +8622,32 @@ function saveBookings(){ try{localStorage.setItem('hbs_bookings',JSON.stringify(
 function bkid(){ return 'bk'+Date.now()+Math.floor(Math.random()*9999); }
 
 function toggleBkForm(){
-  var f=document.getElementById('bk-form');
-  var a=document.getElementById('bk-form-arrow');
-  if(!f) return;
-  var open=f.style.display!=='none';
-  f.style.display=open?'none':'block';
-  if(a) a.innerHTML=open?'&#9660;':'&#9650;';
+  var f=document.getElementById('bk-form'),a=document.getElementById('bk-form-arrow');
+  if(!f)return;
+  var open=f.getAttribute('data-open')==='1'||(f.getAttribute('data-open')===null&&f.style.display!=='none');
+  f.setAttribute('data-open',open?'0':'1');
+  if(open){
+    f.style.animation='bkSlideUp .2s ease forwards';
+    setTimeout(function(){if(f.getAttribute('data-open')==='0'){f.style.display='none';f.style.animation='';}},190);
+  } else {
+    f.style.display='block';
+    f.style.animation='bkSlideDown .3s cubic-bezier(.34,1.3,.64,1)';
+    try{
+      var kids=f.children;
+      for(var i=0;i<kids.length;i++){kids[i].style.animation='bkFieldIn .38s cubic-bezier(.34,1.56,.64,1) '+(i*0.06)+'s both';}
+    }catch(e){}
+  }
+  if(a){a.innerHTML='&#9660;';a.style.display='inline-block';a.style.transition='transform .28s cubic-bezier(.34,1.56,.64,1)';a.style.transform=open?'rotate(0deg)':'rotate(180deg)';}
+  /* Pre-fill empty date fields with today (Kuwait time) for faster entry */
+  if(!open){
+    try{
+      var n=(typeof kwNow==='function')?kwNow():new Date();
+      var iso=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');
+      var ci=document.getElementById('bk-checkin'),co=document.getElementById('bk-checkout');
+      if(ci&&!ci.value)ci.value=iso;
+      if(co&&!co.value)co.value=iso;
+    }catch(e){}
+  }
 }
 
 // ── DOR PARSER ───────────────────────────────────────────
@@ -9004,18 +9132,22 @@ function addBookingManual(){
   var nights=0;
   if(cin&&cout){ var d1=new Date(cin+'T12:00:00'),d2=new Date(cout+'T12:00:00'); if(!isNaN(d1)&&!isNaN(d2)) nights=Math.round((d2-d1)/(86400000)); }
 
-  var bk={id:bkid(),apt:apt.trim(),name:name.trim(),phone:phone.trim(),amount:amount,checkin:checkin,checkout:checkout,nights:nights,type:type,status:initialStatus};
+  var bk={id:bkid(),apt:apt.trim(),name:name.trim(),phone:phone.trim(),amount:amount,checkin:checkin,checkout:checkout,nights:nights,type:type,status:initialStatus,blocked:false,blockedBy:'',notYetBlocked:type==='direct'};
   var _dupM=BOOKINGS.filter(function(b){return b.apt===bk.apt&&b.checkin===bk.checkin&&b.status!=='cancelled';});
   if(_dupM.length){if(!confirm('⚠️ Duplicate!\n'+bk.apt+' already has a booking on '+bk.checkin+'.\n\nAdd anyway?'))return;}
   BOOKINGS.push(bk);
   saveBookings();
-  if(typeof initialStatus!=='undefined'&&initialStatus==='pending'){
-    loadGuests();
-    GUESTS.push({id:gid(),name:bk.name||bk.apt||'Guest',phone:bk.phone,apt:bk.apt,
-      amount:bk.amount,pendingAmount:bk.amount,checkin:bk.checkin,status:'pending',isCash:false});
-    saveGuests();
-    if(typeof renderPending==='function')renderPending();
+  // Sync to Guest Tracker (same flow as DOR): paid -> tracker, pending -> Payment Pending, airbnb -> tracker as airbnb
+  loadGuests();
+  if(initialStatus==='pending'){
+    GUESTS.push({id:bk.id,name:bk.name||bk.apt||'Guest',phone:bk.phone,apt:bk.apt,
+      amount:bk.amount,pendingAmount:bk.amount,checkin:bk.checkin,status:'pending',type:'direct',isCash:false});
+  } else {
+    GUESTS.push({id:bk.id,name:bk.name||bk.apt||'Guest',phone:bk.phone,apt:bk.apt,
+      amount:bk.amount,pendingAmount:0,checkin:bk.checkin,status:(type==='airbnb'?'paid-airbnb':'paid-cash'),type:type,isCash:type!=='airbnb'});
   }
+  saveGuests();
+  if(typeof renderPending==='function')renderPending();
   updateBkPendingBadge();
   if(typeof renderDORBanner==='function')renderDORBanner();
   if(typeof renderBkLanding==='function')renderBkLanding();
@@ -9068,7 +9200,7 @@ function cancelBk(id){
     apt:b.apt,name:b.name,phone:b.phone,
     checkin:b.checkin,amount:b.amount,
     refundType:refundType,refundAmt:refundAmt,
-    cancelDate:cancelDate
+    cancelDate:cancelDate,synced:true
   });
   saveCancellations();
 
@@ -9081,7 +9213,22 @@ function cancelBk(id){
   //  Partial refund -> refunded amount subtracted from the guest entry
   //  No refund      -> money kept, guest entry stays as revenue
   loadGuests();
-  function _cxMatch(g){return g.id===id||((g.apt||'')===(b.apt||'')&&(g.checkin||'')===(b.checkin||''));}
+  function _cxN(s){return String(s||'').toLowerCase().replace(/[^a-z0-9]/g,'');}
+  function _cxD(s){var m=String(s||'').toLowerCase().match(/(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*[^0-9]*(\d{1,2})(?:[^0-9]+(\d{4}))?/);return m?{mo:m[1],d:parseInt(m[2],10),y:m[3]||''}:null;}
+  function _cxDEq(a,b2){var da=_cxD(a),db=_cxD(b2);if(da&&db){if(da.mo!==db.mo||da.d!==db.d)return false;if(da.y&&db.y&&da.y!==db.y)return false;return true;}return _cxN(a)!==''&&_cxN(a)===_cxN(b2);}
+  function _cxPh(s){return String(s||'').replace(/[^0-9]/g,'');}
+  function _cxMatch(g){
+    if(g.id===id)return true;
+    var aptEq=_cxN(g.apt)!==''&&_cxN(g.apt)===_cxN(b.apt);
+    var dateEq=_cxDEq(g.checkin,b.checkin);
+    if(aptEq&&dateEq)return true;
+    var nameEq=_cxN(g.name)!==''&&_cxN(g.name)===_cxN(b.name);
+    if(nameEq&&(aptEq||dateEq))return true;
+    var pg=_cxPh(g.phone),pb=_cxPh(b.phone);
+    var phEq=pg.length>=8&&(pg===pb||pg.slice(-8)===pb.slice(-8));
+    if(phEq&&(aptEq||dateEq))return true;
+    return false;
+  }
   if(refundType==='Full'){
     GUESTS=GUESTS.filter(function(g){return !_cxMatch(g);});
   } else if(refundType==='Partial'&&refundAmt>0){
@@ -9467,7 +9614,7 @@ function makeBkCard(b){
   var nightsBar='<div class="night-pill-wrap"><div class="night-tooltip">'+nights+' night stay</div><span class="night-pill" onclick="this.style.animation=\'none\';void this.offsetWidth;this.style.animation=\'pillPop 0.4s cubic-bezier(.34,1.56,.64,1)\'"><span class="npshimmer"></span>'+nights+' nights</span></div>';
 
   // Status color for left border
-  var borderColor=isPaid?'#4CAF50':'#FF9800';
+  var borderColor=(b.type==='airbnb')?'#FF385C':(isPaid?'#4CAF50':'#FF9800');
   var cardId='bkcard_'+b.id;
 
   return '<div id="'+cardId+'" class="bk-card-anim" style="border:1.5px solid var(--gl);border-left:4px solid '+borderColor+';border-radius:16px;padding:16px;margin-bottom:12px;background:var(--wh);position:relative;overflow:hidden;transition:box-shadow 0.2s,transform 0.15s;cursor:default" '
@@ -9650,7 +9797,7 @@ function updateSummaryCard(cd, totalCleans, kdToday, pendingCount, incentiveResu
     else if(incentiveResult.total>0) si.textContent='KD '+incentiveResult.total.toFixed(1);
     else si.textContent='NIL';
   }
-  var _tot=(typeof ALL_APTS!=='undefined'?ALL_APTS.reduce(function(s,b){return s+b.apts.length;},0):0)||(function(){try{var _ca=JSON.parse(localStorage.getItem('hbs_custom_apts')||'[]');return 26+_ca.length;}catch(e){return 26;}}());
+  var _tot=(typeof hbsTotalApts==='function'?hbsTotalApts():28);
   if(so) so.textContent = reserved ? reserved+'/'+_tot+' ('+occupancyPct+'%)' : '—';
   // Refresh leaderboard and history after generate
   renderLeaderboard();
@@ -9672,12 +9819,16 @@ function cp(id,btn){
   var el=document.getElementById(id);
   var txt=el?el.textContent:'';
   if(!txt){var c=document.getElementById('out-cards');if(c){var b=c.querySelector('#'+id);if(b)txt=b.textContent;}}
-  if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(txt).then(function(){flash(btn);});
-  } else {
-    var ta=document.createElement('textarea');ta.value=txt;ta.style.cssText='position:fixed;opacity:0';
-    document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);flash(btn);
+  function _legacyCp(){
+    try{
+      var ta=document.createElement('textarea');ta.value=txt;ta.setAttribute('readonly','');ta.style.cssText='position:fixed;top:0;left:0;opacity:0;font-size:16px';
+      document.body.appendChild(ta);ta.focus();ta.select();ta.setSelectionRange(0,txt.length);
+      document.execCommand('copy');document.body.removeChild(ta);flash(btn);
+    }catch(e){}
   }
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(function(){flash(btn);}).catch(_legacyCp);
+  } else { _legacyCp(); }
 }
 function flash(btn){
   btn.textContent='\u2713 Copied!';btn.classList.add('done');
@@ -10902,9 +11053,30 @@ function openAddReservation(){
 function toggleBkForm(){
   var f=document.getElementById('bk-form'),a=document.getElementById('bk-form-arrow');
   if(!f)return;
-  var open=f.style.display!=='none';
-  f.style.display=open?'none':'block';
-  if(a)a.innerHTML=open?'&#9660;':'&#9650;';
+  var open=f.getAttribute('data-open')==='1'||(f.getAttribute('data-open')===null&&f.style.display!=='none');
+  f.setAttribute('data-open',open?'0':'1');
+  if(open){
+    f.style.animation='bkSlideUp .2s ease forwards';
+    setTimeout(function(){if(f.getAttribute('data-open')==='0'){f.style.display='none';f.style.animation='';}},190);
+  } else {
+    f.style.display='block';
+    f.style.animation='bkSlideDown .3s cubic-bezier(.34,1.3,.64,1)';
+    try{
+      var kids=f.children;
+      for(var i=0;i<kids.length;i++){kids[i].style.animation='bkFieldIn .38s cubic-bezier(.34,1.56,.64,1) '+(i*0.06)+'s both';}
+    }catch(e){}
+  }
+  if(a){a.innerHTML='&#9660;';a.style.display='inline-block';a.style.transition='transform .28s cubic-bezier(.34,1.56,.64,1)';a.style.transform=open?'rotate(0deg)':'rotate(180deg)';}
+  /* Pre-fill empty date fields with today (Kuwait time) for faster entry */
+  if(!open){
+    try{
+      var n=(typeof kwNow==='function')?kwNow():new Date();
+      var iso=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');
+      var ci=document.getElementById('bk-checkin'),co=document.getElementById('bk-checkout');
+      if(ci&&!ci.value)ci.value=iso;
+      if(co&&!co.value)co.value=iso;
+    }catch(e){}
+  }
 }
 
 // ── EXTRA RESERVATION ────────────────────────────────────────────────────
@@ -11382,7 +11554,7 @@ function renderBkLanding(){
   if(upEl){
     if(upcoming.length){
       upEl.style.display='block';
-      var upBtn=upEl.querySelector('button');if(!upBtn){upEl.innerHTML='';var togBtn=document.createElement('button');togBtn.onclick=function(){var b=document.getElementById('bk-upcoming-body');var a=document.getElementById('bk-upcoming-arrow');var open=b.style.display!=='none';b.style.display=open?'none':'block';a.style.transform=open?'':'rotate(180deg)';};togBtn.style.cssText='width:100%;display:flex;align-items:center;justify-content:space-between;background:var(--wh);border:1.5px solid var(--gl);border-radius:14px;padding:10px 16px;cursor:pointer;font-family:\'DM Sans\',sans-serif;-webkit-tap-highlight-color:transparent;transition:border-color .2s';togBtn.innerHTML='<span style="font-size:12px;font-weight:700;color:var(--br)">&#128197; Upcoming Reservations <span style="background:var(--br);color:#fff;border-radius:12px;padding:1px 8px;font-size:10px;margin-left:6px">'+upcoming.length+'</span></span><span id="bk-upcoming-arrow" style="font-size:11px;color:var(--t3);transition:transform .25s">&#9660;</span>';var bodyDiv=document.createElement('div');bodyDiv.id='bk-upcoming-body';bodyDiv.style.cssText='display:none;margin-top:4px;background:var(--wh);border:1.5px solid var(--gl);border-radius:14px;overflow:hidden';upEl.appendChild(togBtn);upEl.appendChild(bodyDiv);}var bodyEl2=document.getElementById('bk-upcoming-body');if(bodyEl2){bodyEl2.innerHTML=upcoming.slice(0,12).map(function(b){var isPaid=b.status==='paid';return '<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-bottom:1px solid var(--gl);gap:8px"><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;color:var(--br)">'+escH(b.apt||'?')+'</div><div style="font-size:10px;color:var(--t3);margin-top:1px">'+escH(b.name||'Guest')+' &middot; '+escH(b.checkin||'&mdash;')+'</div></div><div style="display:flex;align-items:center;gap:5px;flex-shrink:0">'+(b.amount?'<span style="font-size:11px;font-weight:700;color:'+(isPaid?'var(--gn)':'var(--br)')+'">KD '+_kd(b.amount)+'</span>':'')+'<span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;'+(isPaid?'background:#EAF7EF;color:#1B7A40':'background:#FFF3E0;color:#C45400')+'">'+(isPaid?'&#10003; Paid':'Pending')+'</span></div></div>';}).join('')+(upcoming.length>12?'<div style="font-size:11px;color:var(--t3);text-align:center;padding:10px">+ '+(upcoming.length-12)+' more</div>':'');}
+      var upBtn=upEl.querySelector('button');if(!upBtn){upEl.innerHTML='';var togBtn=document.createElement('button');togBtn.onclick=function(){var b=document.getElementById('bk-upcoming-body');var a=document.getElementById('bk-upcoming-arrow');var open=b.style.display!=='none';b.style.display=open?'none':'block';a.style.transform=open?'':'rotate(180deg)';};togBtn.style.cssText='width:100%;display:flex;align-items:center;justify-content:space-between;background:var(--wh);border:1.5px solid var(--gl);border-radius:14px;padding:10px 16px;cursor:pointer;font-family:\'DM Sans\',sans-serif;-webkit-tap-highlight-color:transparent;transition:border-color .2s';togBtn.innerHTML='<span style="font-size:12px;font-weight:700;color:var(--br)">&#128197; Upcoming Reservations <span id="bk-upcoming-count" style="background:var(--br);color:#fff;border-radius:12px;padding:1px 8px;font-size:10px;margin-left:6px">'+upcoming.length+'</span></span><span id="bk-upcoming-arrow" style="font-size:11px;color:var(--t3);transition:transform .25s">&#9660;</span>';var bodyDiv=document.createElement('div');bodyDiv.id='bk-upcoming-body';bodyDiv.style.cssText='display:none;margin-top:4px;background:var(--wh);border:1.5px solid var(--gl);border-radius:14px;overflow:hidden';upEl.appendChild(togBtn);upEl.appendChild(bodyDiv);}var _upCnt=document.getElementById('bk-upcoming-count');if(_upCnt)_upCnt.textContent=upcoming.length;var bodyEl2=document.getElementById('bk-upcoming-body');if(bodyEl2){bodyEl2.innerHTML=upcoming.slice(0,12).map(function(b){var isPaid=b.status==='paid';return '<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-bottom:1px solid var(--gl);gap:8px"><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;color:var(--br)">'+escH(b.apt||'?')+'</div><div style="font-size:10px;color:var(--t3);margin-top:1px">'+escH(b.name||'Guest')+' &middot; '+escH(b.checkin||'&mdash;')+'</div></div><div style="display:flex;align-items:center;gap:5px;flex-shrink:0">'+(b.amount?'<span style="font-size:11px;font-weight:700;color:'+(isPaid?'var(--gn)':'var(--br)')+'">KD '+_kd(b.amount)+'</span>':'')+'<span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;'+(isPaid?'background:#EAF7EF;color:#1B7A40':'background:#FFF3E0;color:#C45400')+'">'+(isPaid?'&#10003; Paid':'Pending')+'</span></div></div>';}).join('')+(upcoming.length>12?'<div style="font-size:11px;color:var(--t3);text-align:center;padding:10px">+ '+(upcoming.length-12)+' more</div>':'');}
     } else {upEl.style.display='none';}
   }
 }
@@ -11666,7 +11838,7 @@ function renderLeaderboard(forceMon, forceYr){
     var pct=Math.round(b.total/mx*100)||5;
     var card=document.createElement('div');card.style.cssText='background:var(--wh);border:1.5px solid var(--gl);border-radius:18px;margin-bottom:10px;overflow:hidden;cursor:pointer';
     var row=document.createElement('div');row.style.padding='16px 18px';
-    row.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><div style="display:flex;align-items:center;gap:8px">'+(i<3?'<span style="font-size:18px">'+medals[i]+'</span>':'<span style="font-size:13px;font-weight:700;color:var(--t3)">#'+(i+1)+'</span>')+'<div><div style="font-size:15px;font-weight:700;color:var(--br)">'+eh(b.l)+'</div><div style="font-size:11px;color:var(--t3)">'+b.apts.length+' apt'+(b.apts.length!==1?'s':'')+' booked</div></div></div><div style="display:flex;align-items:center;gap:8px"><div style="font-size:18px;font-weight:700;color:'+(i===0?'#B8913A':'var(--br)')+'">KD '+fmt(b.total)+'</div><span id="lbc'+i+'" style="font-size:11px;color:var(--t3);display:inline-block;transition:transform .25s">\u25bc</span></div></div><div style="height:6px;background:var(--cr);border-radius:6px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:'+(i===0?'linear-gradient(90deg,#B8913A,#D4AE5E)':'var(--br)')+';border-radius:6px"></div></div>';
+    row.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><div style="display:flex;align-items:center;gap:8px">'+(i<3?'<span style="font-size:18px">'+medals[i]+'</span>':'<span style="font-size:13px;font-weight:700;color:var(--t3)">#'+(i+1)+'</span>')+'<div><div style="font-size:15px;font-weight:700;color:var(--br)">'+eh(b.l)+'</div><div style="font-size:11px;color:var(--t3)">'+b.apts.length+' Apt'+(b.apts.length!==1?'s':'')+' Booked</div></div></div><div style="display:flex;align-items:center;gap:8px"><div style="font-size:18px;font-weight:700;color:'+(i===0?'#B8913A':'var(--br)')+'">KD '+fmt(b.total)+'</div><span id="lbc'+i+'" style="font-size:11px;color:var(--t3);display:inline-block;transition:transform .25s">\u25bc</span></div></div><div style="height:6px;background:var(--cr);border-radius:6px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:'+(i===0?'linear-gradient(90deg,#B8913A,#D4AE5E)':'var(--br)')+';border-radius:6px"></div></div>';
     var panel=document.createElement('div');panel.style.display='none';panel.style.borderTop='1px solid var(--gl)';panel.style.padding='8px 18px 16px';
     b.apts.forEach(function(a){var r=document.createElement('div');r.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--gl)';r.innerHTML='<div style="font-size:14px;font-weight:600;color:var(--t1)">'+eh(a.apt)+'</div><div style="font-size:15px;font-weight:700;color:var(--br)">KD '+fmt(a.t)+'</div>';panel.appendChild(r);});
     row.onclick=(function(p,ci){return function(){var open=p.style.display!=='none';p.style.display=open?'none':'block';var c=document.getElementById(ci);if(c)c.style.transform=open?'':'rotate(180deg)';};})(panel,'lbc'+i);
@@ -12802,6 +12974,61 @@ window.addEventListener('load', function() {
     }, 200);
   }, 800);
 });
+
+/* ===== Retroactive cancellation -> Guest Tracker cleanup ===== */
+function hbsSyncPastCancellations(){
+  try{
+    if(typeof loadCancellations!=='function'||typeof loadGuests!=='function')return;
+    loadCancellations();loadGuests();
+    if(!Array.isArray(CANCELLATIONS)||!CANCELLATIONS.length)return;
+    function N(s){return String(s||'').toLowerCase().replace(/[^a-z0-9]/g,'');}
+    function D(s){var m=String(s||'').toLowerCase().match(/(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*[^0-9]*(\d{1,2})(?:[^0-9]+(\d{4}))?/);return m?{mo:m[1],d:parseInt(m[2],10),y:m[3]||''}:null;}
+    function DEq(a,b){var da=D(a),db=D(b);if(da&&db){if(da.mo!==db.mo||da.d!==db.d)return false;if(da.y&&db.y&&da.y!==db.y)return false;return true;}return N(a)!==''&&N(a)===N(b);}
+    function P(s){return String(s||'').replace(/[^0-9]/g,'');}
+    var changedC=false,changedG=false;
+    CANCELLATIONS.forEach(function(c){
+      if(c.synced)return;
+      c.synced=true;changedC=true;
+      if(c.refundType!=='Full')return; /* only full refunds are safe to re-apply */
+      var before=GUESTS.length;
+      GUESTS=GUESTS.filter(function(g){
+        var aptEq=N(g.apt)!==''&&N(g.apt)===N(c.apt);
+        var dateEq=DEq(g.checkin,c.checkin);
+        if(aptEq&&dateEq)return false;
+        var nameEq=N(g.name)!==''&&N(g.name)===N(c.name);
+        if(nameEq&&(aptEq||dateEq))return false;
+        var pg=P(g.phone),pc=P(c.phone);
+        var phEq=pg.length>=8&&(pg===pc||pg.slice(-8)===pc.slice(-8));
+        if(phEq&&(aptEq||dateEq))return false;
+        return true;
+      });
+      if(GUESTS.length!==before)changedG=true;
+    });
+    if(changedC&&typeof saveCancellations==='function')saveCancellations();
+    if(changedG){
+      saveGuests(); /* re-renders tracker, pending, stats */
+    }
+  }catch(e){}
+}
+setTimeout(hbsSyncPastCancellations,800);
+
+/* ===== Single source of truth for total apartment count ===== */
+function hbsTotalApts(){
+  try{
+    var baseCounts={t60:4,t62:8,sel:5,rna:3,jas:2,fat:6}; /* counts of the built-in roster */
+    var total=0;
+    if(typeof BUILDINGS_CFG!=='undefined'&&Array.isArray(BUILDINGS_CFG)&&BUILDINGS_CFG.length){
+      BUILDINGS_CFG.forEach(function(b){ if(baseCounts[b.key]) total+=baseCounts[b.key]; });
+    } else {
+      total=28;
+    }
+    var ca=JSON.parse(localStorage.getItem('hbs_custom_apts')||'[]');
+    ca.forEach(function(a){ if(a&&a.buildingKey&&a.apt) total++; });
+    return total>0?total:28;
+  }catch(e){ return 28; }
+}
+
+
 </script>
 </body>
 </html>
