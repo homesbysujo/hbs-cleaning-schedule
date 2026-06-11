@@ -4082,12 +4082,13 @@ function sendCheckinWA(id){
   if(!b){alert('Booking not found.');return;}
   var phone=(b.phone||'').replace(/[^\d]/g,'');
   if(phone.length<7){
-    var entered=prompt('Enter guest phone number (with country code, e.g. 96599001234):'+(b.name?' for '+b.name:''));
-    if(!entered)return;
-    phone=entered.replace(/[^\d]/g,'');
-    if(phone.length<7){alert('Invalid phone number.');return;}
-    // Save phone to booking
-    b.phone=phone;saveBookings();
+    var entered=null;
+    try{entered=prompt('Enter guest phone number (with country code, e.g. 96599001234):'+(b.name?' for '+b.name:''));}catch(e){}
+    if(entered){
+      phone=entered.replace(/[^\d]/g,'');
+      if(phone.length>=7){b.phone=phone;saveBookings();}
+    }
+    if(phone.length<7)phone=''; // fall through: open WhatsApp without a number so the user can pick the contact
   }
   var checkIn=typeof getCheckInDetails==='function'?getCheckInDetails(b.apt):null;
   var firstName=b.name?b.name.split(' ')[0]:'';
@@ -4177,11 +4178,13 @@ function sendShortCheckinWA(id){
   if(!b){alert('Booking not found.');return;}
   var phone=(b.phone||'').replace(/[^\d]/g,'');
   if(phone.length<7){
-    var entered=prompt('Enter guest phone number (with country code):'+(b.name?' for '+b.name:''));
-    if(!entered)return;
-    phone=entered.replace(/[^\d]/g,'');
-    if(phone.length<7){alert('Invalid phone number.');return;}
-    b.phone=phone;saveBookings();
+    var entered=null;
+    try{entered=prompt('Enter guest phone number (with country code):'+(b.name?' for '+b.name:''));}catch(e){}
+    if(entered){
+      phone=entered.replace(/[^\d]/g,'');
+      if(phone.length>=7){b.phone=phone;saveBookings();}
+    }
+    if(phone.length<7)phone='';
   }
   var shortDetails=getShortCheckinDetails(b.apt);
   if(!shortDetails){
@@ -4201,11 +4204,13 @@ function sendCheckoutWA(id){
   if(!b){alert('Booking not found.');return;}
   var phone=(b.phone||'').replace(/[^\d]/g,'');
   if(phone.length<7){
-    var entered=prompt('Enter guest phone number (with country code):'+(b.name?' for '+b.name:''));
-    if(!entered)return;
-    phone=entered.replace(/[^\d]/g,'');
-    if(phone.length<7){alert('Invalid phone number.');return;}
-    b.phone=phone;saveBookings();
+    var entered=null;
+    try{entered=prompt('Enter guest phone number (with country code):'+(b.name?' for '+b.name:''));}catch(e){}
+    if(entered){
+      phone=entered.replace(/[^\d]/g,'');
+      if(phone.length>=7){b.phone=phone;saveBookings();}
+    }
+    if(phone.length<7)phone='';
   }
   var firstName=b.name?b.name.split(' ')[0]:'';
   var msg='Good morning'+(firstName?' '+firstName:'')+'! \uD83D\uDE0A\n\nI hope everything went well with your stay. Whenever you\u2019re ready to check out, just drop me a quick message so I can arrange housekeeping. The usual check-out time is 12 noon. If you\u2019ve already checked out, kindly let me know as well.\n\nIt was a pleasure hosting you, and I\u2019d be happy to welcome you again in the future.\n\nThanks and have a great day \uD83D\uDE0A';
@@ -4218,11 +4223,13 @@ function sendShortCheckoutWA(id){
   if(!b){alert('Booking not found.');return;}
   var phone=(b.phone||'').replace(/[^\d]/g,'');
   if(phone.length<7){
-    var entered=prompt('Enter guest phone number (with country code):'+(b.name?' for '+b.name:''));
-    if(!entered)return;
-    phone=entered.replace(/[^\d]/g,'');
-    if(phone.length<7){alert('Invalid phone number.');return;}
-    b.phone=phone;saveBookings();
+    var entered=null;
+    try{entered=prompt('Enter guest phone number (with country code):'+(b.name?' for '+b.name:''));}catch(e){}
+    if(entered){
+      phone=entered.replace(/[^\d]/g,'');
+      if(phone.length>=7){b.phone=phone;saveBookings();}
+    }
+    if(phone.length<7)phone='';
   }
   var firstName=b.name?b.name.split(' ')[0]:'';
   var msg='Good morning \u2600\uFE0F'+(firstName?' '+firstName:'')+'!\nHope you had a great stay. Please let me know once you check out so I can arrange housekeeping.\nThank you \uD83D\uDE0A\uD83C\uDF38';
@@ -4725,11 +4732,14 @@ function renderBookings(){
             // Try to find a matching booking — flexible key matching
             var matched=null;
             var aptLower=apt.label.toLowerCase().replace(/\s+/g,'');
+            var secLower=(building.sec||'').toLowerCase().replace(/\s+/g,'');
             allDayBks.forEach(function(b){
               if(!b.apt) return;
               var bLower=b.apt.toLowerCase().replace(/\s+/g,'');
               // Exact match or key match only (avoid partial matches like Fat35 matching Fat35B)
               if(bLower===aptLower) matched=b;
+              // "Marina Tower 17A" === sec("Marina Tower")+label("17A")
+              if(!matched&&secLower&&bLower===secLower+aptLower) matched=b;
               if(!matched&&bkMap[apt.key]) matched=bkMap[apt.key];
             });
 
@@ -9471,11 +9481,14 @@ function renderBookings(){
             // Try to find a matching booking — flexible key matching
             var matched=null;
             var aptLower=apt.label.toLowerCase().replace(/\s+/g,'');
+            var secLower=(building.sec||'').toLowerCase().replace(/\s+/g,'');
             allDayBks.forEach(function(b){
               if(!b.apt) return;
               var bLower=b.apt.toLowerCase().replace(/\s+/g,'');
               // Exact match or key match only (avoid partial matches like Fat35 matching Fat35B)
               if(bLower===aptLower) matched=b;
+              // "Marina Tower 17A" === sec("Marina Tower")+label("17A")
+              if(!matched&&secLower&&bLower===secLower+aptLower) matched=b;
               if(!matched&&bkMap[apt.key]) matched=bkMap[apt.key];
             });
 
