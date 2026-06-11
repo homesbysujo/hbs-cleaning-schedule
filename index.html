@@ -2418,7 +2418,9 @@ function fmtGuestPhone(p){
   // UAE: starts with 971 (12 digits) → +971 XX XXX XXXX
   if(d.length===12&&d.startsWith('971'))
     return '+971 '+d.slice(3,5)+' '+d.slice(5,8)+' '+d.slice(8);
-  // Generic: already has + prefix → keep original as-is (preserve user formatting)
+  // Generic international: group digits for readability (+20 1012 233 445 etc.)
+  if(s.startsWith('+')&&d.length>=10)
+    return '+'+d.slice(0,d.length-8)+' '+d.slice(-8,-4)+' '+d.slice(-4);
   if(s.startsWith('+')) return s;
   // Fallback: return as-is
   return s;
@@ -4418,6 +4420,27 @@ function cancelBk(id){
   // Delete booking
   BOOKINGS=BOOKINGS.filter(function(x){return x.id!==id;});
   saveBookings();
+
+  // Sync Guest Tracker with the refund:
+  //  Full refund    -> guest entry removed (revenue gone)
+  //  Partial refund -> refunded amount subtracted from the guest entry
+  //  No refund      -> money kept, guest entry stays as revenue
+  loadGuests();
+  function _cxMatch(g){return g.id===id||((g.apt||'')===(b.apt||'')&&(g.checkin||'')===(b.checkin||''));}
+  if(refundType==='Full'){
+    GUESTS=GUESTS.filter(function(g){return !_cxMatch(g);});
+  } else if(refundType==='Partial'&&refundAmt>0){
+    GUESTS.forEach(function(g){
+      if(!_cxMatch(g))return;
+      g.amount=Math.max(0,(parseFloat(g.amount)||0)-refundAmt);
+      if(g.paidAmount!==undefined&&g.paidAmount!==null)g.paidAmount=Math.max(0,(parseFloat(g.paidAmount)||0)-refundAmt);
+      if(g.status==='partial'&&(parseFloat(g.pendingAmount)||0)<=0)g.status='paid-cash';
+    });
+  }
+  saveGuests();
+  if(typeof renderExtraReservations==='function')try{renderExtraReservations();}catch(e){}
+  if(typeof renderBkLanding==='function')try{renderBkLanding();}catch(e){}
+
   updateBkPendingBadge();
   renderBkCalendar();
   renderCancellations();
@@ -4811,7 +4834,7 @@ function makeBkCard(b){
     +'<div>'
     +'<div style="font-family:\'DM Serif Display\',serif;font-size:17px;color:var(--br);letter-spacing:0.3px">'+(b.apt?escH(b.apt):'Unknown Apt')+'</div>'
     +(b.name?'<div style="font-size:13px;font-weight:600;color:var(--t1);margin-top:2px">&#128100; '+escH(b.name)+'</div>':'')
-    +(b.phone?'<div style="font-size:12px;color:var(--t3);margin-top:1px">&#128222; '+escH(fmtGuestPhone(b.phone))+'</div>':'')
+    +(b.phone?'<div style="font-size:12px;color:var(--t3);margin-top:1px;white-space:nowrap">&#128222; '+escH(fmtGuestPhone(b.phone))+'</div>':'')
     +'</div>'
     +'<div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;justify-content:flex-end">'+creditBadge+pkgBadge+typeLabel+paidBadge+blockedBadge+'</div>'
     +'</div>'
@@ -6142,7 +6165,7 @@ function pndExportPDF(){
   w.document.close();
 }
 function loadGuests(){try{var g=localStorage.getItem('hbs_guests');if(g)GUESTS=JSON.parse(g);}catch(e){}}
-function saveGuests(){try{localStorage.setItem('hbs_guests',JSON.stringify(GUESTS));}catch(e){}renderGuests();renderPending();try{if(typeof renderRevSection==='function')renderRevSection();}catch(e){}try{if(typeof renderGuestLoyalty==='function')renderGuestLoyalty();}catch(e){}}
+function saveGuests(){try{localStorage.setItem('hbs_guests',JSON.stringify(GUESTS));}catch(e){}renderGuests();renderPending();try{if(typeof renderRevSection==='function')renderRevSection();}catch(e){}try{if(typeof renderGuestLoyalty==='function')renderGuestLoyalty();}catch(e){}try{if(typeof updateGuestStats==='function')updateGuestStats();}catch(e){}}
 function gid(){return 'g'+Date.now()+Math.floor(Math.random()*9999);}
 function autoPullGuests(dateStr,apts){
   GUESTS=GUESTS.filter(function(g){return g.checkin!==dateStr;});
@@ -9052,6 +9075,27 @@ function cancelBk(id){
   // Delete booking
   BOOKINGS=BOOKINGS.filter(function(x){return x.id!==id;});
   saveBookings();
+
+  // Sync Guest Tracker with the refund:
+  //  Full refund    -> guest entry removed (revenue gone)
+  //  Partial refund -> refunded amount subtracted from the guest entry
+  //  No refund      -> money kept, guest entry stays as revenue
+  loadGuests();
+  function _cxMatch(g){return g.id===id||((g.apt||'')===(b.apt||'')&&(g.checkin||'')===(b.checkin||''));}
+  if(refundType==='Full'){
+    GUESTS=GUESTS.filter(function(g){return !_cxMatch(g);});
+  } else if(refundType==='Partial'&&refundAmt>0){
+    GUESTS.forEach(function(g){
+      if(!_cxMatch(g))return;
+      g.amount=Math.max(0,(parseFloat(g.amount)||0)-refundAmt);
+      if(g.paidAmount!==undefined&&g.paidAmount!==null)g.paidAmount=Math.max(0,(parseFloat(g.paidAmount)||0)-refundAmt);
+      if(g.status==='partial'&&(parseFloat(g.pendingAmount)||0)<=0)g.status='paid-cash';
+    });
+  }
+  saveGuests();
+  if(typeof renderExtraReservations==='function')try{renderExtraReservations();}catch(e){}
+  if(typeof renderBkLanding==='function')try{renderBkLanding();}catch(e){}
+
   updateBkPendingBadge();
   renderBkCalendar();
   renderCancellations();
@@ -9438,7 +9482,7 @@ function makeBkCard(b){
     +'<div>'
     +'<div style="font-family:\'DM Serif Display\',serif;font-size:17px;color:var(--br);letter-spacing:0.3px">'+(b.apt?escH(b.apt):'Unknown Apt')+'</div>'
     +(b.name?'<div style="font-size:13px;font-weight:600;color:var(--t1);margin-top:2px">&#128100; '+escH(b.name)+'</div>':'')
-    +(b.phone?'<div style="font-size:12px;color:var(--t3);margin-top:1px">&#128222; '+escH(fmtGuestPhone(b.phone))+'</div>':'')
+    +(b.phone?'<div style="font-size:12px;color:var(--t3);margin-top:1px;white-space:nowrap">&#128222; '+escH(fmtGuestPhone(b.phone))+'</div>':'')
     +'</div>'
     +'<div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;justify-content:flex-end">'+creditBadge+pkgBadge+typeLabel+paidBadge+blockedBadge+'</div>'
     +'</div>'
@@ -10417,7 +10461,7 @@ function pndExportPDF(){
   w.document.close();
 }
 function loadGuests(){try{var g=localStorage.getItem('hbs_guests');if(g)GUESTS=JSON.parse(g);}catch(e){}}
-function saveGuests(){try{localStorage.setItem('hbs_guests',JSON.stringify(GUESTS));}catch(e){}renderGuests();renderPending();try{if(typeof renderRevSection==='function')renderRevSection();}catch(e){}try{if(typeof renderGuestLoyalty==='function')renderGuestLoyalty();}catch(e){}}
+function saveGuests(){try{localStorage.setItem('hbs_guests',JSON.stringify(GUESTS));}catch(e){}renderGuests();renderPending();try{if(typeof renderRevSection==='function')renderRevSection();}catch(e){}try{if(typeof renderGuestLoyalty==='function')renderGuestLoyalty();}catch(e){}try{if(typeof updateGuestStats==='function')updateGuestStats();}catch(e){}}
 function gid(){return 'g'+Date.now()+Math.floor(Math.random()*9999);}
 function autoPullGuests(dateStr,apts){
   GUESTS=GUESTS.filter(function(g){return g.checkin!==dateStr;});
@@ -11478,6 +11522,7 @@ function renderGuests(){
   var _aCount=guests.filter(function(g){return g.type==='airbnb';}).length;
   if(_dc){_dc.textContent=_dCount;_dc.style.transform='scale(1.3)';setTimeout(function(){if(_dc)_dc.style.transform='scale(1)';},200);}
   if(_ac){_ac.textContent=_aCount;_ac.style.transform='scale(1.3)';setTimeout(function(){if(_ac)_ac.style.transform='scale(1)';},200);}
+  if(typeof updateGuestStats==='function')try{updateGuestStats();}catch(e){}
   if(!el)return; // old structure, skip
   el.innerHTML='';
   if(!guests.length){el.innerHTML='<div class="gempty">No guests yet</div>';return;}
@@ -12430,6 +12475,33 @@ function saveGuestNoteFromModal(key,grpData){
 }
 // ── END GUEST PROFILE MODAL ───────────────────────────────
 
+function updateGuestStats(){
+  try{
+    var seen={},entries=[];
+    (typeof GUESTS!=='undefined'?GUESTS:[]).forEach(function(g){
+      if(g.id)seen[g.id]=1; seen[(g.apt||'')+'|'+(g.checkin||'')]=1; entries.push(g);
+    });
+    if(typeof BOOKINGS!=='undefined')BOOKINGS.forEach(function(b){
+      if(b.status==='cancelled')return;
+      if(seen[b.id]||seen[(b.apt||'')+'|'+(b.checkin||'')])return;
+      entries.push({status:b.status||'pending',type:b.type||'direct',amount:b.amount||0,paidAmount:b.paidAmount,pendingAmount:b.pendingAmount});
+    });
+    var airbnb=entries.filter(function(g){return g.status==='paid-airbnb'||g.type==='airbnb';});
+    var direct=entries.filter(function(g){return airbnb.indexOf(g)===-1;});
+    var et=document.getElementById('g-total');if(et)et.textContent=entries.length;
+    var ed=document.getElementById('g-direct');if(ed)ed.textContent=direct.length;
+    var ea=document.getElementById('g-airbnb');if(ea)ea.textContent=airbnb.length;
+    var directTotal=direct.reduce(function(sm,g){
+      if(g.status==='pending')return sm;
+      if(g.status==='partial')return sm+(parseFloat(g.paidAmount)||((parseFloat(g.amount)||0)-(parseFloat(g.pendingAmount)||0)));
+      return sm+(parseFloat(g.amount)||0);
+    },0);
+    var edk=document.getElementById('g-direct-kd');
+    if(edk)edk.textContent=directTotal>0?_kd(directTotal)+' KD':'No KD logged';
+    var etd=document.getElementById('g-total-direct-kd');
+    if(etd)etd.textContent=directTotal>0?_kd(directTotal)+' KD':'\u2014';
+  }catch(e){}
+}
 function renderGuestLoyalty(){
   var el=document.getElementById('gl-scroll');
   var dotsEl=document.getElementById('gl-dots');
