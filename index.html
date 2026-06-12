@@ -99,6 +99,20 @@ body.dark #tab-guidebook .gb-section-body{border-color:#3D2E1A!important}
 
 @keyframes earnTapPulse{0%{transform:scale(1)}35%{transform:scale(1.045)}100%{transform:scale(1)}}
 @keyframes medalSpin{0%{transform:rotate(0) scale(1)}50%{transform:rotate(180deg) scale(1.35)}100%{transform:rotate(360deg) scale(1)}}
+
+/* ── Apartment picker animations ── */
+@keyframes bkPillIn{0%{opacity:0;transform:translateY(8px) scale(.9)}100%{opacity:1;transform:none}}
+@keyframes bkPillActive{0%{transform:scale(1)}45%{transform:scale(1.12)}100%{transform:scale(1)}}
+@keyframes bkAptSelPop{0%{transform:scale(.7);opacity:.4}60%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
+.bldg-sel-btn{transition:transform .14s,box-shadow .2s,background .2s!important}
+.bldg-sel-btn:active{transform:scale(.92)!important}
+.bldg-sel-btn:hover{box-shadow:0 3px 10px rgba(92,61,30,.14)}
+.apt-tile{transition:transform .14s,box-shadow .2s,background .2s,border-color .2s!important}
+.apt-tile:hover{box-shadow:0 4px 12px rgba(92,61,30,.16);border-color:var(--br)!important}
+.apt-tile:active{transform:scale(.9)!important}
+#bk-apt-trigger:active{transform:scale(.985)}
+#bk-apt-trigger{transition:border-color .2s,transform .12s,box-shadow .2s}
+#bk-apt-trigger:hover{box-shadow:0 3px 12px rgba(92,61,30,.1)}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
@@ -932,7 +946,7 @@ button{-webkit-user-select:none;user-select:none}
           <div style="font-size:10px;font-weight:600;color:var(--gd);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">Apartment</div>
           <input type="hidden" id="bk-apt">
           <div id="bk-apt-trigger" onclick="toggleAptPicker()" style="display:flex;align-items:center;justify-content:space-between;background:var(--cr);border:1.5px solid var(--gl);border-radius:9px;padding:11px 14px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color .2s">
-            <span id="bk-apt-display" style="font-size:13px;color:var(--t3)">Tap to choose apartment...</span>
+            <span id="bk-apt-display" style="font-size:13px;color:var(--t3)">Tap To Choose Apartment...</span>
             <svg id="bk-apt-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;color:var(--t3);transition:transform .25s"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
           <div id="bk-apt-picker" style="display:none;margin-top:8px;border:1.5px solid var(--gl);border-radius:18px;overflow:hidden;background:var(--wh);box-shadow:0 8px 32px rgba(92,61,30,.14)">
@@ -4756,7 +4770,7 @@ function renderBookings(){
               else totalAirbnb++;
               if(matched.amount) totalKD+=perNight;
               var guestDisplay=matched.name||(matched.phone?fmtGuestPhone(matched.phone):'')||'';
-              list+=emoji+apt.label+' - '+guestDisplay+kdStr+pendingSuffix+nightsSuffix+'\n';
+              list+=emoji+' '+apt.label+' - '+guestDisplay+kdStr+pendingSuffix+nightsSuffix+'\n';
             } else {
               totalAvail++;
               list+='\u2705 '+apt.label+'\n';
@@ -4821,8 +4835,9 @@ function renderBookings(){
           +'</div>';
         window._bkGenList = list;
         // Booking cards below the list
-        var cardsHtml = allDayBks.length
-          ? '<div style="margin-top:18px"><div style="font-family:\'DM Serif Display\',serif;font-size:16px;color:var(--br);margin-bottom:12px">&#128205; Guest Details</div>'+allDayBks.map(makeBkCard).join('')+'</div>'
+        var _cardBks = allDayBks.filter(function(b){return !b.isExtra;}); // extras already shown in the Extra Reservations panel
+        var cardsHtml = _cardBks.length
+          ? '<div style="margin-top:18px"><div style="font-family:\'DM Serif Display\',serif;font-size:16px;color:var(--br);margin-bottom:12px">&#128205; Guest Details</div>'+_cardBks.map(makeBkCard).join('')+'</div>'
           : '';
 
         dayList.innerHTML = summaryHtml + listHtml + cardsHtml;
@@ -9505,7 +9520,7 @@ function renderBookings(){
               else totalAirbnb++;
               if(matched.amount) totalKD+=perNight;
               var guestDisplay=matched.name||(matched.phone?fmtGuestPhone(matched.phone):'')||'';
-              list+=emoji+apt.label+' - '+guestDisplay+kdStr+pendingSuffix+nightsSuffix+'\n';
+              list+=emoji+' '+apt.label+' - '+guestDisplay+kdStr+pendingSuffix+nightsSuffix+'\n';
             } else {
               totalAvail++;
               list+='\u2705 '+apt.label+'\n';
@@ -9570,8 +9585,9 @@ function renderBookings(){
           +'</div>';
         window._bkGenList = list;
         // Booking cards below the list
-        var cardsHtml = allDayBks.length
-          ? '<div style="margin-top:18px"><div style="font-family:\'DM Serif Display\',serif;font-size:16px;color:var(--br);margin-bottom:12px">&#128205; Guest Details</div>'+allDayBks.map(makeBkCard).join('')+'</div>'
+        var _cardBks = allDayBks.filter(function(b){return !b.isExtra;}); // extras already shown in the Extra Reservations panel
+        var cardsHtml = _cardBks.length
+          ? '<div style="margin-top:18px"><div style="font-family:\'DM Serif Display\',serif;font-size:16px;color:var(--br);margin-bottom:12px">&#128205; Guest Details</div>'+_cardBks.map(makeBkCard).join('')+'</div>'
           : '';
 
         dayList.innerHTML = summaryHtml + listHtml + cardsHtml;
@@ -10986,8 +11002,10 @@ function renderAptPicker(){
   try{var _ca=JSON.parse(localStorage.getItem('hbs_custom_apts')||'[]');
     _ca.forEach(function(a){if(a.buildingKey&&a.apt){if(!KNOWN_APTS_PICKER[a.buildingKey])KNOWN_APTS_PICKER[a.buildingKey]=[];if(KNOWN_APTS_PICKER[a.buildingKey].indexOf(a.apt)===-1)KNOWN_APTS_PICKER[a.buildingKey].push(a.apt);}});
   }catch(e){}
-  Object.keys(KNOWN_APTS_PICKER).forEach(function(k){
+  Object.keys(KNOWN_APTS_PICKER).forEach(function(k,pi){
     var btn=document.createElement('button');btn.type='button';btn.className='bldg-sel-btn'+(_activeBldgKey===k?' active':'');btn.textContent=BLDG_LABELS[k]||k;
+    btn.style.animation='bkPillIn .32s cubic-bezier(.34,1.56,.64,1) '+(pi*0.045)+'s both';
+    if(_activeBldgKey===k)btn.style.animation='bkPillActive .35s cubic-bezier(.34,1.56,.64,1) both';
     btn.onclick=function(){_activeBldgKey=k;renderAptPicker();};pillWrap.appendChild(btn);
   });
   inner.appendChild(pillWrap);
@@ -11031,7 +11049,7 @@ function renderAptPicker(){
     });
     sec.appendChild(grid);inner.appendChild(sec);
   } else {
-    var hint=document.createElement('div');hint.style.cssText='padding:16px 14px;text-align:center;color:var(--t3);font-style:italic;font-size:13px';hint.textContent='Select a building above';inner.appendChild(hint);
+    var hint=document.createElement('div');hint.style.cssText='padding:16px 14px;text-align:center;color:var(--t3);font-style:italic;font-size:13px';hint.textContent='Select A Building Above';inner.appendChild(hint);
   }
 }
 function toggleAptPicker(){
@@ -11051,7 +11069,7 @@ function toggleAptPicker(){
 }
 function selectAptFromPicker(label){
   var inp=document.getElementById('bk-apt');if(inp)inp.value=label;
-  var disp=document.getElementById('bk-apt-display');if(disp){disp.textContent=label;disp.style.color='var(--t1)';disp.style.fontWeight='600';}
+  var disp=document.getElementById('bk-apt-display');if(disp){disp.textContent=label;disp.style.color='var(--t1)';disp.style.fontWeight='600';disp.style.display='inline-block';disp.style.animation='none';void disp.offsetWidth;disp.style.animation='bkAptSelPop .4s cubic-bezier(.34,1.56,.64,1)';}
   var trigger=document.getElementById('bk-apt-trigger');if(trigger){trigger.style.borderColor='var(--br)';}
   _aptPickerOpen=false;_activeBldgKey=null;
   var picker=document.getElementById('bk-apt-picker');if(picker){picker.style.opacity='0';setTimeout(function(){picker.style.display='none';},200);}
@@ -11116,7 +11134,7 @@ function openAddExtraReservation(){
     // Apartment picker
     +'<div style="margin-bottom:14px">'
     +'<div style="font-size:10px;font-weight:700;color:#B8913A;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">Apartment</div>'
-    +'<div id="_er-apt-display" style="background:#FAF4EC;border:1.5px solid #E5D4BC;border-radius:12px;padding:12px 14px;font-size:14px;color:#aaa;margin-bottom:10px;min-height:44px;display:flex;align-items:center">Tap a building then pick apartment</div>'
+    +'<div id="_er-apt-display" style="background:#FAF4EC;border:1.5px solid #E5D4BC;border-radius:12px;padding:12px 14px;font-size:14px;color:#aaa;margin-bottom:10px;min-height:44px;display:flex;align-items:center">Tap A Building Then Pick Apartment</div>'
     +'<div id="_er-bldg-pills" style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px"></div>'
     +'<div id="_er-apt-grid" style="display:none;display:flex;gap:8px;flex-wrap:wrap"></div>'
     +'</div>'
@@ -11135,12 +11153,23 @@ function openAddExtraReservation(){
     +'<div><div style="font-size:10px;font-weight:700;color:#B8913A;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">🏁 Check-out</div>'
     +'<input id="_er-checkout" type="date" value="'+todayVal+'" style="width:100%;background:#FAF4EC;border:1.5px solid #E5D4BC;border-radius:12px;color:#3D2208;font-family:\'DM Sans\',sans-serif;font-size:14px;padding:11px 14px;outline:none;box-sizing:border-box"></div>'
     +'</div>'
-    +'<div><div style="font-size:10px;font-weight:700;color:#B8913A;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">Amount (KD)</div>'
-    +'<input id="_er-amount" type="number" min="0" step="0.5" placeholder="0" style="width:100%;background:#FAF4EC;border:1.5px solid #E5D4BC;border-radius:12px;color:#3D2208;font-family:\'DM Sans\',sans-serif;font-size:14px;padding:12px 14px;outline:none;box-sizing:border-box"></div>'
+    +'<div id="_er-amount-wrap"><div id="_er-amount-lbl" style="font-size:10px;font-weight:700;color:#B8913A;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">Amount (KD)</div>'
+    +'<input id="_er-amount" type="number" min="0" step="0.5" placeholder="0" oninput="if(typeof _erPartialHint===\'function\')_erPartialHint()" style="width:100%;background:#FAF4EC;border:1.5px solid #E5D4BC;border-radius:12px;color:#3D2208;font-family:\'DM Sans\',sans-serif;font-size:14px;padding:12px 14px;outline:none;box-sizing:border-box"></div>'
     +'<div><div style="font-size:10px;font-weight:700;color:#888;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">Payment Status</div>'
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
-    +'<button id="_er-s-paid" onclick="_erSetStatus(\'paid\')" style="padding:12px;border-radius:12px;border:2px solid #1B7A40;background:#EAF7EF;color:#1B7A40;font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif">✅ Paid</button>'
-    +'<button id="_er-s-pending" onclick="_erSetStatus(\'pending\')" style="padding:12px;border-radius:12px;border:2px solid #E5D4BC;background:#FAF4EC;color:#888;font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif">⏳ Pending</button>'
+    +'<button id="_er-s-paid" onclick="_erSetStatus(\'paid\')" style="padding:12px 6px;border-radius:12px;border:2px solid #1B7A40;background:#EAF7EF;color:#1B7A40;font-size:12.5px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif">✅ Paid</button>'
+    +'<button id="_er-s-pending" onclick="_erSetStatus(\'pending\')" style="padding:12px 6px;border-radius:12px;border:2px solid #E5D4BC;background:#FAF4EC;color:#888;font-size:12.5px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif">⏳ Pending</button>'
+    +'<button id="_er-s-partial" onclick="_erSetStatus(\'partial\')" style="padding:12px 6px;border-radius:12px;border:2px solid #E5D4BC;background:#FAF4EC;color:#888;font-size:12.5px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif">➗ Partial</button>'
+    +'<button id="_er-s-airbnb" onclick="_erSetStatus(\'airbnb\')" style="padding:12px 6px;border-radius:12px;border:2px solid #E5D4BC;background:#FAF4EC;color:#888;font-size:12.5px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif">🅰️ Airbnb</button>'
+    +'</div>'
+    +'<div id="_er-paid-wrap" style="display:none;margin-top:10px">'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+    +'<div><div style="font-size:10px;font-weight:700;color:#1B7A40;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">\u2705 Paid (KD)</div>'
+    +'<input id="_er-paidamt" type="number" min="0" step="0.5" placeholder="e.g. 25" oninput="if(typeof _erPartialHint===\'function\')_erPartialHint()" style="width:100%;background:#F0FAF4;border:1.5px solid #A8D5B5;border-radius:12px;color:#1B5E20;font-family:\'DM Sans\',sans-serif;font-size:14px;padding:12px 14px;outline:none;box-sizing:border-box;font-weight:700"></div>'
+    +'<div><div style="font-size:10px;font-weight:700;color:#C45400;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">\u203c\ufe0f Not Paid (KD)</div>'
+    +'<input id="_er-pendamt" type="number" min="0" step="0.5" placeholder="e.g. 25" oninput="if(typeof _erPartialHint===\'function\')_erPartialHint()" style="width:100%;background:#FFF8F0;border:1.5px solid #F0C896;border-radius:12px;color:#C45400;font-family:\'DM Sans\',sans-serif;font-size:14px;padding:12px 14px;outline:none;box-sizing:border-box;font-weight:700"></div>'
+    +'</div>'
+    +'<div id="_er-partial-hint" style="font-size:11px;color:#A07830;margin-top:8px;font-weight:600">Enter the paid and not-paid amounts \u2014 total fills in automatically</div>'
     +'</div>'
     +'<input type="hidden" id="_er-status" value="paid">'
     +'</div>'
@@ -11156,9 +11185,36 @@ function openAddExtraReservation(){
 
 function _erSetStatus(s){
   var inp=document.getElementById('_er-status');if(inp)inp.value=s;
-  var bp=document.getElementById('_er-s-paid'),bpd=document.getElementById('_er-s-pending');
-  if(bp)bp.style.cssText='padding:12px;border-radius:12px;border:2px solid '+(s==='paid'?'#1B7A40':'#E5D4BC')+';background:'+(s==='paid'?'#EAF7EF':'#FAF4EC')+';color:'+(s==='paid'?'#1B7A40':'#888')+';font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif';
-  if(bpd)bpd.style.cssText='padding:12px;border-radius:12px;border:2px solid '+(s==='pending'?'#C45400':'#E5D4BC')+';background:'+(s==='pending'?'#FFF3E0':'#FAF4EC')+';color:'+(s==='pending'?'#C45400':'#888')+';font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif';
+  var base='padding:12px 6px;border-radius:12px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;';
+  var bp=document.getElementById('_er-s-paid'),bpd=document.getElementById('_er-s-pending'),bab=document.getElementById('_er-s-airbnb');
+  if(bp)bp.style.cssText=base+'border:2px solid '+(s==='paid'?'#1B7A40':'#E5D4BC')+';background:'+(s==='paid'?'#EAF7EF':'#FAF4EC')+';color:'+(s==='paid'?'#1B7A40':'#888');
+  if(bpd)bpd.style.cssText=base+'border:2px solid '+(s==='pending'?'#C45400':'#E5D4BC')+';background:'+(s==='pending'?'#FFF3E0':'#FAF4EC')+';color:'+(s==='pending'?'#C45400':'#888');
+  if(bab)bab.style.cssText=base+'border:2px solid '+(s==='airbnb'?'#FF385C':'#E5D4BC')+';background:'+(s==='airbnb'?'#FFEDF1':'#FAF4EC')+';color:'+(s==='airbnb'?'#FF385C':'#888');
+  var bpt=document.getElementById('_er-s-partial');
+  if(bpt)bpt.style.cssText=base+'border:2px solid '+(s==='partial'?'#B8913A':'#E5D4BC')+';background:'+(s==='partial'?'#FFF8E1':'#FAF4EC')+';color:'+(s==='partial'?'#8B6914':'#888');
+  var pw=document.getElementById('_er-paid-wrap');
+  if(pw)pw.style.display=(s==='partial')?'block':'none';
+  var al=document.getElementById('_er-amount-lbl');
+  if(al)al.textContent=(s==='partial')?'Total Amount (KD)':'Amount (KD)';
+  var aw=document.getElementById('_er-amount-wrap');
+  if(aw)aw.style.display=(s==='airbnb')?'none':'block';
+  if(s==='partial'&&typeof _erPartialHint==='function')_erPartialHint();
+}
+function _erPartialHint(){
+  var h=document.getElementById('_er-partial-hint');if(!h)return;
+  var paid=parseFloat((document.getElementById('_er-paidamt')||{}).value)||0;
+  var pend=parseFloat((document.getElementById('_er-pendamt')||{}).value)||0;
+  var amtEl=document.getElementById('_er-amount');
+  if(paid>0&&pend>0){
+    var total=Math.round((paid+pend)*10)/10;
+    if(amtEl)amtEl.value=total;
+    h.style.color='#1B7A40';h.textContent='Total KD '+total+' \u2014 \u2705 KD '+paid+' to Guest Tracker \u00b7 \u203c\ufe0f KD '+pend+' to Payment Pending';
+  } else if(paid>0||pend>0){
+    if(amtEl)amtEl.value=Math.round((paid+pend)*10)/10;
+    h.style.color='#A07830';h.textContent='Enter the '+(paid>0?'not-paid':'paid')+' amount too';
+  } else {
+    h.style.color='#A07830';h.textContent='Enter the paid and not-paid amounts \u2014 total fills in automatically';
+  }
 }
 
 function _erBuildBldgPills(){
@@ -11246,27 +11302,45 @@ function addExtraReservation(){
   var status=(document.getElementById('_er-status')||{}).value||'paid';
   if(!apt){alert('Please select an apartment first.');return;}
   if(!cin){alert('Check-in date is required.');return;}
-  if(!amount){alert('Please enter the reservation amount (KD).');return;}
+  if(!amount&&status!=='airbnb'){alert('Please enter the reservation amount (KD).');return;}
+  if(status==='airbnb')amount=parseFloat((document.getElementById('_er-amount')||{}).value)||0;
   var MSHORT=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   function fmtD(d){if(!d)return '';var dt=new Date(d+'T12:00:00');return isNaN(dt)?d:MSHORT[dt.getMonth()]+' '+dt.getDate()+' '+dt.getFullYear();}
   var nights=0;
   if(cin&&cout){var d1=new Date(cin+'T12:00:00'),d2=new Date(cout+'T12:00:00');if(!isNaN(d1)&&!isNaN(d2))nights=Math.max(0,Math.round((d2-d1)/86400000));}
   // Warn if checkout before or same as checkin
   if(cout&&nights<=0){if(!confirm('⚠️ Check-out is same as check-in (0 nights). This is a same-day turnover — continue?'))return;}
+  var paidAmt=0,pendAmt=0;
+  if(status==='partial'){
+    paidAmt=parseFloat((document.getElementById('_er-paidamt')||{}).value)||0;
+    pendAmt=parseFloat((document.getElementById('_er-pendamt')||{}).value)||0;
+    if(paidAmt<=0){alert('Enter the paid amount.');return;}
+    if(pendAmt<=0){alert('Enter the not-paid amount. If fully paid, choose \u2705 Paid instead.');return;}
+    amount=Math.round((paidAmt+pendAmt)*10)/10;
+  }
   loadBookings();
-  var bk={id:bkid(),apt:apt,name:name,phone:phone,amount:amount,checkin:fmtD(cin),checkout:fmtD(cout),nights:nights,type:'direct',status:status,isExtra:true};
+  var erType=(status==='airbnb')?'airbnb':'direct';
+  var erStatus=(status==='airbnb')?'paid':status;
+  var bk={id:bkid(),apt:apt,name:name,phone:phone,amount:amount,checkin:fmtD(cin),checkout:fmtD(cout),nights:nights,type:erType,status:erStatus,isExtra:true,blocked:false,blockedBy:'',notYetBlocked:erType==='direct'};
+  if(status==='partial'){bk.paidAmount=paidAmt;bk.pendingAmount=pendAmt;}
   BOOKINGS.push(bk);
   saveBookings();
   if(typeof GUESTS!=='undefined'){
     loadGuests();
-    if(status==='pending'){
-      GUESTS.push({id:bk.id,name:name||apt||'Guest',phone:phone,apt:apt,amount:amount,pendingAmount:amount,checkin:bk.checkin,status:'pending',isCash:false});
+    if(erStatus==='pending'){
+      GUESTS.push({id:bk.id,name:name||apt||'Guest',phone:phone,apt:apt,amount:amount,pendingAmount:amount,checkin:bk.checkin,status:'pending',type:'direct',isCash:false});
       if(typeof renderPending==='function')renderPending();
+    } else if(erStatus==='partial'){
+      GUESTS.push({id:bk.id,name:name||apt||'Guest',phone:phone,apt:apt,amount:amount,paidAmount:paidAmt,pendingAmount:pendAmt,checkin:bk.checkin,status:'partial',type:'direct',isCash:false});
+      if(typeof renderPending==='function')renderPending();
+    } else if(erType==='airbnb'){
+      GUESTS.push({id:bk.id,name:name||apt||'Guest',phone:phone,apt:apt,amount:amount,pendingAmount:0,checkin:bk.checkin,status:'paid-airbnb',type:'airbnb',isCash:false});
     } else {
-      GUESTS.push({id:bk.id,name:name||apt||'Guest',phone:phone,apt:apt,amount:amount,pendingAmount:0,checkin:bk.checkin,status:'paid-cash',isCash:true});
+      GUESTS.push({id:bk.id,name:name||apt||'Guest',phone:phone,apt:apt,amount:amount,pendingAmount:0,checkin:bk.checkin,status:'paid-cash',type:'direct',isCash:true});
     }
     saveGuests();
   }
+  if(typeof renderDORBanner==='function')renderDORBanner();
   var ov=document.getElementById('_extraResOv');if(ov)ov.remove();
   if(typeof updateBkPendingBadge==='function')updateBkPendingBadge();
   if(typeof renderBkCalendar==='function')renderBkCalendar();
@@ -11313,9 +11387,10 @@ function renderExtraReservations(){
     +'</div>'
     +extras.map(function(b,i){
       var isPaid=b.status==='paid';
+      var isAirbnb=b.type==='airbnb';
       var nights=parseInt(b.nights)||0;
       var nightsStr=nights===0?'Same-day':nights===1?'1 night':nights+' nights';
-      return '<div style="background:#fff;border-radius:16px;margin-bottom:10px;border:1.5px solid '+(isPaid?'#C3E0CE':'#FECBA1')+';border-left:4px solid '+(isPaid?'#1B7A40':'#FF9800')+';overflow:hidden">'
+      return '<div style="background:#fff;border-radius:16px;margin-bottom:10px;border:1.5px solid '+(isAirbnb?'#FFC2CE':isPaid?'#C3E0CE':'#FECBA1')+';border-left:4px solid '+(isAirbnb?'#FF385C':isPaid?'#1B7A40':'#FF9800')+';overflow:hidden">'
         // Card header
         +'<div style="padding:12px 14px 10px;border-bottom:1px solid #f0f0f0">'
         +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">'
@@ -11324,7 +11399,10 @@ function renderExtraReservations(){
         +(b.name?'<div style="font-size:13px;font-weight:600;color:#3D2208;margin-top:2px">👤 '+escH(b.name)+'</div>':'<div style="font-size:12px;color:#aaa;margin-top:2px;font-style:italic">No guest name</div>')
         +(b.phone?'<div style="font-size:12px;color:#666;margin-top:1px">📞 '+escH(fmtPhone(b.phone))+'</div>':'')
         +'</div>'
+        +'<span style="display:flex;gap:5px;align-items:center;flex-shrink:0">'
+        +(isAirbnb?'<span style="font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;white-space:nowrap;background:#FFF0EC;color:#E0490F">\uD83C\uDD70 Airbnb</span>':'')
         +'<span style="font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;white-space:nowrap;'+(isPaid?'background:#EAF7EF;color:#1B7A40':'background:#FFF3E0;color:#C45400')+'">'+(isPaid?'✓ Paid':'⏳ Pending')+'</span>'
+        +'</span>'
         +'</div>'
         +'</div>'
         // Dates grid
@@ -11344,7 +11422,7 @@ function renderExtraReservations(){
         +'</div>'
         // Amount + actions
         +'<div style="padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px">'
-        +'<div style="font-family:\'DM Serif Display\',serif;font-size:18px;color:'+(isPaid?'#1B7A40':'#C45400')+';font-weight:900">'+(b.amount?'KD '+fmt(b.amount):'No amount')+'</div>'
+        +(isAirbnb&&!b.amount?'':'<div style="font-family:\'DM Serif Display\',serif;font-size:18px;color:'+(isPaid?'#1B7A40':'#C45400')+';font-weight:900">'+(b.amount?'KD '+fmt(b.amount):'No amount')+'</div>')
         +'<div style="display:flex;gap:6px;align-items:center">'
         +((!isPaid)?'<button onclick="markExtraPaid(\''+b.id+'\')" style="background:#1B7A40;color:#fff;border:none;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif">✓ Mark Paid</button>':'')
         +'</div>'
@@ -11507,7 +11585,7 @@ function _erHistRowHtml(b,y,delay){
   var dayName=isNaN(d)?'':DAYS[d.getDay()];
   var isPaid=b.status==='paid';
   var isToday=(b.checkin||'')===_erTodayStr();
-  return '<div class="'+(delay?'er-anim':'')+'" style="animation-delay:'+(delay||0)+'ms;position:absolute;top:'+y+'px;left:0;right:0;height:'+(_ER_ROW_H-10)+'px;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:0 18px;background:#fff;border:1.5px solid '+(isToday?'#1B7A40':'#EDE5D8')+';border-left:5px solid '+(isPaid?'#1B7A40':'#FF9800')+';border-radius:16px">'
+  return '<div class="'+(delay?'er-anim':'')+'" style="animation-delay:'+(delay||0)+'ms;position:absolute;top:'+y+'px;left:0;right:0;height:'+(_ER_ROW_H-10)+'px;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:0 18px;background:#fff;border:1.5px solid '+(isToday?'#1B7A40':'#EDE5D8')+';border-left:5px solid '+(b.type==='airbnb'?'#FF385C':isPaid?'#1B7A40':'#FF9800')+';border-radius:16px">'
     +'<div style="display:flex;align-items:center;gap:14px;min-width:0">'
     +'<div style="width:48px;height:48px;border-radius:13px;background:linear-gradient(135deg,#1A3A2A,#2A5C3E);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0">'
     +'<div style="font-size:8.5px;font-weight:700;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:1px">'+(dayName?dayName.slice(0,3):'')+'</div>'
