@@ -5261,8 +5261,16 @@ function sendWA(id,num){var el=document.getElementById(id);var t=el?el.textConte
 function sendWAText(txt,num){window.open('https://wa.me/'+num+'?text='+encodeURIComponent(txt),'_blank');}
 function sendWAStored(id){
   var store=window._msgStore&&window._msgStore[id];
-  if(!store||!store.phone) return;
-  window.open('https://wa.me/'+store.phone+'?text='+encodeURIComponent(store.text),'_blank');
+  var phone='', text='';
+  if(store){ phone=store.phone||''; text=store.text||''; }
+  // Fallback: read directly from the card if the store is missing/empty
+  if(!text){ var el=document.getElementById(id); if(el) text=el.textContent||''; }
+  phone=(phone||'').replace(/\D/g,'');
+  var url='https://wa.me/'+phone+'?text='+encodeURIComponent(text);
+  // iOS Safari often blocks window.open for blank targets after async work,
+  // so navigate the current tab — this reliably opens WhatsApp from a tap.
+  var w=window.open(url,'_blank');
+  if(!w){ window.location.href=url; }
 }
 
 // =========================================================
@@ -9862,8 +9870,16 @@ function sendWA(id,num){var el=document.getElementById(id);var t=el?el.textConte
 function sendWAText(txt,num){window.open('https://wa.me/'+num+'?text='+encodeURIComponent(txt),'_blank');}
 function sendWAStored(id){
   var store=window._msgStore&&window._msgStore[id];
-  if(!store||!store.phone) return;
-  window.open('https://wa.me/'+store.phone+'?text='+encodeURIComponent(store.text),'_blank');
+  var phone='', text='';
+  if(store){ phone=store.phone||''; text=store.text||''; }
+  // Fallback: read directly from the card if the store is missing/empty
+  if(!text){ var el=document.getElementById(id); if(el) text=el.textContent||''; }
+  phone=(phone||'').replace(/\D/g,'');
+  var url='https://wa.me/'+phone+'?text='+encodeURIComponent(text);
+  // iOS Safari often blocks window.open for blank targets after async work,
+  // so navigate the current tab — this reliably opens WhatsApp from a tap.
+  var w=window.open(url,'_blank');
+  if(!w){ window.location.href=url; }
 }
 
 // =========================================================
