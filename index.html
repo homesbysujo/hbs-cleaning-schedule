@@ -2519,7 +2519,7 @@ function renderCustomAptsList(){
   if(!list)return;
   list.innerHTML='';
   // Collect extra apts from KNOWN_APTS_PICKER (beyond defaults)
-  var defaults={'t60':['301','302','1601','1602'],'t62':['1401','1402','1601','1602','1701','1702'],'sel':['13','19','22','25','27'],'rna':['13','47','48'],'jas':['27','28'],'fat':['7A','7B','9A','34A','34B','35A','35B','36A','36B']};
+  var defaults={'t60':['301','302','1601','1602'],'t62':['1401','1402','1601','1602','1701','1702'],'sel':['13','19','22','25','27'],'rna':['13','47','48'],'jas':['27','28'],'fat':['7A','7B','8A','8B','9A','9B','34A','34B','35A','35B','36A','36B']};
   var extras=[];
   if(typeof KNOWN_APTS_PICKER!=='undefined'){
     Object.keys(KNOWN_APTS_PICKER).forEach(function(bldg){
@@ -4705,7 +4705,7 @@ function renderBookings(){
             {key:'jas27',label:'Jassem 27'},{key:'jas28',label:'Jassem 28'}
           ]},
           {sec:'Fatema Apartments', apts:[
-            {key:'fat7a',label:'7A'},{key:'fat7b',label:'7B'},{key:'fat9a',label:'9A'},
+            {key:'fat7a',label:'7A'},{key:'fat7b',label:'7B'},{key:'fat8a',label:'8A'},{key:'fat8b',label:'8B'},{key:'fat9a',label:'9A'},{key:'fat9b',label:'9B'},
             {key:'fat34a',label:'34A'},{key:'fat34b',label:'34B'},
             {key:'fat35a',label:'35A'},{key:'fat35b',label:'35B'},
             {key:'fat36a',label:'36A'},{key:'fat36b',label:'36B'}
@@ -9456,7 +9456,7 @@ function renderBookings(){
             {key:'jas27',label:'Jassem 27'},{key:'jas28',label:'Jassem 28'}
           ]},
           {sec:'Fatema Apartments', apts:[
-            {key:'fat7a',label:'7A'},{key:'fat7b',label:'7B'},{key:'fat9a',label:'9A'},
+            {key:'fat7a',label:'7A'},{key:'fat7b',label:'7B'},{key:'fat8a',label:'8A'},{key:'fat8b',label:'8B'},{key:'fat9a',label:'9A'},{key:'fat9b',label:'9B'},
             {key:'fat34a',label:'34A'},{key:'fat34b',label:'34B'},
             {key:'fat35a',label:'35A'},{key:'fat35b',label:'35B'},
             {key:'fat36a',label:'36A'},{key:'fat36b',label:'36B'}
@@ -10979,7 +10979,7 @@ function _kd(v){var n=parseFloat(v)||0;var r=Math.round(n*10)/10;return r===0?'0
 
 // ── APT PICKER ────────────────────────────────────────────────────────────
 var _aptPickerOpen=false,_activeBldgKey=null;
-var KNOWN_APTS_PICKER={'t60':['301','302','1601','1602'],'t62':['1401','1402','1601','1602','1701','1702'],'sel':['13','19','22','25','27'],'rna':['13','47','48'],'jas':['27','28'],'fat':['7A','7B','9A','34A','34B','35A','35B','36A','36B']};
+var KNOWN_APTS_PICKER={'t60':['301','302','1601','1602'],'t62':['1401','1402','1601','1602','1701','1702'],'sel':['13','19','22','25','27'],'rna':['13','47','48'],'jas':['27','28'],'fat':['7A','7B','8A','8B','9A','9B','34A','34B','35A','35B','36A','36B']};
 var BLDG_LABELS={'t60':'Tower 60','t62':'Tower 62','sel':'Seleena','rna':'R&A','jas':'Jassem','fat':'Fatema'};
 function buildAptLabel(k,a){if(k==='t60')return '60-'+a;if(k==='t62')return '62-'+a;if(k==='sel')return 'Sel '+a;if(k==='rna')return 'RNA '+a;if(k==='jas')return 'Jassem '+a;if(k==='fat')return 'Fat '+a;var _cb=getBldg(k);if(_cb)return (_cb.label||k)+' '+a;return a;}
 function renderAptPicker(){
@@ -11010,7 +11010,7 @@ function renderAptPicker(){
     var lbl=document.createElement('div');lbl.style.cssText='font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gd);margin-bottom:12px';lbl.textContent=BLDG_LABELS[_activeBldgKey];sec.appendChild(lbl);
     var grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:repeat(auto-fill,minmax(68px,1fr));gap:8px';
     var cur=(document.getElementById('bk-apt')||{}).value||'';
-    var defaults={'t60':['301','302','1601','1602'],'t62':['1401','1402','1601','1602','1701','1702'],'sel':['13','19','22','25','27'],'rna':['13','47','48'],'jas':['27','28'],'fat':['7A','7B','9A','34A','34B','35A','35B','36A','36B']};
+    var defaults={'t60':['301','302','1601','1602'],'t62':['1401','1402','1601','1602','1701','1702'],'sel':['13','19','22','25','27'],'rna':['13','47','48'],'jas':['27','28'],'fat':['7A','7B','8A','8B','9A','9B','34A','34B','35A','35B','36A','36B']};
     apts.forEach(function(apt,i){
       var label=buildAptLabel(_activeBldgKey,apt);
       var isDefault=(defaults[_activeBldgKey]||[]).indexOf(apt)!==-1;
@@ -13100,7 +13100,7 @@ setTimeout(hbsSyncPastCancellations,800);
 /* ===== Single source of truth for total apartment count ===== */
 function hbsTotalApts(){
   try{
-    var baseCounts={t60:4,t62:8,sel:5,rna:3,jas:2,fat:9}; /* counts of the built-in roster */
+    var baseCounts={t60:4,t62:8,sel:5,rna:3,jas:2,fat:12}; /* counts of the built-in roster */
     var total=0;
     if(typeof BUILDINGS_CFG!=='undefined'&&Array.isArray(BUILDINGS_CFG)&&BUILDINGS_CFG.length){
       BUILDINGS_CFG.forEach(function(b){ if(baseCounts[b.key]) total+=baseCounts[b.key]; });
@@ -13121,6 +13121,9 @@ function hbsTotalApts(){
     var defMsgs={
       'fat 7a':{checkin:"🏡 Welcome to Fatema Towers! Your stay is all set. Here are your check-in details:\n\n📍 Address Fatema Towers Behind AUK University Salmiya, Block 2 Yusuf Bin Hamoud Street, Avenue 6 Building 5, Plot 144 Floor 3 Flat 7A\n\n———\n\n🔗 Google Maps https://maps.app.goo.gl/uchmVCVF4655VXXX8?g_st=ipc\n\n———\n\n🔑 Smart Lock Code 171701#\n\n———\n\n👥 Just a heads-up – our building policy allows only 2 guests total.\n\n🚬 Smoking? Best to avoid if possible! But you can smoke in the Living room near the balcony window open!\n\n💬 Need Anything? I’m just a text away!\n\n⸻\n\n💖 Wishing you a cozy & pleasant stay! 😊\n\nSujo"},
       'fat 7b':{checkin:"🏡 Welcome to Fatema Towers! Your stay is all set. Here are your check-in details:\n\n📍 Address Fatema Towers Behind AUK University Salmiya, Block 2 Yusuf Bin Hamoud Street, Avenue 6 Building 5, Plot 144 Floor 3 Flat 7B\n\n———\n\n🔗 Google Maps https://maps.app.goo.gl/uchmVCVF4655VXXX8?g_st=ipc\n\n———\n\n🔑 Smart Lock Code 171702#\n\n———\n\n👥 Just a heads-up – our building policy allows only 2 guests total.\n\n🚬 Smoking? Best to avoid if possible! But you can smoke in the Living room near the balcony window open!\n\n💬 Need Anything? I’m just a text away!\n\n⸻\n\n💖 Wishing you a cozy & pleasant stay! 😊\n\nSujo"},
+      'fat 8a':{checkin:"🏡 Welcome to Fatema Towers! Your stay is all set. Here are your check-in details:\n\n📍 Address Fatema Towers Behind AUK University Salmiya, Block 2 Yusuf Bin Hamoud Street, Avenue 6 Building 5, Plot 144 Floor 3 Flat 8A\n\n———\n\n🔗 Google Maps https://maps.app.goo.gl/uchmVCVF4655VXXX8?g_st=ipc\n\n———\n\n🔑 Smart Lock Code 181801#\n\n———\n\n👥 Just a heads-up – our building policy allows only 2 guests total.\n\n🚬 Smoking? Best to avoid if possible! But you can smoke in the Living room near the balcony window open!\n\n💬 Need Anything? I’m just a text away!\n\n⸻\n\n💖 Wishing you a cozy & pleasant stay! 😊\n\nSujo"},
+      'fat 8b':{checkin:"🏡 Welcome to Fatema Towers! Your stay is all set. Here are your check-in details:\n\n📍 Address Fatema Towers Behind AUK University Salmiya, Block 2 Yusuf Bin Hamoud Street, Avenue 6 Building 5, Plot 144 Floor 3 Flat 8B\n\n———\n\n🔗 Google Maps https://maps.app.goo.gl/uchmVCVF4655VXXX8?g_st=ipc\n\n———\n\n🔑 Smart Lock Code 181802#\n\n———\n\n👥 Just a heads-up – our building policy allows only 2 guests total.\n\n🚬 Smoking? Best to avoid if possible! But you can smoke in the Living room near the balcony window open!\n\n💬 Need Anything? I’m just a text away!\n\n⸻\n\n💖 Wishing you a cozy & pleasant stay! 😊\n\nSujo"},
+      'fat 9b':{checkin:"🏡 Welcome to Fatema Towers! Your stay is all set. Here are your check-in details:\n\n📍 Address Fatema Towers Behind AUK University Salmiya, Block 2 Yusuf Bin Hamoud Street, Avenue 6 Building 5, Plot 144 Floor 3 Flat 9B\n\n———\n\n🔗 Google Maps https://maps.app.goo.gl/uchmVCVF4655VXXX8?g_st=ipc\n\n———\n\n🔑 Smart Lock Code 191902#\n\n———\n\n👥 Just a heads-up – our building policy allows only 2 guests total.\n\n🚬 Smoking? Best to avoid if possible! But you can smoke in the Living room near the balcony window open!\n\n💬 Need Anything? I’m just a text away!\n\n⸻\n\n💖 Wishing you a cozy & pleasant stay! 😊\n\nSujo"},
       'fat 9a':{checkin:"🏡 Welcome to Fatema Towers! Your stay is all set. Here are your check-in details:\n\n📍 Address Fatema Towers Behind AUK University Salmiya, Block 2 Yusuf Bin Hamoud Street, Avenue 6 Building 5, Plot 144 Floor 3 Flat 9A\n\n———\n\n🔗 Google Maps https://maps.app.goo.gl/uchmVCVF4655VXXX8?g_st=ipc\n\n———\n\n🔑 Smart Lock Code 191901#\n\n———\n\n👥 Just a heads-up – our building policy allows only 2 guests total.\n\n🚬 Smoking? Best to avoid if possible! But you can smoke in the Living room near the balcony window open!\n\n💬 Need Anything? I’m just a text away!\n\n⸻\n\n💖 Wishing you a cozy & pleasant stay! 😊\n\nSujo"}
     };
     if(typeof APT_MSGS==='undefined'){window.APT_MSGS={};}
