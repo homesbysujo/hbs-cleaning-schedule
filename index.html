@@ -337,7 +337,7 @@ textarea{font-size:16px!important}
 input{font-size:16px!important}
 @media(max-width:480px){
   /* ── CORE LAYOUT ── */
-  body{padding:0 0 88px!important}
+  body{padding:8px 0 88px!important}
   .page{border-radius:0!important;box-shadow:none!important;width:100%!important;max-width:100%!important}
   
   /* ── HEADER ── */
@@ -1033,15 +1033,7 @@ button{-webkit-user-select:none;user-select:none}
 
 <!-- WEATHER WIDGET -->
 <div class="sec" style="padding-bottom:0">
-  <div id="weather-widget" class="weather-widget">
-    <div class="wx-icon" id="wx-icon">🌤</div>
-    <div class="wx-info">
-      <div class="wx-temp" id="wx-temp">--°C</div>
-      <div class="wx-desc" id="wx-desc">Loading weather...</div>
-      <div class="wx-details" id="wx-details">Salmiya, Kuwait</div>
-    </div>
-    <div id="wx-priority" class="wx-priority" style="display:none">HIGH PRIORITY</div>
-  </div>
+  <div id="weather-widget" class="weather-widget" style="display:none"></div>
   <div id="wx-alert" class="wx-alert" style="display:none">⚠️ <span id="wx-alert-msg"></span></div>
 </div>
 
@@ -1416,7 +1408,6 @@ button{-webkit-user-select:none;user-select:none}
     <button class="cash-filter" onclick="setCashFilter('Vipin',this)" data-filter="Vipin">Vipin</button>
     <button class="cash-filter" onclick="setCashFilter('Alan',this)" data-filter="Alan">Alan</button>
     <button class="cash-filter" onclick="setCashFilter('Gayani',this)" data-filter="Gayani">Gayani</button>
-    <button class="cash-filter" onclick="setCashFilter('Bharathi',this)" data-filter="Bharathi">Bharathi</button>
     <button class="cash-filter" onclick="setCashFilter('Biswa',this)" data-filter="Biswa">Biswa</button>
     <button class="cash-filter" onclick="setCashFilter('Kanthi',this)" data-filter="Kanthi">Kanthi</button>
     <button class="cash-filter" onclick="setCashFilter('Samyuktha',this)" data-filter="Samyuktha">Samyuktha</button>
@@ -1465,8 +1456,7 @@ button{-webkit-user-select:none;user-select:none}
       <option value="">-- Select collector --</option>
       <option value="Vipin">Vipin — Tower 60/62 Supervisor</option>
       <option value="Alan">Alan — Tower 60 &amp; 62</option>
-      <option value="Gayani">Gayani — R&amp;A</option>
-      <option value="Bharathi">Bharathi — Jassem</option>
+      <option value="Gayani">Gayani — R&amp;A + Jassem</option>
       <option value="Biswa">Biswa — Fatema</option>
       <option value="Kanthi">Kanthi — Selena</option>
       <option value="Samyuktha">Samyuktha — Selena Supervisor</option>
@@ -2316,7 +2306,7 @@ var DEFAULT_BUILDINGS = [
   {key:'t62', label:'Tower 62',         isTower:true,  prefix:'62-', cleanerName:'Alan',       cleanerPhone:'96594116095', supName:'Vipin',      supPhone:'96597414872'},
   {key:'sel', label:'Selena Apartments',isTower:false, prefix:'Sel ',cleanerName:'Kanthi',     cleanerPhone:'96597936588', supName:'Samyuktha',  supPhone:'96551765790'},
   {key:'rna', label:'R&A Apartments',   isTower:false, prefix:'RNA ',cleanerName:'Gayani',     cleanerPhone:'96565591476', supName:'',           supPhone:''},
-  {key:'jas', label:'Jassem Apartments',isTower:false, prefix:'Jas ',cleanerName:'Bharathi',   cleanerPhone:'96550977061', supName:'',           supPhone:''},
+  {key:'jas', label:'Jassem Apartments',isTower:false, prefix:'Jas ',cleanerName:'Gayani',     cleanerPhone:'96565591476', supName:'',           supPhone:''},
   {key:'fat', label:'Fatema Apartments',isTower:false, prefix:'Fat ',cleanerName:'Biswa',      cleanerPhone:'96555127880', supName:'',           supPhone:''}
 ];
 
@@ -2529,7 +2519,7 @@ function renderCustomAptsList(){
   if(!list)return;
   list.innerHTML='';
   // Collect extra apts from KNOWN_APTS_PICKER (beyond defaults)
-  var defaults={'t60':['301','302','1601','1602'],'t62':['1401','1402','1601','1602','1701','1702'],'sel':['13','19','22','25','27'],'rna':['13','47','48'],'jas':['27','28'],'fat':['34A','34B','35A','35B','36A','36B']};
+  var defaults={'t60':['301','302','1601','1602'],'t62':['1401','1402','1601','1602','1701','1702'],'sel':['13','19','22','25','27'],'rna':['13','47','48'],'jas':['27','28'],'fat':['7A','7B','9A','34A','34B','35A','35B','36A','36B']};
   var extras=[];
   if(typeof KNOWN_APTS_PICKER!=='undefined'){
     Object.keys(KNOWN_APTS_PICKER).forEach(function(bldg){
@@ -3074,26 +3064,20 @@ try{
   msgCards.push({id:'mVip',title:(vipName||'Vipin')+' \u2014 Both Towers (Supervisor)',phone:vipPhone,text:viptxt});
 
 
-  // Gayani — R&A  /  Bharathi — Jassem
+  // Gayani — R&A + Jassem (merged)
   var bcRna=bCfg('rna'); var bcJas=bCfg('jas');
   var brna=BUILDINGS['rna']||{list:[],order:[]};
   var bjas=BUILDINGS['jas']||{list:[],order:[]};
   var gaytxt='';
-  var rnaMp={};brna.list.forEach(function(e){rnaMp[e.label]=e;});
-  var jasMp={};bjas.list.forEach(function(e){jasMp[e.label]=e;});
-  if(brna.list.length){
+  if(brna.list.length||bjas.list.length){
+    var rnaMp={};brna.list.forEach(function(e){rnaMp[e.label]=e;});
+    var jasMp={};bjas.list.forEach(function(e){jasMp[e.label]=e;});
     gaytxt=(bcRna.label||'R&A Apartments')+' ( '+cd+' )\nToday\'s Schedule\n\n';
     gaytxt+=numSort(brna.order).map(function(a){return a+' - '+(rnaMp[a]?R:X);}).join('\n');
+    gaytxt+='\n\n'+(bcJas.label||'Jassem Apartments')+' ( '+cd+' )\nToday\'s Schedule\n\n';
+    gaytxt+=numSort(bjas.order).map(function(a){return a+' - '+(jasMp[a]?R:X);}).join('\n');
   } else { gaytxt='No cleans today \u2705'; }
-  msgCards.push({id:'mGay',title:(bcRna.cleanerName||'Gayani')+' \u2014 R&A',phone:bcRna.cleanerPhone||'96565591476',text:gaytxt});
-
-  // Bharathi \u2014 Jassem
-  var bhatxt='';
-  if(bjas.list.length){
-    bhatxt=(bcJas.label||'Jassem Apartments')+' ( '+cd+' )\nToday\'s Schedule\n\n';
-    bhatxt+=numSort(bjas.order).map(function(a){return a+' - '+(jasMp[a]?R:X);}).join('\n');
-  } else { bhatxt='No cleans today \u2705'; }
-  msgCards.push({id:'mBha',title:(bcJas.cleanerName||'Bharathi')+' \u2014 Jassem',phone:bcJas.cleanerPhone||'96550977061',text:bhatxt});
+  msgCards.push({id:'mGay',title:(bcRna.cleanerName||'Gayani')+' \u2014 R&A + Jassem',phone:bcRna.cleanerPhone||'96565591476',text:gaytxt});
 
   // Biswa — Fatema
   var bcFat=bCfg('fat');
@@ -3167,17 +3151,12 @@ try{
   // Tower 62
   var t62booked=numSort(b62.order.filter(function(a){return b62.apts[a]&&b62.apts[a].status==='booked';}));
   if(t62booked.length){grpTxt+='*Alan - Tower 62*\n';t62booked.forEach(function(a){grpTxt+='62-'+a+' - '+b62.apts[a].emoji+(b62.apts[a].guest?' '+b62.apts[a].guest:'')+'\n';});grpTxt+='\n';}
-  // R&A — sort numerically (Gayani)
-  if(brna.list.length){
+  // R&A + Jassem — sort numerically
+  if(brna.list.length||bjas.list.length){
     var rnaSorted=brna.list.slice().sort(function(a,b){return parseInt(a.label)-parseInt(b.label);});
-    grpTxt+='*Gayani - R&A*\n';
-    rnaSorted.forEach(function(e){grpTxt+=e.label+' - '+e.emoji+(e.guest?' '+e.guest:'')+'\n';});
-    grpTxt+='\n';
-  }
-  // Jassem — sort numerically (Bharathi)
-  if(bjas.list.length){
     var jasSorted=bjas.list.slice().sort(function(a,b){return parseInt(a.label)-parseInt(b.label);});
-    grpTxt+='*Bharathi - Jassem*\n';
+    grpTxt+='*Gayani - R&A + Jassem*\n';
+    rnaSorted.forEach(function(e){grpTxt+=e.label+' - '+e.emoji+(e.guest?' '+e.guest:'')+'\n';});
     jasSorted.forEach(function(e){grpTxt+=e.label+' - '+e.emoji+(e.guest?' '+e.guest:'')+'\n';});
     grpTxt+='\n';
   }
@@ -4726,6 +4705,7 @@ function renderBookings(){
             {key:'jas27',label:'Jassem 27'},{key:'jas28',label:'Jassem 28'}
           ]},
           {sec:'Fatema Apartments', apts:[
+            {key:'fat7a',label:'7A'},{key:'fat7b',label:'7B'},{key:'fat9a',label:'9A'},
             {key:'fat34a',label:'34A'},{key:'fat34b',label:'34B'},
             {key:'fat35a',label:'35A'},{key:'fat35b',label:'35B'},
             {key:'fat36a',label:'36A'},{key:'fat36b',label:'36B'}
@@ -5261,16 +5241,8 @@ function sendWA(id,num){var el=document.getElementById(id);var t=el?el.textConte
 function sendWAText(txt,num){window.open('https://wa.me/'+num+'?text='+encodeURIComponent(txt),'_blank');}
 function sendWAStored(id){
   var store=window._msgStore&&window._msgStore[id];
-  var phone='', text='';
-  if(store){ phone=store.phone||''; text=store.text||''; }
-  // Fallback: read directly from the card if the store is missing/empty
-  if(!text){ var el=document.getElementById(id); if(el) text=el.textContent||''; }
-  phone=(phone||'').replace(/\D/g,'');
-  var url='https://wa.me/'+phone+'?text='+encodeURIComponent(text);
-  // iOS Safari often blocks window.open for blank targets after async work,
-  // so navigate the current tab — this reliably opens WhatsApp from a tap.
-  var w=window.open(url,'_blank');
-  if(!w){ window.location.href=url; }
+  if(!store||!store.phone) return;
+  window.open('https://wa.me/'+store.phone+'?text='+encodeURIComponent(store.text),'_blank');
 }
 
 // =========================================================
@@ -5475,7 +5447,7 @@ function loadWeather(){
     var de=document.getElementById('wx-desc');if(de)de.textContent='Weather unavailable';
   });
 }
-loadWeather();
+/* loadWeather(); weather widget removed */
 
 // ── CHECK-IN REMINDER BANNER ──────────────────────────────────────────────
 function renderCheckinBanner(){
@@ -5824,8 +5796,7 @@ function getCollectorOptions(apt){
   var a=(apt||'').toLowerCase();
   if(a.indexOf('60-')!==-1||a.indexOf('62-')!==-1) return ['Vipin','Alan'];
   if(a.indexOf('fat')!==-1) return ['Biswa'];
-  if(a.indexOf('jas')!==-1) return ['Bharathi','Ahmed'];
-  if(a.indexOf('rna')!==-1) return ['Gayani','Ahmed'];
+  if(a.indexOf('rna')!==-1||a.indexOf('jas')!==-1) return ['Gayani','Ahmed'];
   if(a.indexOf('sel')!==-1) return ['Samyuktha','Kanthi','Ahmed'];
   // Check custom buildings
   try{
@@ -5837,7 +5808,7 @@ function getCollectorOptions(apt){
       if(opts.length)return opts;
     }
   }catch(e){}
-  var base=['Vipin','Alan','Gayani','Bharathi','Biswa','Kanthi','Samyuktha','Ahmed'];
+  var base=['Vipin','Alan','Gayani','Biswa','Kanthi','Samyuktha','Ahmed'];
   getCustomBldgCollectors().forEach(function(c){if(base.indexOf(c.name)<0)base.push(c.name);});
   return base;
 }
@@ -5876,7 +5847,7 @@ function setCashFilter(f,btn){
 function renderCashFilterBar(){
   var bar=document.getElementById('cash-filter-bar');
   if(!bar)return;
-  var base=['all','Vipin','Alan','Gayani','Bharathi','Biswa','Kanthi','Samyuktha','Ahmed'];
+  var base=['all','Vipin','Alan','Gayani','Biswa','Kanthi','Samyuktha','Ahmed'];
   var custom=getCustomBldgCollectors().map(function(c){return c.name;});
   var all=base.concat(custom.filter(function(n){return base.indexOf(n)<0;}));
   bar.innerHTML=all.map(function(f,i){
@@ -7658,7 +7629,7 @@ var DEFAULT_BUILDINGS = [
   {key:'t62', label:'Tower 62',         isTower:true,  prefix:'62-', cleanerName:'Alan',       cleanerPhone:'96594116095', supName:'Vipin',      supPhone:'96597414872'},
   {key:'sel', label:'Selena Apartments',isTower:false, prefix:'Sel ',cleanerName:'Kanthi',     cleanerPhone:'96597936588', supName:'Samyuktha',  supPhone:'96551765790'},
   {key:'rna', label:'R&A Apartments',   isTower:false, prefix:'RNA ',cleanerName:'Gayani',     cleanerPhone:'96565591476', supName:'',           supPhone:''},
-  {key:'jas', label:'Jassem Apartments',isTower:false, prefix:'Jas ',cleanerName:'Bharathi',   cleanerPhone:'96550977061', supName:'',           supPhone:''},
+  {key:'jas', label:'Jassem Apartments',isTower:false, prefix:'Jas ',cleanerName:'Gayani',     cleanerPhone:'96565591476', supName:'',           supPhone:''},
   {key:'fat', label:'Fatema Apartments',isTower:false, prefix:'Fat ',cleanerName:'Biswa',      cleanerPhone:'96555127880', supName:'',           supPhone:''}
 ];
 
@@ -8079,26 +8050,20 @@ try{
   msgCards.push({id:'mVip',title:(vipName||'Vipin')+' \u2014 Both Towers (Supervisor)',phone:vipPhone,text:viptxt});
 
 
-  // Gayani — R&A  /  Bharathi — Jassem
+  // Gayani — R&A + Jassem (merged)
   var bcRna=bCfg('rna'); var bcJas=bCfg('jas');
   var brna=BUILDINGS['rna']||{list:[],order:[]};
   var bjas=BUILDINGS['jas']||{list:[],order:[]};
   var gaytxt='';
-  var rnaMp={};brna.list.forEach(function(e){rnaMp[e.label]=e;});
-  var jasMp={};bjas.list.forEach(function(e){jasMp[e.label]=e;});
-  if(brna.list.length){
+  if(brna.list.length||bjas.list.length){
+    var rnaMp={};brna.list.forEach(function(e){rnaMp[e.label]=e;});
+    var jasMp={};bjas.list.forEach(function(e){jasMp[e.label]=e;});
     gaytxt=(bcRna.label||'R&A Apartments')+' ( '+cd+' )\nToday\'s Schedule\n\n';
     gaytxt+=numSort(brna.order).map(function(a){return a+' - '+(rnaMp[a]?R:X);}).join('\n');
+    gaytxt+='\n\n'+(bcJas.label||'Jassem Apartments')+' ( '+cd+' )\nToday\'s Schedule\n\n';
+    gaytxt+=numSort(bjas.order).map(function(a){return a+' - '+(jasMp[a]?R:X);}).join('\n');
   } else { gaytxt='No cleans today \u2705'; }
-  msgCards.push({id:'mGay',title:(bcRna.cleanerName||'Gayani')+' \u2014 R&A',phone:bcRna.cleanerPhone||'96565591476',text:gaytxt});
-
-  // Bharathi \u2014 Jassem
-  var bhatxt='';
-  if(bjas.list.length){
-    bhatxt=(bcJas.label||'Jassem Apartments')+' ( '+cd+' )\nToday\'s Schedule\n\n';
-    bhatxt+=numSort(bjas.order).map(function(a){return a+' - '+(jasMp[a]?R:X);}).join('\n');
-  } else { bhatxt='No cleans today \u2705'; }
-  msgCards.push({id:'mBha',title:(bcJas.cleanerName||'Bharathi')+' \u2014 Jassem',phone:bcJas.cleanerPhone||'96550977061',text:bhatxt});
+  msgCards.push({id:'mGay',title:(bcRna.cleanerName||'Gayani')+' \u2014 R&A + Jassem',phone:bcRna.cleanerPhone||'96565591476',text:gaytxt});
 
   // Biswa — Fatema
   var bcFat=bCfg('fat');
@@ -8172,17 +8137,12 @@ try{
   // Tower 62
   var t62booked=numSort(b62.order.filter(function(a){return b62.apts[a]&&b62.apts[a].status==='booked';}));
   if(t62booked.length){grpTxt+='*Alan - Tower 62*\n';t62booked.forEach(function(a){grpTxt+='62-'+a+' - '+b62.apts[a].emoji+(b62.apts[a].guest?' '+b62.apts[a].guest:'')+'\n';});grpTxt+='\n';}
-  // R&A — sort numerically (Gayani)
-  if(brna.list.length){
+  // R&A + Jassem — sort numerically
+  if(brna.list.length||bjas.list.length){
     var rnaSorted=brna.list.slice().sort(function(a,b){return parseInt(a.label)-parseInt(b.label);});
-    grpTxt+='*Gayani - R&A*\n';
-    rnaSorted.forEach(function(e){grpTxt+=e.label+' - '+e.emoji+(e.guest?' '+e.guest:'')+'\n';});
-    grpTxt+='\n';
-  }
-  // Jassem — sort numerically (Bharathi)
-  if(bjas.list.length){
     var jasSorted=bjas.list.slice().sort(function(a,b){return parseInt(a.label)-parseInt(b.label);});
-    grpTxt+='*Bharathi - Jassem*\n';
+    grpTxt+='*Gayani - R&A + Jassem*\n';
+    rnaSorted.forEach(function(e){grpTxt+=e.label+' - '+e.emoji+(e.guest?' '+e.guest:'')+'\n';});
     jasSorted.forEach(function(e){grpTxt+=e.label+' - '+e.emoji+(e.guest?' '+e.guest:'')+'\n';});
     grpTxt+='\n';
   }
@@ -9496,6 +9456,7 @@ function renderBookings(){
             {key:'jas27',label:'Jassem 27'},{key:'jas28',label:'Jassem 28'}
           ]},
           {sec:'Fatema Apartments', apts:[
+            {key:'fat7a',label:'7A'},{key:'fat7b',label:'7B'},{key:'fat9a',label:'9A'},
             {key:'fat34a',label:'34A'},{key:'fat34b',label:'34B'},
             {key:'fat35a',label:'35A'},{key:'fat35b',label:'35B'},
             {key:'fat36a',label:'36A'},{key:'fat36b',label:'36B'}
@@ -9870,16 +9831,8 @@ function sendWA(id,num){var el=document.getElementById(id);var t=el?el.textConte
 function sendWAText(txt,num){window.open('https://wa.me/'+num+'?text='+encodeURIComponent(txt),'_blank');}
 function sendWAStored(id){
   var store=window._msgStore&&window._msgStore[id];
-  var phone='', text='';
-  if(store){ phone=store.phone||''; text=store.text||''; }
-  // Fallback: read directly from the card if the store is missing/empty
-  if(!text){ var el=document.getElementById(id); if(el) text=el.textContent||''; }
-  phone=(phone||'').replace(/\D/g,'');
-  var url='https://wa.me/'+phone+'?text='+encodeURIComponent(text);
-  // iOS Safari often blocks window.open for blank targets after async work,
-  // so navigate the current tab — this reliably opens WhatsApp from a tap.
-  var w=window.open(url,'_blank');
-  if(!w){ window.location.href=url; }
+  if(!store||!store.phone) return;
+  window.open('https://wa.me/'+store.phone+'?text='+encodeURIComponent(store.text),'_blank');
 }
 
 // =========================================================
@@ -10084,7 +10037,7 @@ function loadWeather(){
     var de=document.getElementById('wx-desc');if(de)de.textContent='Weather unavailable';
   });
 }
-loadWeather();
+/* loadWeather(); weather widget removed */
 
 // ── CHECK-IN REMINDER BANNER ──────────────────────────────────────────────
 function renderCheckinBanner(){
@@ -10277,8 +10230,7 @@ function getCollectorOptions(apt){
   var a=(apt||'').toLowerCase();
   if(a.indexOf('60-')!==-1||a.indexOf('62-')!==-1) return ['Vipin','Alan'];
   if(a.indexOf('fat')!==-1) return ['Biswa'];
-  if(a.indexOf('jas')!==-1) return ['Bharathi','Ahmed'];
-  if(a.indexOf('rna')!==-1) return ['Gayani','Ahmed'];
+  if(a.indexOf('rna')!==-1||a.indexOf('jas')!==-1) return ['Gayani','Ahmed'];
   if(a.indexOf('sel')!==-1) return ['Samyuktha','Kanthi','Ahmed'];
   // Check custom buildings
   try{
@@ -10290,7 +10242,7 @@ function getCollectorOptions(apt){
       if(opts.length)return opts;
     }
   }catch(e){}
-  var base=['Vipin','Alan','Gayani','Bharathi','Biswa','Kanthi','Samyuktha','Ahmed'];
+  var base=['Vipin','Alan','Gayani','Biswa','Kanthi','Samyuktha','Ahmed'];
   getCustomBldgCollectors().forEach(function(c){if(base.indexOf(c.name)<0)base.push(c.name);});
   return base;
 }
@@ -10329,7 +10281,7 @@ function setCashFilter(f,btn){
 function renderCashFilterBar(){
   var bar=document.getElementById('cash-filter-bar');
   if(!bar)return;
-  var base=['all','Vipin','Alan','Gayani','Bharathi','Biswa','Kanthi','Samyuktha','Ahmed'];
+  var base=['all','Vipin','Alan','Gayani','Biswa','Kanthi','Samyuktha','Ahmed'];
   var custom=getCustomBldgCollectors().map(function(c){return c.name;});
   var all=base.concat(custom.filter(function(n){return base.indexOf(n)<0;}));
   bar.innerHTML=all.map(function(f,i){
@@ -11027,7 +10979,7 @@ function _kd(v){var n=parseFloat(v)||0;var r=Math.round(n*10)/10;return r===0?'0
 
 // ── APT PICKER ────────────────────────────────────────────────────────────
 var _aptPickerOpen=false,_activeBldgKey=null;
-var KNOWN_APTS_PICKER={'t60':['301','302','1601','1602'],'t62':['1401','1402','1601','1602','1701','1702'],'sel':['13','19','22','25','27'],'rna':['13','47','48'],'jas':['27','28'],'fat':['34A','34B','35A','35B','36A','36B']};
+var KNOWN_APTS_PICKER={'t60':['301','302','1601','1602'],'t62':['1401','1402','1601','1602','1701','1702'],'sel':['13','19','22','25','27'],'rna':['13','47','48'],'jas':['27','28'],'fat':['7A','7B','9A','34A','34B','35A','35B','36A','36B']};
 var BLDG_LABELS={'t60':'Tower 60','t62':'Tower 62','sel':'Seleena','rna':'R&A','jas':'Jassem','fat':'Fatema'};
 function buildAptLabel(k,a){if(k==='t60')return '60-'+a;if(k==='t62')return '62-'+a;if(k==='sel')return 'Sel '+a;if(k==='rna')return 'RNA '+a;if(k==='jas')return 'Jassem '+a;if(k==='fat')return 'Fat '+a;var _cb=getBldg(k);if(_cb)return (_cb.label||k)+' '+a;return a;}
 function renderAptPicker(){
@@ -11058,7 +11010,7 @@ function renderAptPicker(){
     var lbl=document.createElement('div');lbl.style.cssText='font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gd);margin-bottom:12px';lbl.textContent=BLDG_LABELS[_activeBldgKey];sec.appendChild(lbl);
     var grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:repeat(auto-fill,minmax(68px,1fr));gap:8px';
     var cur=(document.getElementById('bk-apt')||{}).value||'';
-    var defaults={'t60':['301','302','1601','1602'],'t62':['1401','1402','1601','1602','1701','1702'],'sel':['13','19','22','25','27'],'rna':['13','47','48'],'jas':['27','28'],'fat':['34A','34B','35A','35B','36A','36B']};
+    var defaults={'t60':['301','302','1601','1602'],'t62':['1401','1402','1601','1602','1701','1702'],'sel':['13','19','22','25','27'],'rna':['13','47','48'],'jas':['27','28'],'fat':['7A','7B','9A','34A','34B','35A','35B','36A','36B']};
     apts.forEach(function(apt,i){
       var label=buildAptLabel(_activeBldgKey,apt);
       var isDefault=(defaults[_activeBldgKey]||[]).indexOf(apt)!==-1;
@@ -13148,7 +13100,7 @@ setTimeout(hbsSyncPastCancellations,800);
 /* ===== Single source of truth for total apartment count ===== */
 function hbsTotalApts(){
   try{
-    var baseCounts={t60:4,t62:8,sel:5,rna:3,jas:2,fat:6}; /* counts of the built-in roster */
+    var baseCounts={t60:4,t62:8,sel:5,rna:3,jas:2,fat:9}; /* counts of the built-in roster */
     var total=0;
     if(typeof BUILDINGS_CFG!=='undefined'&&Array.isArray(BUILDINGS_CFG)&&BUILDINGS_CFG.length){
       BUILDINGS_CFG.forEach(function(b){ if(baseCounts[b.key]) total+=baseCounts[b.key]; });
@@ -13161,6 +13113,25 @@ function hbsTotalApts(){
   }catch(e){ return 28; }
 }
 
+
+
+/* ===== Built-in Fatema 7A/7B/9A check-in messages (added defaults) ===== */
+(function(){
+  try{
+    var defMsgs={
+      'fat 7a':{checkin:"🏡 Welcome to Fatema Towers! Your stay is all set. Here are your check-in details:\n\n📍 Address Fatema Towers Behind AUK University Salmiya, Block 2 Yusuf Bin Hamoud Street, Avenue 6 Building 5, Plot 144 Floor 3 Flat 7A\n\n———\n\n🔗 Google Maps https://maps.app.goo.gl/uchmVCVF4655VXXX8?g_st=ipc\n\n———\n\n🔑 Smart Lock Code 171701#\n\n———\n\n👥 Just a heads-up – our building policy allows only 2 guests total.\n\n🚬 Smoking? Best to avoid if possible! But you can smoke in the Living room near the balcony window open!\n\n💬 Need Anything? I’m just a text away!\n\n⸻\n\n💖 Wishing you a cozy & pleasant stay! 😊\n\nSujo"},
+      'fat 7b':{checkin:"🏡 Welcome to Fatema Towers! Your stay is all set. Here are your check-in details:\n\n📍 Address Fatema Towers Behind AUK University Salmiya, Block 2 Yusuf Bin Hamoud Street, Avenue 6 Building 5, Plot 144 Floor 3 Flat 7B\n\n———\n\n🔗 Google Maps https://maps.app.goo.gl/uchmVCVF4655VXXX8?g_st=ipc\n\n———\n\n🔑 Smart Lock Code 171702#\n\n———\n\n👥 Just a heads-up – our building policy allows only 2 guests total.\n\n🚬 Smoking? Best to avoid if possible! But you can smoke in the Living room near the balcony window open!\n\n💬 Need Anything? I’m just a text away!\n\n⸻\n\n💖 Wishing you a cozy & pleasant stay! 😊\n\nSujo"},
+      'fat 9a':{checkin:"🏡 Welcome to Fatema Towers! Your stay is all set. Here are your check-in details:\n\n📍 Address Fatema Towers Behind AUK University Salmiya, Block 2 Yusuf Bin Hamoud Street, Avenue 6 Building 5, Plot 144 Floor 3 Flat 9A\n\n———\n\n🔗 Google Maps https://maps.app.goo.gl/uchmVCVF4655VXXX8?g_st=ipc\n\n———\n\n🔑 Smart Lock Code 191901#\n\n———\n\n👥 Just a heads-up – our building policy allows only 2 guests total.\n\n🚬 Smoking? Best to avoid if possible! But you can smoke in the Living room near the balcony window open!\n\n💬 Need Anything? I’m just a text away!\n\n⸻\n\n💖 Wishing you a cozy & pleasant stay! 😊\n\nSujo"}
+    };
+    if(typeof APT_MSGS==='undefined'){window.APT_MSGS={};}
+    var changed=false;
+    Object.keys(defMsgs).forEach(function(k){
+      if(!APT_MSGS[k]){APT_MSGS[k]={};}
+      if(!APT_MSGS[k].checkin){APT_MSGS[k].checkin=defMsgs[k].checkin;changed=true;}
+    });
+    if(changed&&typeof saveAptMsgs==='function'){saveAptMsgs();}
+  }catch(e){}
+})();
 
 </script>
 </body>
