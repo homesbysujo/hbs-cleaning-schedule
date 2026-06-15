@@ -1408,6 +1408,7 @@ button{-webkit-user-select:none;user-select:none}
     <button class="cash-filter" onclick="setCashFilter('Vipin',this)" data-filter="Vipin">Vipin</button>
     <button class="cash-filter" onclick="setCashFilter('Alan',this)" data-filter="Alan">Alan</button>
     <button class="cash-filter" onclick="setCashFilter('Gayani',this)" data-filter="Gayani">Gayani</button>
+    <button class="cash-filter" onclick="setCashFilter('Bharathi',this)" data-filter="Bharathi">Bharathi</button>
     <button class="cash-filter" onclick="setCashFilter('Biswa',this)" data-filter="Biswa">Biswa</button>
     <button class="cash-filter" onclick="setCashFilter('Kanthi',this)" data-filter="Kanthi">Kanthi</button>
     <button class="cash-filter" onclick="setCashFilter('Samyuktha',this)" data-filter="Samyuktha">Samyuktha</button>
@@ -1456,7 +1457,8 @@ button{-webkit-user-select:none;user-select:none}
       <option value="">-- Select collector --</option>
       <option value="Vipin">Vipin — Tower 60/62 Supervisor</option>
       <option value="Alan">Alan — Tower 60 &amp; 62</option>
-      <option value="Gayani">Gayani — R&amp;A + Jassem</option>
+      <option value="Gayani">Gayani — R&amp;A</option>
+      <option value="Bharathi">Bharathi — Jassem</option>
       <option value="Biswa">Biswa — Fatema</option>
       <option value="Kanthi">Kanthi — Selena</option>
       <option value="Samyuktha">Samyuktha — Selena Supervisor</option>
@@ -2306,7 +2308,7 @@ var DEFAULT_BUILDINGS = [
   {key:'t62', label:'Tower 62',         isTower:true,  prefix:'62-', cleanerName:'Alan',       cleanerPhone:'96594116095', supName:'Vipin',      supPhone:'96597414872'},
   {key:'sel', label:'Selena Apartments',isTower:false, prefix:'Sel ',cleanerName:'Kanthi',     cleanerPhone:'96597936588', supName:'Samyuktha',  supPhone:'96551765790'},
   {key:'rna', label:'R&A Apartments',   isTower:false, prefix:'RNA ',cleanerName:'Gayani',     cleanerPhone:'96565591476', supName:'',           supPhone:''},
-  {key:'jas', label:'Jassem Apartments',isTower:false, prefix:'Jas ',cleanerName:'Gayani',     cleanerPhone:'96565591476', supName:'',           supPhone:''},
+  {key:'jas', label:'Jassem Apartments',isTower:false, prefix:'Jas ',cleanerName:'Bharathi',   cleanerPhone:'9655097706',  supName:'',           supPhone:''},
   {key:'fat', label:'Fatema Apartments',isTower:false, prefix:'Fat ',cleanerName:'Biswa',      cleanerPhone:'96555127880', supName:'',           supPhone:''}
 ];
 
@@ -3064,20 +3066,26 @@ try{
   msgCards.push({id:'mVip',title:(vipName||'Vipin')+' \u2014 Both Towers (Supervisor)',phone:vipPhone,text:viptxt});
 
 
-  // Gayani — R&A + Jassem (merged)
+  // Gayani — R&A (own card)
   var bcRna=bCfg('rna'); var bcJas=bCfg('jas');
   var brna=BUILDINGS['rna']||{list:[],order:[]};
   var bjas=BUILDINGS['jas']||{list:[],order:[]};
+  var rnaMp={};brna.list.forEach(function(e){rnaMp[e.label]=e;});
+  var jasMp={};bjas.list.forEach(function(e){jasMp[e.label]=e;});
   var gaytxt='';
-  if(brna.list.length||bjas.list.length){
-    var rnaMp={};brna.list.forEach(function(e){rnaMp[e.label]=e;});
-    var jasMp={};bjas.list.forEach(function(e){jasMp[e.label]=e;});
+  if(brna.list.length){
     gaytxt=(bcRna.label||'R&A Apartments')+' ( '+cd+' )\nToday\'s Schedule\n\n';
     gaytxt+=numSort(brna.order).map(function(a){return a+' - '+(rnaMp[a]?R:X);}).join('\n');
-    gaytxt+='\n\n'+(bcJas.label||'Jassem Apartments')+' ( '+cd+' )\nToday\'s Schedule\n\n';
-    gaytxt+=numSort(bjas.order).map(function(a){return a+' - '+(jasMp[a]?R:X);}).join('\n');
   } else { gaytxt='No cleans today \u2705'; }
-  msgCards.push({id:'mGay',title:(bcRna.cleanerName||'Gayani')+' \u2014 R&A + Jassem',phone:bcRna.cleanerPhone||'96565591476',text:gaytxt});
+  msgCards.push({id:'mGay',title:(bcRna.cleanerName||'Gayani')+' \u2014 R&A Apartments',phone:bcRna.cleanerPhone||'96565591476',text:gaytxt});
+
+  // Bharathi — Jassem (own card)
+  var jastxt='';
+  if(bjas.list.length){
+    jastxt=(bcJas.label||'Jassem Apartments')+' ( '+cd+' )\nToday\'s Schedule\n\n';
+    jastxt+=numSort(bjas.order).map(function(a){return a+' - '+(jasMp[a]?R:X);}).join('\n');
+  } else { jastxt='No cleans today \u2705'; }
+  msgCards.push({id:'mJas',title:(bcJas.cleanerName||'Bharathi')+' \u2014 Jassem Apartments',phone:bcJas.cleanerPhone||'9655097706',text:jastxt});
 
   // Biswa — Fatema
   var bcFat=bCfg('fat');
@@ -3151,12 +3159,17 @@ try{
   // Tower 62
   var t62booked=numSort(b62.order.filter(function(a){return b62.apts[a]&&b62.apts[a].status==='booked';}));
   if(t62booked.length){grpTxt+='*Alan - Tower 62*\n';t62booked.forEach(function(a){grpTxt+='62-'+a+' - '+b62.apts[a].emoji+(b62.apts[a].guest?' '+b62.apts[a].guest:'')+'\n';});grpTxt+='\n';}
-  // R&A + Jassem — sort numerically
-  if(brna.list.length||bjas.list.length){
+  // R&A — sort numerically
+  if(brna.list.length){
     var rnaSorted=brna.list.slice().sort(function(a,b){return parseInt(a.label)-parseInt(b.label);});
-    var jasSorted=bjas.list.slice().sort(function(a,b){return parseInt(a.label)-parseInt(b.label);});
-    grpTxt+='*Gayani - R&A + Jassem*\n';
+    grpTxt+='*Gayani - R&A Apartments*\n';
     rnaSorted.forEach(function(e){grpTxt+=e.label+' - '+e.emoji+(e.guest?' '+e.guest:'')+'\n';});
+    grpTxt+='\n';
+  }
+  // Jassem — sort numerically
+  if(bjas.list.length){
+    var jasSorted=bjas.list.slice().sort(function(a,b){return parseInt(a.label)-parseInt(b.label);});
+    grpTxt+='*Bharathi - Jassem Apartments*\n';
     jasSorted.forEach(function(e){grpTxt+=e.label+' - '+e.emoji+(e.guest?' '+e.guest:'')+'\n';});
     grpTxt+='\n';
   }
@@ -5796,7 +5809,8 @@ function getCollectorOptions(apt){
   var a=(apt||'').toLowerCase();
   if(a.indexOf('60-')!==-1||a.indexOf('62-')!==-1) return ['Vipin','Alan'];
   if(a.indexOf('fat')!==-1) return ['Biswa'];
-  if(a.indexOf('rna')!==-1||a.indexOf('jas')!==-1) return ['Gayani','Ahmed'];
+  if(a.indexOf('jas')!==-1) return ['Bharathi','Gayani','Ahmed'];
+  if(a.indexOf('rna')!==-1) return ['Gayani','Ahmed'];
   if(a.indexOf('sel')!==-1) return ['Samyuktha','Kanthi','Ahmed'];
   // Check custom buildings
   try{
@@ -5808,7 +5822,7 @@ function getCollectorOptions(apt){
       if(opts.length)return opts;
     }
   }catch(e){}
-  var base=['Vipin','Alan','Gayani','Biswa','Kanthi','Samyuktha','Ahmed'];
+  var base=['Vipin','Alan','Gayani','Bharathi','Biswa','Kanthi','Samyuktha','Ahmed'];
   getCustomBldgCollectors().forEach(function(c){if(base.indexOf(c.name)<0)base.push(c.name);});
   return base;
 }
@@ -5847,7 +5861,7 @@ function setCashFilter(f,btn){
 function renderCashFilterBar(){
   var bar=document.getElementById('cash-filter-bar');
   if(!bar)return;
-  var base=['all','Vipin','Alan','Gayani','Biswa','Kanthi','Samyuktha','Ahmed'];
+  var base=['all','Vipin','Alan','Gayani','Bharathi','Biswa','Kanthi','Samyuktha','Ahmed'];
   var custom=getCustomBldgCollectors().map(function(c){return c.name;});
   var all=base.concat(custom.filter(function(n){return base.indexOf(n)<0;}));
   bar.innerHTML=all.map(function(f,i){
@@ -7629,7 +7643,7 @@ var DEFAULT_BUILDINGS = [
   {key:'t62', label:'Tower 62',         isTower:true,  prefix:'62-', cleanerName:'Alan',       cleanerPhone:'96594116095', supName:'Vipin',      supPhone:'96597414872'},
   {key:'sel', label:'Selena Apartments',isTower:false, prefix:'Sel ',cleanerName:'Kanthi',     cleanerPhone:'96597936588', supName:'Samyuktha',  supPhone:'96551765790'},
   {key:'rna', label:'R&A Apartments',   isTower:false, prefix:'RNA ',cleanerName:'Gayani',     cleanerPhone:'96565591476', supName:'',           supPhone:''},
-  {key:'jas', label:'Jassem Apartments',isTower:false, prefix:'Jas ',cleanerName:'Gayani',     cleanerPhone:'96565591476', supName:'',           supPhone:''},
+  {key:'jas', label:'Jassem Apartments',isTower:false, prefix:'Jas ',cleanerName:'Bharathi',   cleanerPhone:'9655097706',  supName:'',           supPhone:''},
   {key:'fat', label:'Fatema Apartments',isTower:false, prefix:'Fat ',cleanerName:'Biswa',      cleanerPhone:'96555127880', supName:'',           supPhone:''}
 ];
 
@@ -8050,20 +8064,26 @@ try{
   msgCards.push({id:'mVip',title:(vipName||'Vipin')+' \u2014 Both Towers (Supervisor)',phone:vipPhone,text:viptxt});
 
 
-  // Gayani — R&A + Jassem (merged)
+  // Gayani — R&A (own card)
   var bcRna=bCfg('rna'); var bcJas=bCfg('jas');
   var brna=BUILDINGS['rna']||{list:[],order:[]};
   var bjas=BUILDINGS['jas']||{list:[],order:[]};
+  var rnaMp={};brna.list.forEach(function(e){rnaMp[e.label]=e;});
+  var jasMp={};bjas.list.forEach(function(e){jasMp[e.label]=e;});
   var gaytxt='';
-  if(brna.list.length||bjas.list.length){
-    var rnaMp={};brna.list.forEach(function(e){rnaMp[e.label]=e;});
-    var jasMp={};bjas.list.forEach(function(e){jasMp[e.label]=e;});
+  if(brna.list.length){
     gaytxt=(bcRna.label||'R&A Apartments')+' ( '+cd+' )\nToday\'s Schedule\n\n';
     gaytxt+=numSort(brna.order).map(function(a){return a+' - '+(rnaMp[a]?R:X);}).join('\n');
-    gaytxt+='\n\n'+(bcJas.label||'Jassem Apartments')+' ( '+cd+' )\nToday\'s Schedule\n\n';
-    gaytxt+=numSort(bjas.order).map(function(a){return a+' - '+(jasMp[a]?R:X);}).join('\n');
   } else { gaytxt='No cleans today \u2705'; }
-  msgCards.push({id:'mGay',title:(bcRna.cleanerName||'Gayani')+' \u2014 R&A + Jassem',phone:bcRna.cleanerPhone||'96565591476',text:gaytxt});
+  msgCards.push({id:'mGay',title:(bcRna.cleanerName||'Gayani')+' \u2014 R&A Apartments',phone:bcRna.cleanerPhone||'96565591476',text:gaytxt});
+
+  // Bharathi — Jassem (own card)
+  var jastxt='';
+  if(bjas.list.length){
+    jastxt=(bcJas.label||'Jassem Apartments')+' ( '+cd+' )\nToday\'s Schedule\n\n';
+    jastxt+=numSort(bjas.order).map(function(a){return a+' - '+(jasMp[a]?R:X);}).join('\n');
+  } else { jastxt='No cleans today \u2705'; }
+  msgCards.push({id:'mJas',title:(bcJas.cleanerName||'Bharathi')+' \u2014 Jassem Apartments',phone:bcJas.cleanerPhone||'9655097706',text:jastxt});
 
   // Biswa — Fatema
   var bcFat=bCfg('fat');
@@ -8137,12 +8157,17 @@ try{
   // Tower 62
   var t62booked=numSort(b62.order.filter(function(a){return b62.apts[a]&&b62.apts[a].status==='booked';}));
   if(t62booked.length){grpTxt+='*Alan - Tower 62*\n';t62booked.forEach(function(a){grpTxt+='62-'+a+' - '+b62.apts[a].emoji+(b62.apts[a].guest?' '+b62.apts[a].guest:'')+'\n';});grpTxt+='\n';}
-  // R&A + Jassem — sort numerically
-  if(brna.list.length||bjas.list.length){
+  // R&A — sort numerically
+  if(brna.list.length){
     var rnaSorted=brna.list.slice().sort(function(a,b){return parseInt(a.label)-parseInt(b.label);});
-    var jasSorted=bjas.list.slice().sort(function(a,b){return parseInt(a.label)-parseInt(b.label);});
-    grpTxt+='*Gayani - R&A + Jassem*\n';
+    grpTxt+='*Gayani - R&A Apartments*\n';
     rnaSorted.forEach(function(e){grpTxt+=e.label+' - '+e.emoji+(e.guest?' '+e.guest:'')+'\n';});
+    grpTxt+='\n';
+  }
+  // Jassem — sort numerically
+  if(bjas.list.length){
+    var jasSorted=bjas.list.slice().sort(function(a,b){return parseInt(a.label)-parseInt(b.label);});
+    grpTxt+='*Bharathi - Jassem Apartments*\n';
     jasSorted.forEach(function(e){grpTxt+=e.label+' - '+e.emoji+(e.guest?' '+e.guest:'')+'\n';});
     grpTxt+='\n';
   }
@@ -10230,7 +10255,8 @@ function getCollectorOptions(apt){
   var a=(apt||'').toLowerCase();
   if(a.indexOf('60-')!==-1||a.indexOf('62-')!==-1) return ['Vipin','Alan'];
   if(a.indexOf('fat')!==-1) return ['Biswa'];
-  if(a.indexOf('rna')!==-1||a.indexOf('jas')!==-1) return ['Gayani','Ahmed'];
+  if(a.indexOf('jas')!==-1) return ['Bharathi','Gayani','Ahmed'];
+  if(a.indexOf('rna')!==-1) return ['Gayani','Ahmed'];
   if(a.indexOf('sel')!==-1) return ['Samyuktha','Kanthi','Ahmed'];
   // Check custom buildings
   try{
@@ -10242,7 +10268,7 @@ function getCollectorOptions(apt){
       if(opts.length)return opts;
     }
   }catch(e){}
-  var base=['Vipin','Alan','Gayani','Biswa','Kanthi','Samyuktha','Ahmed'];
+  var base=['Vipin','Alan','Gayani','Bharathi','Biswa','Kanthi','Samyuktha','Ahmed'];
   getCustomBldgCollectors().forEach(function(c){if(base.indexOf(c.name)<0)base.push(c.name);});
   return base;
 }
@@ -10281,7 +10307,7 @@ function setCashFilter(f,btn){
 function renderCashFilterBar(){
   var bar=document.getElementById('cash-filter-bar');
   if(!bar)return;
-  var base=['all','Vipin','Alan','Gayani','Biswa','Kanthi','Samyuktha','Ahmed'];
+  var base=['all','Vipin','Alan','Gayani','Bharathi','Biswa','Kanthi','Samyuktha','Ahmed'];
   var custom=getCustomBldgCollectors().map(function(c){return c.name;});
   var all=base.concat(custom.filter(function(n){return base.indexOf(n)<0;}));
   bar.innerHTML=all.map(function(f,i){
