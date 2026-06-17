@@ -2215,8 +2215,6 @@ function updateTotalsWithExtras(){
 }
 
 function openEdit(){
-  requireAdminPassword(function(){
-
   loadExtraCharges();
   document.getElementById('eT60').value = S.t60;
   document.getElementById('eT62').value = S.t62;
@@ -2224,8 +2222,6 @@ function openEdit(){
   ecBldgChange();
   renderExtraChargesList();
   document.getElementById('editModal').classList.add('open');
-
-  }); // end requireAdminPassword
 }
 function closeEdit(){ document.getElementById('editModal').classList.remove('open'); }
 function saveEdit(){
@@ -7550,8 +7546,6 @@ function updateTotalsWithExtras(){
 }
 
 function openEdit(){
-  requireAdminPassword(function(){
-
   loadExtraCharges();
   document.getElementById('eT60').value = S.t60;
   document.getElementById('eT62').value = S.t62;
@@ -7559,8 +7553,6 @@ function openEdit(){
   ecBldgChange();
   renderExtraChargesList();
   document.getElementById('editModal').classList.add('open');
-
-  }); // end requireAdminPassword
 }
 function closeEdit(){ document.getElementById('editModal').classList.remove('open'); }
 function saveEdit(){
