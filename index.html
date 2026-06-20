@@ -4828,10 +4828,19 @@ function renderBookings(){
               var _isPartial = matched.status==='partial' || (matched.paidAmount>0 && matched.pendingAmount>0);
               var emoji = matched.type==='airbnb' ? '\uD83C\uDD70\uFE0F' : '\uD83D\uDCB0';
               var nightsNum = matched.nights&&matched.nights>1?matched.nights:1;
-              var totalAmt = parseFloat(_isPartial ? matched.paidAmount : matched.amount)||0;
-              var perNight = nightsNum>1?Math.round((totalAmt/nightsNum)*10)/10:totalAmt;
-              /* For a fully-pending booking, don't show a paid kd amount (it's all pending) */
-              var kdStr = (!_isPending && perNight)?' / '+perNight+'kd':'';
+              var _paidPortion = parseFloat(_isPartial ? matched.paidAmount : matched.amount)||0;
+              var perNight = nightsNum>1?Math.round((_paidPortion/nightsNum)*10)/10:_paidPortion;
+              var kdStr;
+              if(_isPending){
+                /* fully pending: no paid amount shown, only the pending suffix */
+                kdStr='';
+              } else if(_isPartial){
+                /* partial: show the PAID amount as 'KD X' (always, regardless of nights) */
+                kdStr=' / KD '+_paidPortion;
+              } else {
+                /* fully paid: per-night kd */
+                kdStr=perNight?' / '+perNight+'kd':'';
+              }
               var _pendAmt = _isPending ? (parseFloat(matched.pendingAmount)||parseFloat(matched.amount)||0) : (parseFloat(matched.pendingAmount)||0);
               var pendingSuffix = _pendAmt>0 ? ' / \u203C\uFE0F '+_pendAmt+' KD' : '';
               var nightsSuffix = nightsNum>1?' / '+nightsNum+' nights \uD83D\uDD01':'';
@@ -9633,10 +9642,19 @@ function renderBookings(){
               var _isPartial = matched.status==='partial' || (matched.paidAmount>0 && matched.pendingAmount>0);
               var emoji = matched.type==='airbnb' ? '\uD83C\uDD70\uFE0F' : '\uD83D\uDCB0';
               var nightsNum = matched.nights&&matched.nights>1?matched.nights:1;
-              var totalAmt = parseFloat(_isPartial ? matched.paidAmount : matched.amount)||0;
-              var perNight = nightsNum>1?Math.round((totalAmt/nightsNum)*10)/10:totalAmt;
-              /* For a fully-pending booking, don't show a paid kd amount (it's all pending) */
-              var kdStr = (!_isPending && perNight)?' / '+perNight+'kd':'';
+              var _paidPortion = parseFloat(_isPartial ? matched.paidAmount : matched.amount)||0;
+              var perNight = nightsNum>1?Math.round((_paidPortion/nightsNum)*10)/10:_paidPortion;
+              var kdStr;
+              if(_isPending){
+                /* fully pending: no paid amount shown, only the pending suffix */
+                kdStr='';
+              } else if(_isPartial){
+                /* partial: show the PAID amount as 'KD X' (always, regardless of nights) */
+                kdStr=' / KD '+_paidPortion;
+              } else {
+                /* fully paid: per-night kd */
+                kdStr=perNight?' / '+perNight+'kd':'';
+              }
               var _pendAmt = _isPending ? (parseFloat(matched.pendingAmount)||parseFloat(matched.amount)||0) : (parseFloat(matched.pendingAmount)||0);
               var pendingSuffix = _pendAmt>0 ? ' / \u203C\uFE0F '+_pendAmt+' KD' : '';
               var nightsSuffix = nightsNum>1?' / '+nightsNum+' nights \uD83D\uDD01':'';
