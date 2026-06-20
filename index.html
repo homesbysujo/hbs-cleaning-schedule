@@ -11385,8 +11385,8 @@ function _erBuildBldgPills(){
     try{loadBldgCfg();}catch(e){}
     if(typeof BUILDINGS_CFG!=='undefined'){
       BUILDINGS_CFG.forEach(function(b){
-        if(!bldgs.some(function(x){return x.k===b.buildingKey;}))
-          bldgs.push({k:b.buildingKey,l:b.label||b.buildingKey,icon:'🏘️'});
+        if(!bldgs.some(function(x){return x.k===b.key;}))
+          bldgs.push({k:b.key,l:b.label||b.key,icon:'🏘️'});
       });
     }
   }
