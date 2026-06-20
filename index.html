@@ -113,6 +113,18 @@ body.dark #tab-guidebook .gb-section-body{border-color:#3D2E1A!important}
 #bk-apt-trigger:active{transform:scale(.985)}
 #bk-apt-trigger{transition:border-color .2s,transform .12s,box-shadow .2s}
 #bk-apt-trigger:hover{box-shadow:0 3px 12px rgba(92,61,30,.1)}
+
+.mcard2{background:var(--wh);border:1.5px solid var(--gl);border-radius:18px;padding:18px 18px;margin-top:18px;box-shadow:0 2px 12px rgba(92,61,30,.05)}
+.mcard2-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
+.mcard2-title{font-family:'DM Serif Display',serif;font-size:17px;color:var(--br);line-height:1.1}
+.mcard2-sub{font-size:12px;color:var(--t3);margin-top:4px}
+.mcard2-controls{display:flex;gap:10px;align-items:stretch}
+.mcard2-pdf{display:flex;align-items:center;justify-content:center;gap:7px;background:var(--br);color:#fff;border:none;border-radius:12px;padding:0 20px;height:46px;font-size:14px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;flex-shrink:0;transition:background .15s,transform .12s}
+.mcard2-pdf:hover{background:var(--br2)}
+.mcard2-pdf:active{transform:scale(.96)}
+body.dark .mcard2{background:#2A1E0F;border-color:#3D2E1A}
+body.dark .mcard2-title{color:#D4AE5E}
+@media print{.mcard2{display:none!important}}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
@@ -927,6 +939,7 @@ button{-webkit-user-select:none;user-select:none}
   })();
   </script>
 
+  <div style="padding:10px 20px 0"><div id="bk-checkout-section" style="display:none"></div></div>
   <div style="padding:10px 20px 0"><div id="bk-upcoming-list" style="display:none;background:var(--wh);border:1.5px solid var(--gl);border-radius:18px;padding:20px 20px 8px"></div></div>
   <div style="padding:16px 20px 0"><input type="text" id="bk-search" oninput="bkSearch()" placeholder="Search guest, apartment or date..." style="width:100%;background:var(--cr);border:1.5px solid var(--gl);border-radius:12px;color:var(--t1);font-family:'DM Sans',sans-serif;font-size:13px;padding:11px 16px;outline:none;box-sizing:border-box"></div>
   <div id="bk-search-results" style="display:none;margin:8px 20px 0"></div>
@@ -1063,20 +1076,24 @@ button{-webkit-user-select:none;user-select:none}
     <button class="abtn red" onclick="clearAllData()" style="border-color:#c44;color:#c44;font-weight:700;flex:1">&#128465; Clear All Data</button>
   </div>
   <div class="info" id="infonote">&#10003; Data saved locally. Auto-reset on 1st of each month.</div>
-  <div class="mbar">
-    <div class="mbar-l">
-      <div class="mbar-title">Monthly Report <span class="mbadge" id="logcount">0</span></div>
-      <div class="mbar-sub" id="logsub">No cleanings logged this month yet</div>
+  <div class="mcard2">
+    <div class="mcard2-head">
+      <div>
+        <div class="mcard2-title">Monthly Report</div>
+        <div class="mcard2-sub" id="logsub">No Cleanings Logged This Month Yet</div>
+      </div>
+      <span class="mbadge" id="logcount" style="display:none">0</span>
     </div>
-    <div class="mbtns" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-      <div class="msel-wrap" style="position:relative;display:inline-flex;align-items:center">
-        <select id="reportMonthSel" onchange="renderLog()" style="background:var(--wh);border:1.5px solid var(--gl);border-radius:10px;color:var(--t1);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;padding:0 34px 0 14px;outline:none;cursor:pointer;height:44px;appearance:none;-webkit-appearance:none;-moz-appearance:none">
+    <div class="mcard2-controls">
+      <div class="msel-wrap" style="position:relative;display:flex;align-items:center;flex:1">
+        <svg style="position:absolute;left:13px;pointer-events:none;opacity:.45" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <select id="reportMonthSel" onchange="renderLog()" style="width:100%;background:var(--cr);border:1.5px solid var(--gl);border-radius:12px;color:var(--t1);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;padding:0 36px 0 38px;outline:none;cursor:pointer;height:46px;appearance:none;-webkit-appearance:none;-moz-appearance:none">
           <option value="">This Month</option>
         </select>
-        <svg style="position:absolute;right:12px;pointer-events:none;opacity:.5" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        <svg style="position:absolute;right:13px;pointer-events:none;opacity:.45" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
       </div>
-      <button class="mbtn mbtn-pdf" onclick="alanMonthlyPDF()" style="gap:6px;padding:8px 14px">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <button onclick="alanMonthlyPDF()" class="mcard2-pdf">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
         PDF
       </button>
     </div>
@@ -2116,10 +2133,11 @@ function renderLog(){
   }
   var selMk = sel&&sel.value ? sel.value : logKey();
   var e=LOG[selMk], cnt=e?e.entries.length:0;
-  document.getElementById('logcount').textContent = cnt;
+  var _lc=document.getElementById('logcount');
+  if(_lc){_lc.textContent=cnt;_lc.style.display=cnt>0?'inline-flex':'none';}
   document.getElementById('logsub').textContent = cnt===0
-    ? 'No cleanings logged this month yet'
-    : cnt+' cleaning'+(cnt===1?'':'s')+' \u00b7 T60: '+(e.t60Total||0)+' KD \u00b7 T62: '+(e.t62Total||0)+' KD';
+    ? 'No Cleanings Logged This Month Yet'
+    : cnt+' Cleaning'+(cnt===1?'':'s')+' \u00b7 T60: '+(e.t60Total||0)+' KD \u00b7 T62: '+(e.t62Total||0)+' KD';
 }
 
 // =========================================================
@@ -2999,15 +3017,40 @@ try{
   }
   var mk0=S.year+'-'+String(S.month+1).padStart(2,'0');
   if(!LOG[mk0]) LOG[mk0]={entries:[],t60Total:0,t62Total:0};
-  var alreadyDone=LOG[mk0].entries.some(function(e){return e.date===cd;});
-  if(!alreadyDone){
-    S.t60=parseFloat((S.t60+t60d).toFixed(1));
-    S.t62=parseFloat((S.t62+t62d).toFixed(1));
+  // If this date was already logged, REMOVE its old entries first so re-pasting
+  // an edited list re-computes the totals correctly (instead of being skipped).
+  var _priorForDate=LOG[mk0].entries.filter(function(e){return e.date===cd;});
+  if(_priorForDate.length){
+    var _prev60=_priorForDate.filter(function(e){return e.building==='Tower 60';}).reduce(function(s,e){return s+(parseFloat(e.kd)||0);},0);
+    var _prev62=_priorForDate.filter(function(e){return e.building==='Tower 62';}).reduce(function(s,e){return s+(parseFloat(e.kd)||0);},0);
+    // back out the old amounts from running totals and the month log
+    S.t60=parseFloat((S.t60-_prev60).toFixed(1)); if(S.t60<0)S.t60=0;
+    S.t62=parseFloat((S.t62-_prev62).toFixed(1)); if(S.t62<0)S.t62=0;
+    LOG[mk0].t60Total=parseFloat(((LOG[mk0].t60Total||0)-_prev60).toFixed(1)); if(LOG[mk0].t60Total<0)LOG[mk0].t60Total=0;
+    LOG[mk0].t62Total=parseFloat(((LOG[mk0].t62Total||0)-_prev62).toFixed(1)); if(LOG[mk0].t62Total<0)LOG[mk0].t62Total=0;
+    LOG[mk0].entries=LOG[mk0].entries.filter(function(e){return e.date!==cd;});
   }
-  if(!alreadyDone){
-    b60.order.forEach(function(a){if(b60.apts[a]&&b60.apts[a].status==='booked'){LOG[mk0].entries.push({date:cd,apt:'60-'+a,building:'Tower 60',guest:b60.apts[a].guest,kd:KD});LOG[mk0].t60Total+=KD;}});
-    b62.order.forEach(function(a){if(b62.apts[a]&&b62.apts[a].status==='booked'){LOG[mk0].entries.push({date:cd,apt:'62-'+a,building:'Tower 62',guest:b62.apts[a].guest,kd:KD});LOG[mk0].t62Total+=KD;}});
-  }
+  // Now add the fresh amounts for this paste
+  S.t60=parseFloat((S.t60+t60d).toFixed(1));
+  S.t62=parseFloat((S.t62+t62d).toFixed(1));
+  b60.order.forEach(function(a){if(b60.apts[a]&&b60.apts[a].status==='booked'){LOG[mk0].entries.push({date:cd,apt:'60-'+a,building:'Tower 60',guest:b60.apts[a].guest,kd:KD});LOG[mk0].t60Total+=KD;}});
+  b62.order.forEach(function(a){if(b62.apts[a]&&b62.apts[a].status==='booked'){LOG[mk0].entries.push({date:cd,apt:'62-'+a,building:'Tower 62',guest:b62.apts[a].guest,kd:KD});LOG[mk0].t62Total+=KD;}});
+
+  // ── ENSURE FULL ROSTER for flat buildings ───────────────
+  // So the cleaner's schedule always lists every known apartment
+  // (unbooked ones show as ❌), even if the paste only mentioned some.
+  (function(){
+    try{
+      var rosters=(typeof KNOWN_APTS_PICKER!=='undefined')?KNOWN_APTS_PICKER:null;
+      if(!rosters)return;
+      ['rna','jas','fat','sel'].forEach(function(sec){
+        var roster=rosters[sec]; if(!roster||!roster.length)return;
+        var bld=BUILDINGS[sec]; if(!bld){bld={apts:{},list:[],order:[],isTower:false};BUILDINGS[sec]=bld;}
+        if(!bld.order)bld.order=[];
+        roster.forEach(function(ap){ if(bld.order.indexOf(ap)===-1) bld.order.push(ap); });
+      });
+    }catch(e){}
+  })();
 
   // ── BUILD ALL MESSAGES DYNAMICALLY ──────────────────────
   var R=String.fromCodePoint(0x1F51C), X='\u274C';
@@ -3758,14 +3801,30 @@ function toggleBkForm(){
     }catch(e){}
   }
   if(a){a.innerHTML='&#9660;';a.style.display='inline-block';a.style.transition='transform .28s cubic-bezier(.34,1.56,.64,1)';a.style.transform=open?'rotate(0deg)':'rotate(180deg)';}
-  /* Pre-fill empty date fields with today (Kuwait time) for faster entry */
+  /* Pre-fill empty date fields: check-in = today, check-out = next day */
   if(!open){
     try{
       var n=(typeof kwNow==='function')?kwNow():new Date();
       var iso=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');
+      var nx=new Date(n.getFullYear(),n.getMonth(),n.getDate()+1);
+      var isoNext=nx.getFullYear()+'-'+String(nx.getMonth()+1).padStart(2,'0')+'-'+String(nx.getDate()).padStart(2,'0');
       var ci=document.getElementById('bk-checkin'),co=document.getElementById('bk-checkout');
       if(ci&&!ci.value)ci.value=iso;
-      if(co&&!co.value)co.value=iso;
+      if(co&&!co.value)co.value=isoNext;
+      /* Auto-follow: changing check-in sets check-out to the next day */
+      if(ci&&!ci.getAttribute('data-autofollow')){
+        ci.setAttribute('data-autofollow','1');
+        ci.addEventListener('change',function(){
+          try{
+            if(!ci.value)return;
+            var d=new Date(ci.value+'T12:00:00');
+            if(isNaN(d))return;
+            var nd=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1);
+            var ndIso=nd.getFullYear()+'-'+String(nd.getMonth()+1).padStart(2,'0')+'-'+String(nd.getDate()).padStart(2,'0');
+            if(co)co.value=ndIso;
+          }catch(e){}
+        });
+      }
     }catch(e){}
   }
 }
@@ -4766,12 +4825,16 @@ function renderBookings(){
 
             if(matched){
               totalReserved++;
-              var emoji = matched.type==='airbnb'?'\uD83C\uDD70\uFE0F':'\uD83D\uDCB0';
+              var _isPending = matched.status==='pending';
+              var _isPartial = matched.status==='partial' || (matched.paidAmount>0 && matched.pendingAmount>0);
+              var emoji = matched.type==='airbnb' ? '\uD83C\uDD70\uFE0F' : '\uD83D\uDCB0';
               var nightsNum = matched.nights&&matched.nights>1?matched.nights:1;
-              var totalAmt = parseFloat(matched.paidAmount&&matched.pendingAmount>0?matched.paidAmount:matched.amount)||0;
+              var totalAmt = parseFloat(_isPartial ? matched.paidAmount : matched.amount)||0;
               var perNight = nightsNum>1?Math.round((totalAmt/nightsNum)*10)/10:totalAmt;
-              var kdStr = perNight?' / '+perNight+'kd':'';
-              var pendingSuffix = matched.pendingAmount>0?' / \u203C\uFE0F '+matched.pendingAmount+' KD':'';
+              /* For a fully-pending booking, don't show a paid kd amount (it's all pending) */
+              var kdStr = (!_isPending && perNight)?' / '+perNight+'kd':'';
+              var _pendAmt = _isPending ? (parseFloat(matched.pendingAmount)||parseFloat(matched.amount)||0) : (parseFloat(matched.pendingAmount)||0);
+              var pendingSuffix = _pendAmt>0 ? ' / \u203C\uFE0F '+_pendAmt+' KD' : '';
               var nightsSuffix = nightsNum>1?' / '+nightsNum+' nights \uD83D\uDD01':'';
               if(matched.type==='direct') totalDirect++;
               else totalAirbnb++;
@@ -5788,7 +5851,7 @@ function renderMonthlyRevenue(){
     });
   },50);
 }
-function switchTab(tab,el){document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});document.querySelectorAll('.tab-pane').forEach(function(p){p.classList.remove('active');});document.getElementById('tab-'+tab).classList.add('active');el.classList.add('active');if(tab==='guests'){if(!window._allTabsReady){setTimeout(function(){try{renderGuests();}catch(e){}setTimeout(function(){try{renderLeaderboard();}catch(e){}},30);},0);}}if(tab==='pending')renderPending();if(tab==='cash')renderCash();if(tab==='bookings'){renderBkCalendar();updateBkPendingBadge();renderCancellations();if(typeof renderBkLanding==='function')renderBkLanding();if(typeof renderDORBanner==='function')renderDORBanner();if(typeof renderPending==='function')renderPending();}if(tab==='schedule'){renderCheckinBanner();if(typeof renderSchedEarners==='function')renderSchedEarners();}try{window.scrollTo({top:0,left:0,behavior:'instant'});}catch(e){window.scrollTo(0,0);}}
+function switchTab(tab,el){document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});document.querySelectorAll('.tab-pane').forEach(function(p){p.classList.remove('active');});document.getElementById('tab-'+tab).classList.add('active');el.classList.add('active');if(tab==='guests'){if(!window._allTabsReady){setTimeout(function(){try{renderGuests();}catch(e){}setTimeout(function(){try{renderLeaderboard();}catch(e){}},30);},0);}}if(tab==='pending')renderPending();if(tab==='cash')renderCash();if(tab==='bookings'){renderBkCalendar();updateBkPendingBadge();renderCancellations();if(typeof renderCheckouts==='function')renderCheckouts();if(typeof renderBkLanding==='function')renderBkLanding();if(typeof renderDORBanner==='function')renderDORBanner();if(typeof renderPending==='function')renderPending();}if(tab==='schedule'){renderCheckinBanner();if(typeof renderSchedEarners==='function')renderSchedEarners();}try{window.scrollTo({top:0,left:0,behavior:'instant'});}catch(e){window.scrollTo(0,0);}}
 
 // =========================================================
 //  CASH IN HAND
@@ -7447,10 +7510,11 @@ function renderLog(){
   }
   var selMk = sel&&sel.value ? sel.value : logKey();
   var e=LOG[selMk], cnt=e?e.entries.length:0;
-  document.getElementById('logcount').textContent = cnt;
+  var _lc=document.getElementById('logcount');
+  if(_lc){_lc.textContent=cnt;_lc.style.display=cnt>0?'inline-flex':'none';}
   document.getElementById('logsub').textContent = cnt===0
-    ? 'No cleanings logged this month yet'
-    : cnt+' cleaning'+(cnt===1?'':'s')+' \u00b7 T60: '+(e.t60Total||0)+' KD \u00b7 T62: '+(e.t62Total||0)+' KD';
+    ? 'No Cleanings Logged This Month Yet'
+    : cnt+' Cleaning'+(cnt===1?'':'s')+' \u00b7 T60: '+(e.t60Total||0)+' KD \u00b7 T62: '+(e.t62Total||0)+' KD';
 }
 
 // =========================================================
@@ -7993,15 +8057,40 @@ try{
   }
   var mk0=S.year+'-'+String(S.month+1).padStart(2,'0');
   if(!LOG[mk0]) LOG[mk0]={entries:[],t60Total:0,t62Total:0};
-  var alreadyDone=LOG[mk0].entries.some(function(e){return e.date===cd;});
-  if(!alreadyDone){
-    S.t60=parseFloat((S.t60+t60d).toFixed(1));
-    S.t62=parseFloat((S.t62+t62d).toFixed(1));
+  // If this date was already logged, REMOVE its old entries first so re-pasting
+  // an edited list re-computes the totals correctly (instead of being skipped).
+  var _priorForDate=LOG[mk0].entries.filter(function(e){return e.date===cd;});
+  if(_priorForDate.length){
+    var _prev60=_priorForDate.filter(function(e){return e.building==='Tower 60';}).reduce(function(s,e){return s+(parseFloat(e.kd)||0);},0);
+    var _prev62=_priorForDate.filter(function(e){return e.building==='Tower 62';}).reduce(function(s,e){return s+(parseFloat(e.kd)||0);},0);
+    // back out the old amounts from running totals and the month log
+    S.t60=parseFloat((S.t60-_prev60).toFixed(1)); if(S.t60<0)S.t60=0;
+    S.t62=parseFloat((S.t62-_prev62).toFixed(1)); if(S.t62<0)S.t62=0;
+    LOG[mk0].t60Total=parseFloat(((LOG[mk0].t60Total||0)-_prev60).toFixed(1)); if(LOG[mk0].t60Total<0)LOG[mk0].t60Total=0;
+    LOG[mk0].t62Total=parseFloat(((LOG[mk0].t62Total||0)-_prev62).toFixed(1)); if(LOG[mk0].t62Total<0)LOG[mk0].t62Total=0;
+    LOG[mk0].entries=LOG[mk0].entries.filter(function(e){return e.date!==cd;});
   }
-  if(!alreadyDone){
-    b60.order.forEach(function(a){if(b60.apts[a]&&b60.apts[a].status==='booked'){LOG[mk0].entries.push({date:cd,apt:'60-'+a,building:'Tower 60',guest:b60.apts[a].guest,kd:KD});LOG[mk0].t60Total+=KD;}});
-    b62.order.forEach(function(a){if(b62.apts[a]&&b62.apts[a].status==='booked'){LOG[mk0].entries.push({date:cd,apt:'62-'+a,building:'Tower 62',guest:b62.apts[a].guest,kd:KD});LOG[mk0].t62Total+=KD;}});
-  }
+  // Now add the fresh amounts for this paste
+  S.t60=parseFloat((S.t60+t60d).toFixed(1));
+  S.t62=parseFloat((S.t62+t62d).toFixed(1));
+  b60.order.forEach(function(a){if(b60.apts[a]&&b60.apts[a].status==='booked'){LOG[mk0].entries.push({date:cd,apt:'60-'+a,building:'Tower 60',guest:b60.apts[a].guest,kd:KD});LOG[mk0].t60Total+=KD;}});
+  b62.order.forEach(function(a){if(b62.apts[a]&&b62.apts[a].status==='booked'){LOG[mk0].entries.push({date:cd,apt:'62-'+a,building:'Tower 62',guest:b62.apts[a].guest,kd:KD});LOG[mk0].t62Total+=KD;}});
+
+  // ── ENSURE FULL ROSTER for flat buildings ───────────────
+  // So the cleaner's schedule always lists every known apartment
+  // (unbooked ones show as ❌), even if the paste only mentioned some.
+  (function(){
+    try{
+      var rosters=(typeof KNOWN_APTS_PICKER!=='undefined')?KNOWN_APTS_PICKER:null;
+      if(!rosters)return;
+      ['rna','jas','fat','sel'].forEach(function(sec){
+        var roster=rosters[sec]; if(!roster||!roster.length)return;
+        var bld=BUILDINGS[sec]; if(!bld){bld={apts:{},list:[],order:[],isTower:false};BUILDINGS[sec]=bld;}
+        if(!bld.order)bld.order=[];
+        roster.forEach(function(ap){ if(bld.order.indexOf(ap)===-1) bld.order.push(ap); });
+      });
+    }catch(e){}
+  })();
 
   // ── BUILD ALL MESSAGES DYNAMICALLY ──────────────────────
   var R=String.fromCodePoint(0x1F51C), X='\u274C';
@@ -8678,14 +8767,30 @@ function toggleBkForm(){
     }catch(e){}
   }
   if(a){a.innerHTML='&#9660;';a.style.display='inline-block';a.style.transition='transform .28s cubic-bezier(.34,1.56,.64,1)';a.style.transform=open?'rotate(0deg)':'rotate(180deg)';}
-  /* Pre-fill empty date fields with today (Kuwait time) for faster entry */
+  /* Pre-fill empty date fields: check-in = today, check-out = next day */
   if(!open){
     try{
       var n=(typeof kwNow==='function')?kwNow():new Date();
       var iso=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');
+      var nx=new Date(n.getFullYear(),n.getMonth(),n.getDate()+1);
+      var isoNext=nx.getFullYear()+'-'+String(nx.getMonth()+1).padStart(2,'0')+'-'+String(nx.getDate()).padStart(2,'0');
       var ci=document.getElementById('bk-checkin'),co=document.getElementById('bk-checkout');
       if(ci&&!ci.value)ci.value=iso;
-      if(co&&!co.value)co.value=iso;
+      if(co&&!co.value)co.value=isoNext;
+      /* Auto-follow: changing check-in sets check-out to the next day */
+      if(ci&&!ci.getAttribute('data-autofollow')){
+        ci.setAttribute('data-autofollow','1');
+        ci.addEventListener('change',function(){
+          try{
+            if(!ci.value)return;
+            var d=new Date(ci.value+'T12:00:00');
+            if(isNaN(d))return;
+            var nd=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1);
+            var ndIso=nd.getFullYear()+'-'+String(nd.getMonth()+1).padStart(2,'0')+'-'+String(nd.getDate()).padStart(2,'0');
+            if(co)co.value=ndIso;
+          }catch(e){}
+        });
+      }
     }catch(e){}
   }
 }
@@ -9525,12 +9630,16 @@ function renderBookings(){
 
             if(matched){
               totalReserved++;
-              var emoji = matched.type==='airbnb'?'\uD83C\uDD70\uFE0F':'\uD83D\uDCB0';
+              var _isPending = matched.status==='pending';
+              var _isPartial = matched.status==='partial' || (matched.paidAmount>0 && matched.pendingAmount>0);
+              var emoji = matched.type==='airbnb' ? '\uD83C\uDD70\uFE0F' : '\uD83D\uDCB0';
               var nightsNum = matched.nights&&matched.nights>1?matched.nights:1;
-              var totalAmt = parseFloat(matched.paidAmount&&matched.pendingAmount>0?matched.paidAmount:matched.amount)||0;
+              var totalAmt = parseFloat(_isPartial ? matched.paidAmount : matched.amount)||0;
               var perNight = nightsNum>1?Math.round((totalAmt/nightsNum)*10)/10:totalAmt;
-              var kdStr = perNight?' / '+perNight+'kd':'';
-              var pendingSuffix = matched.pendingAmount>0?' / \u203C\uFE0F '+matched.pendingAmount+' KD':'';
+              /* For a fully-pending booking, don't show a paid kd amount (it's all pending) */
+              var kdStr = (!_isPending && perNight)?' / '+perNight+'kd':'';
+              var _pendAmt = _isPending ? (parseFloat(matched.pendingAmount)||parseFloat(matched.amount)||0) : (parseFloat(matched.pendingAmount)||0);
+              var pendingSuffix = _pendAmt>0 ? ' / \u203C\uFE0F '+_pendAmt+' KD' : '';
               var nightsSuffix = nightsNum>1?' / '+nightsNum+' nights \uD83D\uDD01':'';
               if(matched.type==='direct') totalDirect++;
               else totalAirbnb++;
@@ -10230,7 +10339,7 @@ function renderMonthlyRevenue(){
     });
   },50);
 }
-function switchTab(tab,el){document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});document.querySelectorAll('.tab-pane').forEach(function(p){p.classList.remove('active');});document.getElementById('tab-'+tab).classList.add('active');el.classList.add('active');if(tab==='guests'){if(!window._allTabsReady){setTimeout(function(){try{renderGuests();}catch(e){}setTimeout(function(){try{renderLeaderboard();}catch(e){}},30);},0);}}if(tab==='pending')renderPending();if(tab==='cash')renderCash();if(tab==='bookings'){renderBkCalendar();updateBkPendingBadge();renderCancellations();}if(tab==='schedule'){renderCheckinBanner();if(typeof renderSchedEarners==='function')renderSchedEarners();}try{window.scrollTo({top:0,left:0,behavior:'instant'});}catch(e){window.scrollTo(0,0);}}
+function switchTab(tab,el){document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});document.querySelectorAll('.tab-pane').forEach(function(p){p.classList.remove('active');});document.getElementById('tab-'+tab).classList.add('active');el.classList.add('active');if(tab==='guests'){if(!window._allTabsReady){setTimeout(function(){try{renderGuests();}catch(e){}setTimeout(function(){try{renderLeaderboard();}catch(e){}},30);},0);}}if(tab==='pending')renderPending();if(tab==='cash')renderCash();if(tab==='bookings'){renderBkCalendar();updateBkPendingBadge();renderCancellations();if(typeof renderCheckouts==='function')renderCheckouts();}if(tab==='schedule'){renderCheckinBanner();if(typeof renderSchedEarners==='function')renderSchedEarners();}try{window.scrollTo({top:0,left:0,behavior:'instant'});}catch(e){window.scrollTo(0,0);}}
 
 // =========================================================
 //  CASH IN HAND
@@ -11115,14 +11224,30 @@ function toggleBkForm(){
     }catch(e){}
   }
   if(a){a.innerHTML='&#9660;';a.style.display='inline-block';a.style.transition='transform .28s cubic-bezier(.34,1.56,.64,1)';a.style.transform=open?'rotate(0deg)':'rotate(180deg)';}
-  /* Pre-fill empty date fields with today (Kuwait time) for faster entry */
+  /* Pre-fill empty date fields: check-in = today, check-out = next day */
   if(!open){
     try{
       var n=(typeof kwNow==='function')?kwNow():new Date();
       var iso=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');
+      var nx=new Date(n.getFullYear(),n.getMonth(),n.getDate()+1);
+      var isoNext=nx.getFullYear()+'-'+String(nx.getMonth()+1).padStart(2,'0')+'-'+String(nx.getDate()).padStart(2,'0');
       var ci=document.getElementById('bk-checkin'),co=document.getElementById('bk-checkout');
       if(ci&&!ci.value)ci.value=iso;
-      if(co&&!co.value)co.value=iso;
+      if(co&&!co.value)co.value=isoNext;
+      /* Auto-follow: changing check-in sets check-out to the next day */
+      if(ci&&!ci.getAttribute('data-autofollow')){
+        ci.setAttribute('data-autofollow','1');
+        ci.addEventListener('change',function(){
+          try{
+            if(!ci.value)return;
+            var d=new Date(ci.value+'T12:00:00');
+            if(isNaN(d))return;
+            var nd=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1);
+            var ndIso=nd.getFullYear()+'-'+String(nd.getMonth()+1).padStart(2,'0')+'-'+String(nd.getDate()).padStart(2,'0');
+            if(co)co.value=ndIso;
+          }catch(e){}
+        });
+      }
     }catch(e){}
   }
 }
@@ -11370,6 +11495,79 @@ function _erTodayStr(){
   var t=kwNow();
   return MS[t.getMonth()]+' '+t.getDate()+' '+t.getFullYear();
 }
+/* ===== MARK CHECKOUT FEATURE ===== */
+function _coTodayStr(){
+  var MS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var t=kwNow();
+  return MS[t.getMonth()]+' '+t.getDate()+' '+t.getFullYear();
+}
+function _coNorm(s){
+  /* normalize a date string to "Mon D YYYY" for comparison */
+  var m=String(s||'').toLowerCase().match(/(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*[^0-9]*([0-9]{1,2})(?:[^0-9]+([0-9]{4}))?/);
+  if(!m)return String(s||'').trim();
+  var mo=m[1].charAt(0).toUpperCase()+m[1].slice(1,3);
+  var y=m[3]||String(kwNow().getFullYear());
+  return mo+' '+parseInt(m[2],10)+' '+y;
+}
+function loadCheckouts(){ try{var c=localStorage.getItem('hbs_checkouts_done');return c?JSON.parse(c):{};}catch(e){return {};} }
+function saveCheckouts(o){ try{localStorage.setItem('hbs_checkouts_done',JSON.stringify(o));}catch(e){} }
+function markCheckout(id){
+  var done=loadCheckouts(); done[id]=_coTodayStr(); saveCheckouts(done);
+  renderCheckouts();
+}
+function unmarkCheckout(id){
+  var done=loadCheckouts(); delete done[id]; saveCheckouts(done);
+  renderCheckouts();
+}
+function renderCheckouts(){
+  var el=document.getElementById('bk-checkout-section'); if(!el) return;
+  loadBookings();
+  var today=_coTodayStr();
+  var done=loadCheckouts();
+  /* auto-clear marks that aren't for today (new day = fresh list) */
+  var cleaned=false;
+  Object.keys(done).forEach(function(k){ if(done[k]!==today){ delete done[k]; cleaned=true; } });
+  if(cleaned) saveCheckouts(done);
+  /* todays checkouts = bookings whose checkout date is today */
+  var list=BOOKINGS.filter(function(b){
+    if(b.status==='cancelled') return false;
+    var co=b.checkout||'';
+    return co && _coNorm(co)===today;
+  });
+  if(!list.length){ el.style.display='none'; el.innerHTML=''; return; }
+  el.style.display='block';
+  var pending=list.filter(function(b){return !done[b.id];});
+  var doneList=list.filter(function(b){return !!done[b.id];});
+  var fmtPhone=typeof fmtGuestPhone==='function'?fmtGuestPhone:function(p){return p;};
+  function row(b,isDone){
+    var nm=escH(b.name||fmtPhone(b.phone)||'Guest');
+    var apt=escH(b.apt||'?');
+    var btn=isDone
+      ? '<button onclick="unmarkCheckout(\''+b.id+'\')" style="background:none;border:1px solid #C3E0CE;color:#1B7A40;border-radius:9px;padding:7px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap">\u21ba Undo</button>'
+      : '<button onclick="markCheckout(\''+b.id+'\')" style="background:#1B7A40;border:none;color:#fff;border-radius:9px;padding:8px 14px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap">\u2713 Mark Checked Out</button>';
+    return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid var(--gl);'+(isDone?'opacity:.55':'')+'">'
+      +'<div style="min-width:0">'
+        +'<div style="font-size:13px;font-weight:700;color:var(--br)">'+apt+(isDone?' <span style="color:#1B7A40;font-size:11px;font-weight:700">\u2713 Checked Out</span>':'')+'</div>'
+        +'<div style="font-size:11px;color:var(--t3);margin-top:1px">'+nm+'</div>'
+      +'</div>'+btn+'</div>';
+  }
+  var html='<div style="background:var(--wh);border:1.5px solid var(--gl);border-radius:18px;padding:16px 18px">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
+      +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;color:#C45400;text-transform:uppercase">\uD83D\uDEAA Today\u2019s Checkouts</div>'
+      +'<div style="background:'+(pending.length?'#FFF3E0':'#EAF7EF')+';color:'+(pending.length?'#C45400':'#1B7A40')+';border-radius:20px;padding:3px 11px;font-size:11px;font-weight:700">'+doneList.length+' / '+list.length+' done</div>'
+    +'</div>';
+  if(pending.length){
+    html+='<div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--gd);text-transform:uppercase;margin:8px 0 2px">Pending Checkout</div>';
+    html+=pending.map(function(b){return row(b,false);}).join('');
+  }
+  if(doneList.length){
+    html+='<div style="font-size:10px;font-weight:700;letter-spacing:1px;color:#1B7A40;text-transform:uppercase;margin:12px 0 2px">Checked Out</div>';
+    html+=doneList.map(function(b){return row(b,true);}).join('');
+  }
+  html+='</div>';
+  el.innerHTML=html;
+}
+
 function renderExtraReservations(){
   loadBookings();
   var allExtras=BOOKINGS.filter(function(b){return b.isExtra&&b.status!=='cancelled';});
