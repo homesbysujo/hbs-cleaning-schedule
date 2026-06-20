@@ -939,7 +939,6 @@ button{-webkit-user-select:none;user-select:none}
   })();
   </script>
 
-  <div style="padding:10px 20px 0"><div id="bk-checkout-section" style="display:none"></div></div>
   <div style="padding:10px 20px 0"><div id="bk-upcoming-list" style="display:none;background:var(--wh);border:1.5px solid var(--gl);border-radius:18px;padding:20px 20px 8px"></div></div>
   <div style="padding:16px 20px 0"><input type="text" id="bk-search" oninput="bkSearch()" placeholder="Search guest, apartment or date..." style="width:100%;background:var(--cr);border:1.5px solid var(--gl);border-radius:12px;color:var(--t1);font-family:'DM Sans',sans-serif;font-size:13px;padding:11px 16px;outline:none;box-sizing:border-box"></div>
   <div id="bk-search-results" style="display:none;margin:8px 20px 0"></div>
@@ -5851,7 +5850,7 @@ function renderMonthlyRevenue(){
     });
   },50);
 }
-function switchTab(tab,el){document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});document.querySelectorAll('.tab-pane').forEach(function(p){p.classList.remove('active');});document.getElementById('tab-'+tab).classList.add('active');el.classList.add('active');if(tab==='guests'){if(!window._allTabsReady){setTimeout(function(){try{renderGuests();}catch(e){}setTimeout(function(){try{renderLeaderboard();}catch(e){}},30);},0);}}if(tab==='pending')renderPending();if(tab==='cash')renderCash();if(tab==='bookings'){renderBkCalendar();updateBkPendingBadge();renderCancellations();if(typeof renderCheckouts==='function')renderCheckouts();if(typeof renderBkLanding==='function')renderBkLanding();if(typeof renderDORBanner==='function')renderDORBanner();if(typeof renderPending==='function')renderPending();}if(tab==='schedule'){renderCheckinBanner();if(typeof renderSchedEarners==='function')renderSchedEarners();}try{window.scrollTo({top:0,left:0,behavior:'instant'});}catch(e){window.scrollTo(0,0);}}
+function switchTab(tab,el){document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});document.querySelectorAll('.tab-pane').forEach(function(p){p.classList.remove('active');});document.getElementById('tab-'+tab).classList.add('active');el.classList.add('active');if(tab==='guests'){if(!window._allTabsReady){setTimeout(function(){try{renderGuests();}catch(e){}setTimeout(function(){try{renderLeaderboard();}catch(e){}},30);},0);}}if(tab==='pending')renderPending();if(tab==='cash')renderCash();if(tab==='bookings'){renderBkCalendar();updateBkPendingBadge();renderCancellations();if(typeof renderBkLanding==='function')renderBkLanding();if(typeof renderDORBanner==='function')renderDORBanner();if(typeof renderPending==='function')renderPending();}if(tab==='schedule'){renderCheckinBanner();if(typeof renderSchedEarners==='function')renderSchedEarners();}try{window.scrollTo({top:0,left:0,behavior:'instant'});}catch(e){window.scrollTo(0,0);}}
 
 // =========================================================
 //  CASH IN HAND
@@ -10339,7 +10338,7 @@ function renderMonthlyRevenue(){
     });
   },50);
 }
-function switchTab(tab,el){document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});document.querySelectorAll('.tab-pane').forEach(function(p){p.classList.remove('active');});document.getElementById('tab-'+tab).classList.add('active');el.classList.add('active');if(tab==='guests'){if(!window._allTabsReady){setTimeout(function(){try{renderGuests();}catch(e){}setTimeout(function(){try{renderLeaderboard();}catch(e){}},30);},0);}}if(tab==='pending')renderPending();if(tab==='cash')renderCash();if(tab==='bookings'){renderBkCalendar();updateBkPendingBadge();renderCancellations();if(typeof renderCheckouts==='function')renderCheckouts();}if(tab==='schedule'){renderCheckinBanner();if(typeof renderSchedEarners==='function')renderSchedEarners();}try{window.scrollTo({top:0,left:0,behavior:'instant'});}catch(e){window.scrollTo(0,0);}}
+function switchTab(tab,el){document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});document.querySelectorAll('.tab-pane').forEach(function(p){p.classList.remove('active');});document.getElementById('tab-'+tab).classList.add('active');el.classList.add('active');if(tab==='guests'){if(!window._allTabsReady){setTimeout(function(){try{renderGuests();}catch(e){}setTimeout(function(){try{renderLeaderboard();}catch(e){}},30);},0);}}if(tab==='pending')renderPending();if(tab==='cash')renderCash();if(tab==='bookings'){renderBkCalendar();updateBkPendingBadge();renderCancellations();}if(tab==='schedule'){renderCheckinBanner();if(typeof renderSchedEarners==='function')renderSchedEarners();}try{window.scrollTo({top:0,left:0,behavior:'instant'});}catch(e){window.scrollTo(0,0);}}
 
 // =========================================================
 //  CASH IN HAND
@@ -11495,79 +11494,6 @@ function _erTodayStr(){
   var t=kwNow();
   return MS[t.getMonth()]+' '+t.getDate()+' '+t.getFullYear();
 }
-/* ===== MARK CHECKOUT FEATURE ===== */
-function _coTodayStr(){
-  var MS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  var t=kwNow();
-  return MS[t.getMonth()]+' '+t.getDate()+' '+t.getFullYear();
-}
-function _coNorm(s){
-  /* normalize a date string to "Mon D YYYY" for comparison */
-  var m=String(s||'').toLowerCase().match(/(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*[^0-9]*([0-9]{1,2})(?:[^0-9]+([0-9]{4}))?/);
-  if(!m)return String(s||'').trim();
-  var mo=m[1].charAt(0).toUpperCase()+m[1].slice(1,3);
-  var y=m[3]||String(kwNow().getFullYear());
-  return mo+' '+parseInt(m[2],10)+' '+y;
-}
-function loadCheckouts(){ try{var c=localStorage.getItem('hbs_checkouts_done');return c?JSON.parse(c):{};}catch(e){return {};} }
-function saveCheckouts(o){ try{localStorage.setItem('hbs_checkouts_done',JSON.stringify(o));}catch(e){} }
-function markCheckout(id){
-  var done=loadCheckouts(); done[id]=_coTodayStr(); saveCheckouts(done);
-  renderCheckouts();
-}
-function unmarkCheckout(id){
-  var done=loadCheckouts(); delete done[id]; saveCheckouts(done);
-  renderCheckouts();
-}
-function renderCheckouts(){
-  var el=document.getElementById('bk-checkout-section'); if(!el) return;
-  loadBookings();
-  var today=_coTodayStr();
-  var done=loadCheckouts();
-  /* auto-clear marks that aren't for today (new day = fresh list) */
-  var cleaned=false;
-  Object.keys(done).forEach(function(k){ if(done[k]!==today){ delete done[k]; cleaned=true; } });
-  if(cleaned) saveCheckouts(done);
-  /* todays checkouts = bookings whose checkout date is today */
-  var list=BOOKINGS.filter(function(b){
-    if(b.status==='cancelled') return false;
-    var co=b.checkout||'';
-    return co && _coNorm(co)===today;
-  });
-  if(!list.length){ el.style.display='none'; el.innerHTML=''; return; }
-  el.style.display='block';
-  var pending=list.filter(function(b){return !done[b.id];});
-  var doneList=list.filter(function(b){return !!done[b.id];});
-  var fmtPhone=typeof fmtGuestPhone==='function'?fmtGuestPhone:function(p){return p;};
-  function row(b,isDone){
-    var nm=escH(b.name||fmtPhone(b.phone)||'Guest');
-    var apt=escH(b.apt||'?');
-    var btn=isDone
-      ? '<button onclick="unmarkCheckout(\''+b.id+'\')" style="background:none;border:1px solid #C3E0CE;color:#1B7A40;border-radius:9px;padding:7px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap">\u21ba Undo</button>'
-      : '<button onclick="markCheckout(\''+b.id+'\')" style="background:#1B7A40;border:none;color:#fff;border-radius:9px;padding:8px 14px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap">\u2713 Mark Checked Out</button>';
-    return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid var(--gl);'+(isDone?'opacity:.55':'')+'">'
-      +'<div style="min-width:0">'
-        +'<div style="font-size:13px;font-weight:700;color:var(--br)">'+apt+(isDone?' <span style="color:#1B7A40;font-size:11px;font-weight:700">\u2713 Checked Out</span>':'')+'</div>'
-        +'<div style="font-size:11px;color:var(--t3);margin-top:1px">'+nm+'</div>'
-      +'</div>'+btn+'</div>';
-  }
-  var html='<div style="background:var(--wh);border:1.5px solid var(--gl);border-radius:18px;padding:16px 18px">'
-    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
-      +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;color:#C45400;text-transform:uppercase">\uD83D\uDEAA Today\u2019s Checkouts</div>'
-      +'<div style="background:'+(pending.length?'#FFF3E0':'#EAF7EF')+';color:'+(pending.length?'#C45400':'#1B7A40')+';border-radius:20px;padding:3px 11px;font-size:11px;font-weight:700">'+doneList.length+' / '+list.length+' done</div>'
-    +'</div>';
-  if(pending.length){
-    html+='<div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--gd);text-transform:uppercase;margin:8px 0 2px">Pending Checkout</div>';
-    html+=pending.map(function(b){return row(b,false);}).join('');
-  }
-  if(doneList.length){
-    html+='<div style="font-size:10px;font-weight:700;letter-spacing:1px;color:#1B7A40;text-transform:uppercase;margin:12px 0 2px">Checked Out</div>';
-    html+=doneList.map(function(b){return row(b,true);}).join('');
-  }
-  html+='</div>';
-  el.innerHTML=html;
-}
-
 function renderExtraReservations(){
   loadBookings();
   var allExtras=BOOKINGS.filter(function(b){return b.isExtra&&b.status!=='cancelled';});
