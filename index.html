@@ -2539,7 +2539,7 @@ function renderCustomAptsList(){
   if(!list)return;
   list.innerHTML='';
   // Collect extra apts from KNOWN_APTS_PICKER (beyond defaults)
-  var defaults={'t60':['301','302','1601','1602'],'t62':['1401','1402','1601','1602','1701','1702'],'sel':['13','19','22','25','27'],'rna':['13','47','48'],'jas':['27','28'],'fat':['7A','7B','8A','8B','9A','9B','34A','34B','35A','35B','36A','36B']};
+  var defaults={'t60':['301','302','1601','1602'],'t62':['1401','1402','1501','1502','1601','1602','1701','1702'],'sel':['13','19','22','25','27'],'rna':['13','47','48'],'jas':['27','28'],'fat':['7A','7B','8A','8B','9A','9B','34A','34B','35A','35B','36A','36B']};
   var extras=[];
   if(typeof KNOWN_APTS_PICKER!=='undefined'){
     Object.keys(KNOWN_APTS_PICKER).forEach(function(bldg){
@@ -4804,13 +4804,13 @@ function renderBookings(){
         }catch(e){}
 
         // Generate formatted reservation list text
-        var list='Apartment update '+MSHORT2[_bkCalMonth]+' '+_bkSelDay+' ('+dayName+')\n';
+        var list='Apartment update '+MSHORT2[_bkCalMonth]+' '+_bkSelDay+' ('+dayName+')\n\n';
         var totalDirect=0, totalAirbnb=0, totalAvail=0, totalReserved=0, totalKD=0, totalPending=0;
 
         var totalApts=ALL_APTS.reduce(function(s,b){return s+b.apts.length;},0);
 
         ALL_APTS.forEach(function(building){
-          list+='*'+building.sec+'*\n';
+          list+='*'+building.sec+'*\n\n';
           building.apts.forEach(function(apt){
             // Try to find a matching booking — flexible key matching
             var matched=null;
@@ -4890,6 +4890,7 @@ function renderBookings(){
         list+='\uD83D\uDCB0 -   '+totalDirect+'\n';
         list+='\u2705 -   '+totalAvail+'\n';
         list+=(dayExtras&&dayExtras.length?'\uD83D\uDCB5 -   '+dayExtras.length+'\n':'');
+        list+='\n';
         list+='Today\'s incentive - NIL\n\n';
         dayExtras.forEach(function(ex){
           var exNights=(ex.nights&&ex.nights>1)?ex.nights:1;
@@ -9634,13 +9635,13 @@ function renderBookings(){
         }catch(e){}
 
         // Generate formatted reservation list text
-        var list='Apartment update '+MSHORT2[_bkCalMonth]+' '+_bkSelDay+' ('+dayName+')\n';
+        var list='Apartment update '+MSHORT2[_bkCalMonth]+' '+_bkSelDay+' ('+dayName+')\n\n';
         var totalDirect=0, totalAirbnb=0, totalAvail=0, totalReserved=0, totalKD=0, totalPending=0;
 
         var totalApts=ALL_APTS.reduce(function(s,b){return s+b.apts.length;},0);
 
         ALL_APTS.forEach(function(building){
-          list+='*'+building.sec+'*\n';
+          list+='*'+building.sec+'*\n\n';
           building.apts.forEach(function(apt){
             // Try to find a matching booking — flexible key matching
             var matched=null;
@@ -9720,6 +9721,7 @@ function renderBookings(){
         list+='\uD83D\uDCB0 -   '+totalDirect+'\n';
         list+='\u2705 -   '+totalAvail+'\n';
         list+=(dayExtras&&dayExtras.length?'\uD83D\uDCB5 -   '+dayExtras.length+'\n':'');
+        list+='\n';
         list+='Today\'s incentive - NIL\n\n';
         dayExtras.forEach(function(ex){
           var exNights=(ex.nights&&ex.nights>1)?ex.nights:1;
@@ -11160,7 +11162,7 @@ function _kd(v){var n=parseFloat(v)||0;var r=Math.round(n*10)/10;return r===0?'0
 
 // ── APT PICKER ────────────────────────────────────────────────────────────
 var _aptPickerOpen=false,_activeBldgKey=null;
-var KNOWN_APTS_PICKER={'t60':['301','302','1601','1602'],'t62':['1401','1402','1601','1602','1701','1702'],'sel':['13','19','22','25','27'],'rna':['13','47','48'],'jas':['27','28'],'fat':['7A','7B','8A','8B','9A','9B','34A','34B','35A','35B','36A','36B']};
+var KNOWN_APTS_PICKER={'t60':['301','302','1601','1602'],'t62':['1401','1402','1501','1502','1601','1602','1701','1702'],'sel':['13','19','22','25','27'],'rna':['13','47','48'],'jas':['27','28'],'fat':['7A','7B','8A','8B','9A','9B','34A','34B','35A','35B','36A','36B']};
 var BLDG_LABELS={'t60':'Tower 60','t62':'Tower 62','sel':'Seleena','rna':'R&A','jas':'Jassem','fat':'Fatema'};
 function buildAptLabel(k,a){if(k==='t60')return '60-'+a;if(k==='t62')return '62-'+a;if(k==='sel')return 'Sel '+a;if(k==='rna')return 'RNA '+a;if(k==='jas')return 'Jassem '+a;if(k==='fat')return 'Fat '+a;var _cb=getBldg(k);if(_cb)return (_cb.label||k)+' '+a;return a;}
 function renderAptPicker(){
@@ -11191,7 +11193,7 @@ function renderAptPicker(){
     var lbl=document.createElement('div');lbl.style.cssText='font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gd);margin-bottom:12px';lbl.textContent=BLDG_LABELS[_activeBldgKey];sec.appendChild(lbl);
     var grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:repeat(auto-fill,minmax(68px,1fr));gap:8px';
     var cur=(document.getElementById('bk-apt')||{}).value||'';
-    var defaults={'t60':['301','302','1601','1602'],'t62':['1401','1402','1601','1602','1701','1702'],'sel':['13','19','22','25','27'],'rna':['13','47','48'],'jas':['27','28'],'fat':['7A','7B','8A','8B','9A','9B','34A','34B','35A','35B','36A','36B']};
+    var defaults={'t60':['301','302','1601','1602'],'t62':['1401','1402','1501','1502','1601','1602','1701','1702'],'sel':['13','19','22','25','27'],'rna':['13','47','48'],'jas':['27','28'],'fat':['7A','7B','8A','8B','9A','9B','34A','34B','35A','35B','36A','36B']};
     apts.forEach(function(apt,i){
       var label=buildAptLabel(_activeBldgKey,apt);
       var isDefault=(defaults[_activeBldgKey]||[]).indexOf(apt)!==-1;
