@@ -2779,15 +2779,15 @@ function syncReservationToGuests(){
     // ── Parse guest name ──
     // ── Parse phone ──
     var guestPhone = '';
-    var phoneM2 = trimmed.match(/(\+?\d[\d\s\-]{7,})/);
-    if(phoneM2) guestPhone = phoneM2[1].trim();
+    var phoneM2 = trimmed.match(/(\+?[\d\(][\d\s\-\(\)]{7,})/);
+    if(phoneM2) guestPhone = phoneM2[1].replace(/[\(\)]/g,'').trim();
 
     var guestName = '';
     var dashIdx = trimmed.indexOf(' - ');
     if(dashIdx !== -1){
       var afterDash = trimmed.substring(dashIdx+3).trim();
       // Remove phone and KD from end
-      afterDash = afterDash.replace(/(\+?\d[\d\s\-]{7,})/g,'').replace(/\/\s*[\d.]+\s*kd.*/i,'').replace(/\/\s*kd\s*[\d.]+.*/i,'').replace(/\s*‼.*$/,'').replace(/🔁.*/,'').trim();
+      afterDash = afterDash.replace(/(\+?[\d\(][\d\s\-\(\)]{7,})/g,'').replace(/\/\s*[\d.]+\s*kd.*/i,'').replace(/\/\s*kd\s*[\d.]+.*/i,'').replace(/\s*‼.*$/,'').replace(/🔁.*/,'').trim();
       afterDash = afterDash.replace(/^[-\s]+/,'').trim();
       guestName = afterDash || '';
     }
@@ -3919,12 +3919,12 @@ function parseDOR(){
   // 2. PHONE — any country code (3-pass: +prefix line → local digits line → embedded +)
   var phone='';
   for(var li2=0;li2<lines.length&&!phone;li2++){
-    if(/^\+[\d\s\-]{7,}$/.test(lines[li2])){phone=lines[li2].replace(/[\s\-]/g,'');}
+    if(/^\+[\d\s\-\(\)]{7,}$/.test(lines[li2])){phone=lines[li2].replace(/[\s\-\(\)]/g,'');}
   }
   for(var li2b=0;li2b<lines.length&&!phone;li2b++){
-    if(/^\d[\d\s]{6,}\d$/.test(lines[li2b])&&!/[a-zA-Z]/.test(lines[li2b])){phone=lines[li2b].replace(/\s/g,'');}
+    if(/^[\(]?\d[\d\s\-\(\)]{6,}\d$/.test(lines[li2b])&&!/[a-zA-Z]/.test(lines[li2b])){phone=lines[li2b].replace(/[\s\-\(\)]/g,'');}
   }
-  if(!phone){var _pm=raw.match(/\+[\d\s\-]{9,}/);if(_pm){phone=_pm[0].replace(/[\s\-]/g,'');}}
+  if(!phone){var _pm=raw.match(/\+[\d\s\-\(\)]{9,}/);if(_pm){phone=_pm[0].replace(/[\s\-\(\)]/g,'');}}
 
   // 3. GUEST NAME — a line with only letters/spaces, no keywords
   var name='';
@@ -8911,12 +8911,12 @@ function parseDOR(){
   // 2. PHONE — any country code (3-pass: +prefix line → local digits line → embedded +)
   var phone='';
   for(var li2=0;li2<lines.length&&!phone;li2++){
-    if(/^\+[\d\s\-]{7,}$/.test(lines[li2])){phone=lines[li2].replace(/[\s\-]/g,'');}
+    if(/^\+[\d\s\-\(\)]{7,}$/.test(lines[li2])){phone=lines[li2].replace(/[\s\-\(\)]/g,'');}
   }
   for(var li2b=0;li2b<lines.length&&!phone;li2b++){
-    if(/^\d[\d\s]{6,}\d$/.test(lines[li2b])&&!/[a-zA-Z]/.test(lines[li2b])){phone=lines[li2b].replace(/\s/g,'');}
+    if(/^[\(]?\d[\d\s\-\(\)]{6,}\d$/.test(lines[li2b])&&!/[a-zA-Z]/.test(lines[li2b])){phone=lines[li2b].replace(/[\s\-\(\)]/g,'');}
   }
-  if(!phone){var _pm=raw.match(/\+[\d\s\-]{9,}/);if(_pm){phone=_pm[0].replace(/[\s\-]/g,'');}}
+  if(!phone){var _pm=raw.match(/\+[\d\s\-\(\)]{9,}/);if(_pm){phone=_pm[0].replace(/[\s\-\(\)]/g,'');}}
 
   // 3. GUEST NAME — a line with only letters/spaces, no keywords
   var name='';
