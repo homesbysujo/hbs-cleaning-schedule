@@ -2987,8 +2987,12 @@ try{
       var ag=cl.split(/\s+/).slice(1).join(' ')||g2;
       var kdAmt=parseKD(line);
       // Only add to cleaning list if NOT available
+      // Multi-night / continuing stay: 🔁 present OR "N nights" with N>=2.
+      // Such a guest is NOT checking out today, so the apt needs NO clean today.
+      var _nM=line.match(/(\d+)\s*nights?/i);
+      var _isStaying=line.indexOf('\uD83D\uDD01')!==-1||(_nM&&parseInt(_nM[1])>=2);
       if(!isAvailFlat){
-        var ent={label:al,emoji:em,guest:ag,kd:kdAmt,monthly:monthly,rawLine:line,cash:cash};
+        var ent={label:al,emoji:em,guest:ag,kd:kdAmt,monthly:monthly,rawLine:line,cash:cash,staying:_isStaying};
         bld.list.push(ent);
       }
       // Always track order so ✅ apts still show in messages (as ❌ = no clean needed)
@@ -3118,7 +3122,7 @@ try{
   var gaytxt='';
   if(brna.list.length){
     gaytxt=(bcRna.label||'R&A Apartments')+' ( '+cd+' )\nToday\'s Schedule\n\n';
-    gaytxt+=numSort(brna.order).map(function(a){return a+' - '+(rnaMp[a]?R:X);}).join('\n');
+    gaytxt+=numSort(brna.order).map(function(a){return a+' - '+((rnaMp[a]&&!rnaMp[a].staying)?R:X);}).join('\n');
   } else { gaytxt='No cleans today \u2705'; }
   msgCards.push({id:'mGay',title:(bcRna.cleanerName||'Gayani')+' \u2014 R&A Apartments',phone:bcRna.cleanerPhone||'96565591476',text:gaytxt});
 
@@ -3126,7 +3130,7 @@ try{
   var jastxt='';
   if(bjas.list.length){
     jastxt=(bcJas.label||'Jassem Apartments')+' ( '+cd+' )\nToday\'s Schedule\n\n';
-    jastxt+=numSort(bjas.order).map(function(a){return a+' - '+(jasMp[a]?R:X);}).join('\n');
+    jastxt+=numSort(bjas.order).map(function(a){return a+' - '+((jasMp[a]&&!jasMp[a].staying)?R:X);}).join('\n');
   } else { jastxt='No cleans today \u2705'; }
   msgCards.push({id:'mJas',title:(bcJas.cleanerName||'Bharathi')+' \u2014 Jassem Apartments',phone:bcJas.cleanerPhone||'9655097706',text:jastxt});
 
@@ -3135,7 +3139,7 @@ try{
   var bfat=BUILDINGS['fat']||{list:[],order:[]};
   var fatMp={};bfat.list.forEach(function(e){fatMp[e.label]=e;});
   var bistxt=bfat.list.length
-    ?((bcFat.label||'Fatema Apartments')+' ( '+cd+' )\nToday\'s Schedule\n\n'+strSort(bfat.order).map(function(a){return a+' - '+(fatMp[a]?R:X);}).join('\n'))
+    ?((bcFat.label||'Fatema Apartments')+' ( '+cd+' )\nToday\'s Schedule\n\n'+strSort(bfat.order).map(function(a){return a+' - '+((fatMp[a]&&!fatMp[a].staying)?R:X);}).join('\n'))
     :'No cleans today \u2705';
   msgCards.push({id:'mBis',title:(bcFat.cleanerName||'Biswa')+' \u2014 Fatema',phone:bcFat.cleanerPhone||'96555127880',text:bistxt});
 
@@ -3144,13 +3148,13 @@ try{
   var bsel=BUILDINGS['sel']||{list:[],order:[]};
   var selMp={};bsel.list.forEach(function(e){selMp[e.label]=e;});
   var shatxt=bsel.list.length
-    ?((bcSel.label||'Selena Apartments')+' ( '+cd+' )\nToday\'s Schedule\n\n'+numSort(bsel.order).map(function(a){return a+' - '+(selMp[a]?R:X);}).join('\n'))
+    ?((bcSel.label||'Selena Apartments')+' ( '+cd+' )\nToday\'s Schedule\n\n'+numSort(bsel.order).map(function(a){return a+' - '+((selMp[a]&&!selMp[a].staying)?R:X);}).join('\n'))
     :'No cleans today \u2705';
   msgCards.push({id:'mSha',title:(bcSel.cleanerName||'Kanthi')+' \u2014 Selena',phone:bcSel.cleanerPhone||'96597936588',text:shatxt});
 
   // Samyuktha — Selena Supervisor
   var samtxt=bsel.list.length
-    ?((bcSel.label||'Selena Apartments')+' ( '+cd+' )\nToday\'s Schedule\n\n'+numSort(bsel.order).map(function(a){return a+' - '+(selMp[a]?R:X);}).join('\n'))
+    ?((bcSel.label||'Selena Apartments')+' ( '+cd+' )\nToday\'s Schedule\n\n'+numSort(bsel.order).map(function(a){return a+' - '+((selMp[a]&&!selMp[a].staying)?R:X);}).join('\n'))
     :'No cleans today at Selena \u2705';
   var samyName=bcSel.supName||'Samyuktha'; var samyPhone=bcSel.supPhone||'96551765790';
   if(samyName) msgCards.push({id:'mSamy',title:samyName+' \u2014 Selena Supervisor',phone:samyPhone,text:samtxt});
@@ -3169,7 +3173,7 @@ try{
       bld.order.forEach(function(a){custTxt+=cfg.prefix+a+' - '+(bld.apts[a]&&bld.apts[a].status==='booked'?R:X)+'\n';});
     } else {
       var custMp={};bld.list.forEach(function(e){custMp[e.label]=e;});
-      bld.order.forEach(function(a){custTxt+=a+' - '+(custMp[a]?R:X)+'\n';});
+      bld.order.forEach(function(a){custTxt+=a+' - '+((custMp[a]&&!custMp[a].staying)?R:X)+'\n';});
     }
     if(!cfg.name){
       _unassignedBldgs.push(cfg.label);
@@ -8048,8 +8052,12 @@ try{
       var ag=cl.split(/\s+/).slice(1).join(' ')||g2;
       var kdAmt=parseKD(line);
       // Only add to cleaning list if NOT available
+      // Multi-night / continuing stay: 🔁 present OR "N nights" with N>=2.
+      // Such a guest is NOT checking out today, so the apt needs NO clean today.
+      var _nM=line.match(/(\d+)\s*nights?/i);
+      var _isStaying=line.indexOf('\uD83D\uDD01')!==-1||(_nM&&parseInt(_nM[1])>=2);
       if(!isAvailFlat){
-        var ent={label:al,emoji:em,guest:ag,kd:kdAmt,monthly:monthly,rawLine:line,cash:cash};
+        var ent={label:al,emoji:em,guest:ag,kd:kdAmt,monthly:monthly,rawLine:line,cash:cash,staying:_isStaying};
         bld.list.push(ent);
       }
       // Always track order so ✅ apts still show in messages (as ❌ = no clean needed)
@@ -8179,7 +8187,7 @@ try{
   var gaytxt='';
   if(brna.list.length){
     gaytxt=(bcRna.label||'R&A Apartments')+' ( '+cd+' )\nToday\'s Schedule\n\n';
-    gaytxt+=numSort(brna.order).map(function(a){return a+' - '+(rnaMp[a]?R:X);}).join('\n');
+    gaytxt+=numSort(brna.order).map(function(a){return a+' - '+((rnaMp[a]&&!rnaMp[a].staying)?R:X);}).join('\n');
   } else { gaytxt='No cleans today \u2705'; }
   msgCards.push({id:'mGay',title:(bcRna.cleanerName||'Gayani')+' \u2014 R&A Apartments',phone:bcRna.cleanerPhone||'96565591476',text:gaytxt});
 
@@ -8187,7 +8195,7 @@ try{
   var jastxt='';
   if(bjas.list.length){
     jastxt=(bcJas.label||'Jassem Apartments')+' ( '+cd+' )\nToday\'s Schedule\n\n';
-    jastxt+=numSort(bjas.order).map(function(a){return a+' - '+(jasMp[a]?R:X);}).join('\n');
+    jastxt+=numSort(bjas.order).map(function(a){return a+' - '+((jasMp[a]&&!jasMp[a].staying)?R:X);}).join('\n');
   } else { jastxt='No cleans today \u2705'; }
   msgCards.push({id:'mJas',title:(bcJas.cleanerName||'Bharathi')+' \u2014 Jassem Apartments',phone:bcJas.cleanerPhone||'9655097706',text:jastxt});
 
@@ -8196,7 +8204,7 @@ try{
   var bfat=BUILDINGS['fat']||{list:[],order:[]};
   var fatMp={};bfat.list.forEach(function(e){fatMp[e.label]=e;});
   var bistxt=bfat.list.length
-    ?((bcFat.label||'Fatema Apartments')+' ( '+cd+' )\nToday\'s Schedule\n\n'+strSort(bfat.order).map(function(a){return a+' - '+(fatMp[a]?R:X);}).join('\n'))
+    ?((bcFat.label||'Fatema Apartments')+' ( '+cd+' )\nToday\'s Schedule\n\n'+strSort(bfat.order).map(function(a){return a+' - '+((fatMp[a]&&!fatMp[a].staying)?R:X);}).join('\n'))
     :'No cleans today \u2705';
   msgCards.push({id:'mBis',title:(bcFat.cleanerName||'Biswa')+' \u2014 Fatema',phone:bcFat.cleanerPhone||'96555127880',text:bistxt});
 
@@ -8205,13 +8213,13 @@ try{
   var bsel=BUILDINGS['sel']||{list:[],order:[]};
   var selMp={};bsel.list.forEach(function(e){selMp[e.label]=e;});
   var shatxt=bsel.list.length
-    ?((bcSel.label||'Selena Apartments')+' ( '+cd+' )\nToday\'s Schedule\n\n'+numSort(bsel.order).map(function(a){return a+' - '+(selMp[a]?R:X);}).join('\n'))
+    ?((bcSel.label||'Selena Apartments')+' ( '+cd+' )\nToday\'s Schedule\n\n'+numSort(bsel.order).map(function(a){return a+' - '+((selMp[a]&&!selMp[a].staying)?R:X);}).join('\n'))
     :'No cleans today \u2705';
   msgCards.push({id:'mSha',title:(bcSel.cleanerName||'Kanthi')+' \u2014 Selena',phone:bcSel.cleanerPhone||'96597936588',text:shatxt});
 
   // Samyuktha — Selena Supervisor
   var samtxt=bsel.list.length
-    ?((bcSel.label||'Selena Apartments')+' ( '+cd+' )\nToday\'s Schedule\n\n'+numSort(bsel.order).map(function(a){return a+' - '+(selMp[a]?R:X);}).join('\n'))
+    ?((bcSel.label||'Selena Apartments')+' ( '+cd+' )\nToday\'s Schedule\n\n'+numSort(bsel.order).map(function(a){return a+' - '+((selMp[a]&&!selMp[a].staying)?R:X);}).join('\n'))
     :'No cleans today at Selena \u2705';
   var samyName=bcSel.supName||'Samyuktha'; var samyPhone=bcSel.supPhone||'96551765790';
   if(samyName) msgCards.push({id:'mSamy',title:samyName+' \u2014 Selena Supervisor',phone:samyPhone,text:samtxt});
@@ -8230,7 +8238,7 @@ try{
       bld.order.forEach(function(a){custTxt+=cfg.prefix+a+' - '+(bld.apts[a]&&bld.apts[a].status==='booked'?R:X)+'\n';});
     } else {
       var custMp={};bld.list.forEach(function(e){custMp[e.label]=e;});
-      bld.order.forEach(function(a){custTxt+=a+' - '+(custMp[a]?R:X)+'\n';});
+      bld.order.forEach(function(a){custTxt+=a+' - '+((custMp[a]&&!custMp[a].staying)?R:X)+'\n';});
     }
     if(!cfg.name){
       _unassignedBldgs.push(cfg.label);
