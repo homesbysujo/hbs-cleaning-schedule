@@ -3962,8 +3962,8 @@ function parseDOR(){
       creditAmount=parseFloat(creditM[3]);
     } else {
       // Separate lines: "Paid KD 60" + "Pending KD 30"
-      var paidLineM=raw.match(/paid\s+(?:kd\s*)?([\d.]+)/i);
-      var pendLineM=raw.match(/pending\s+(?:kd\s*)?([\d.]+)/i);
+      var paidLineM=raw.match(/paid\s+(?:kd\s*)?([\d.]+)\s*(?:kd)?/i);
+      var pendLineM=raw.match(/pending\s+(?:kd\s*)?([\d.]+)\s*(?:kd)?/i);
       if(paidLineM&&pendLineM){
         paidAmount=parseFloat(paidLineM[1]);
         pendingAmount=parseFloat(pendLineM[1]);
@@ -3997,7 +3997,7 @@ function parseDOR(){
   var isPending=raw.indexOf('\u203C')!==-1||/payment\s*pending/i.test(raw)||pendingAmount>0;
   // Paid if: "Paid", "Payment X kd" (amount without pending), or creditAmount
   var isPaid=!isPending&&(/\bpaid\b/i.test(raw)||/payment\s+[\d.]+\s*kd/i.test(raw)||/kd\s*[\d.]+/i.test(raw)||creditAmount>0);
-  var status=isPending?'pending':(isPaid?'paid':'paid');
+  var status=(paidAmount>0&&pendingAmount>0)?'partial':(isPending?'pending':(isPaid?'paid':'paid'));
 
   // 6b. BLOCKED ON AIRBNB — "blocked" keyword present
   var isBlocked=/\bblocked\b/i.test(raw);
@@ -8937,8 +8937,8 @@ function parseDOR(){
       creditAmount=parseFloat(creditM[3]);
     } else {
       // Separate lines: "Paid KD 60" + "Pending KD 30"
-      var paidLineM=raw.match(/paid\s+(?:kd\s*)?([\d.]+)/i);
-      var pendLineM=raw.match(/pending\s+(?:kd\s*)?([\d.]+)/i);
+      var paidLineM=raw.match(/paid\s+(?:kd\s*)?([\d.]+)\s*(?:kd)?/i);
+      var pendLineM=raw.match(/pending\s+(?:kd\s*)?([\d.]+)\s*(?:kd)?/i);
       if(paidLineM&&pendLineM){
         paidAmount=parseFloat(paidLineM[1]);
         pendingAmount=parseFloat(pendLineM[1]);
@@ -8972,7 +8972,7 @@ function parseDOR(){
   var isPending=raw.indexOf('\u203C')!==-1||/payment\s*pending/i.test(raw)||pendingAmount>0;
   // Paid if: "Paid", "Payment X kd" (amount without pending), or creditAmount
   var isPaid=!isPending&&(/\bpaid\b/i.test(raw)||/payment\s+[\d.]+\s*kd/i.test(raw)||/kd\s*[\d.]+/i.test(raw)||creditAmount>0);
-  var status=isPending?'pending':(isPaid?'paid':'paid');
+  var status=(paidAmount>0&&pendingAmount>0)?'partial':(isPending?'pending':(isPaid?'paid':'paid'));
 
   // 6b. BLOCKED ON AIRBNB — "blocked" keyword present
   var isBlocked=/\bblocked\b/i.test(raw);
