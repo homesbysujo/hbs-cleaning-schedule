@@ -4801,7 +4801,7 @@ function renderBookings(){
 
         // Generate formatted reservation list text
         var list='Apartment update '+MSHORT2[_bkCalMonth]+' '+_bkSelDay+' ('+dayName+')\n';
-        var totalDirect=0, totalAirbnb=0, totalAvail=0, totalReserved=0, totalKD=0;
+        var totalDirect=0, totalAirbnb=0, totalAvail=0, totalReserved=0, totalKD=0, totalPending=0;
 
         var totalApts=ALL_APTS.reduce(function(s,b){return s+b.apts.length;},0);
 
@@ -4828,25 +4828,25 @@ function renderBookings(){
               var _isPartial = matched.status==='partial' || (matched.paidAmount>0 && matched.pendingAmount>0);
               var emoji = matched.type==='airbnb' ? '\uD83C\uDD70\uFE0F' : '\uD83D\uDCB0';
               var nightsNum = matched.nights&&matched.nights>1?matched.nights:1;
-              var _paidPortion = parseFloat(_isPartial ? matched.paidAmount : matched.amount)||0;
-              var perNight = nightsNum>1?Math.round((_paidPortion/nightsNum)*10)/10:_paidPortion;
+              /* paid portion = full amount for paid; paidAmount for partial; 0 for fully pending */
+              var _rawPaid = _isPending ? 0 : parseFloat(_isPartial ? matched.paidAmount : matched.amount)||0;
+              var _rawPend = _isPending ? (parseFloat(matched.pendingAmount)||parseFloat(matched.amount)||0) : (parseFloat(matched.pendingAmount)||0);
+              /* per-night values (divide by nights for multi-night stays) */
+              var paidPerNight = nightsNum>1?Math.round((_rawPaid/nightsNum)*10)/10:_rawPaid;
+              var pendPerNight = nightsNum>1?Math.round((_rawPend/nightsNum)*10)/10:_rawPend;
               var kdStr;
               if(_isPending){
-                /* fully pending: no paid amount shown, only the pending suffix */
-                kdStr='';
+                kdStr=''; /* fully pending: only the pending suffix shows */
               } else if(_isPartial){
-                /* partial: show the PAID amount as 'KD X' (always, regardless of nights) */
-                kdStr=' / KD '+_paidPortion;
+                kdStr=' / KD '+paidPerNight;
               } else {
-                /* fully paid: per-night kd */
-                kdStr=perNight?' / '+perNight+'kd':'';
+                kdStr=paidPerNight?' / '+paidPerNight+'kd':'';
               }
-              var _pendAmt = _isPending ? (parseFloat(matched.pendingAmount)||parseFloat(matched.amount)||0) : (parseFloat(matched.pendingAmount)||0);
-              var pendingSuffix = _pendAmt>0 ? ' / \u203C\uFE0F '+_pendAmt+' KD' : '';
+              var pendingSuffix = pendPerNight>0 ? ' / \u203C\uFE0F '+pendPerNight+' KD' : '';
               var nightsSuffix = nightsNum>1?' / '+nightsNum+' nights \uD83D\uDD01':'';
               if(matched.type==='direct') totalDirect++;
               else totalAirbnb++;
-              if(matched.amount) totalKD+=perNight;
+              if(matched.type==='direct'){ totalKD+=paidPerNight; totalPending+=pendPerNight; }
               var guestDisplay=matched.name||(matched.phone?fmtGuestPhone(matched.phone):'')||'';
               list+=emoji+' '+apt.label+' - '+guestDisplay+kdStr+pendingSuffix+nightsSuffix+'\n';
             } else {
@@ -4887,8 +4887,20 @@ function renderBookings(){
         list+='\u2705 -   '+totalAvail+'\n';
         list+=(dayExtras&&dayExtras.length?'\uD83D\uDCB5 -   '+dayExtras.length+'\n':'');
         list+='Today\'s incentive - NIL\n\n';
-        dayExtras.forEach(function(ex){totalKD+=(parseFloat(ex.amount)||0);});
-        list+='Total \uD83D\uDCB0 :  '+_kd(totalKD)+' KD\n';
+        dayExtras.forEach(function(ex){
+          var exNights=(ex.nights&&ex.nights>1)?ex.nights:1;
+          var exPaid=(ex.status==='pending')?0:(parseFloat((ex.status==='partial'||(ex.paidAmount>0&&ex.pendingAmount>0))?ex.paidAmount:ex.amount)||0);
+          var exPend=(ex.status==='pending')?(parseFloat(ex.pendingAmount)||parseFloat(ex.amount)||0):(parseFloat(ex.pendingAmount)||0);
+          totalKD+=(exNights>1?Math.round((exPaid/exNights)*10)/10:exPaid);
+          totalPending+=(exNights>1?Math.round((exPend/exNights)*10)/10:exPend);
+        });
+        totalKD=Math.round(totalKD*10)/10; totalPending=Math.round(totalPending*10)/10;
+        var _grand=Math.round((totalKD+totalPending)*10)/10;
+        if(totalPending>0){
+          list+='Total \uD83D\uDCB0 :  '+_kd(totalKD)+' KD ( \u203C\uFE0F '+_kd(totalPending)+' KD ) = '+_kd(_grand)+' KD\n\n';
+        } else {
+          list+='Total \uD83D\uDCB0 :  '+_kd(totalKD)+' KD\n\n';
+        }
         list+='Reserved  -  '+totalReserved+' \uD83D\uDE0E\n';
         list+='Available  -  '+totalAvail+' ‼️';
 
@@ -9615,7 +9627,7 @@ function renderBookings(){
 
         // Generate formatted reservation list text
         var list='Apartment update '+MSHORT2[_bkCalMonth]+' '+_bkSelDay+' ('+dayName+')\n';
-        var totalDirect=0, totalAirbnb=0, totalAvail=0, totalReserved=0, totalKD=0;
+        var totalDirect=0, totalAirbnb=0, totalAvail=0, totalReserved=0, totalKD=0, totalPending=0;
 
         var totalApts=ALL_APTS.reduce(function(s,b){return s+b.apts.length;},0);
 
@@ -9642,25 +9654,25 @@ function renderBookings(){
               var _isPartial = matched.status==='partial' || (matched.paidAmount>0 && matched.pendingAmount>0);
               var emoji = matched.type==='airbnb' ? '\uD83C\uDD70\uFE0F' : '\uD83D\uDCB0';
               var nightsNum = matched.nights&&matched.nights>1?matched.nights:1;
-              var _paidPortion = parseFloat(_isPartial ? matched.paidAmount : matched.amount)||0;
-              var perNight = nightsNum>1?Math.round((_paidPortion/nightsNum)*10)/10:_paidPortion;
+              /* paid portion = full amount for paid; paidAmount for partial; 0 for fully pending */
+              var _rawPaid = _isPending ? 0 : parseFloat(_isPartial ? matched.paidAmount : matched.amount)||0;
+              var _rawPend = _isPending ? (parseFloat(matched.pendingAmount)||parseFloat(matched.amount)||0) : (parseFloat(matched.pendingAmount)||0);
+              /* per-night values (divide by nights for multi-night stays) */
+              var paidPerNight = nightsNum>1?Math.round((_rawPaid/nightsNum)*10)/10:_rawPaid;
+              var pendPerNight = nightsNum>1?Math.round((_rawPend/nightsNum)*10)/10:_rawPend;
               var kdStr;
               if(_isPending){
-                /* fully pending: no paid amount shown, only the pending suffix */
-                kdStr='';
+                kdStr=''; /* fully pending: only the pending suffix shows */
               } else if(_isPartial){
-                /* partial: show the PAID amount as 'KD X' (always, regardless of nights) */
-                kdStr=' / KD '+_paidPortion;
+                kdStr=' / KD '+paidPerNight;
               } else {
-                /* fully paid: per-night kd */
-                kdStr=perNight?' / '+perNight+'kd':'';
+                kdStr=paidPerNight?' / '+paidPerNight+'kd':'';
               }
-              var _pendAmt = _isPending ? (parseFloat(matched.pendingAmount)||parseFloat(matched.amount)||0) : (parseFloat(matched.pendingAmount)||0);
-              var pendingSuffix = _pendAmt>0 ? ' / \u203C\uFE0F '+_pendAmt+' KD' : '';
+              var pendingSuffix = pendPerNight>0 ? ' / \u203C\uFE0F '+pendPerNight+' KD' : '';
               var nightsSuffix = nightsNum>1?' / '+nightsNum+' nights \uD83D\uDD01':'';
               if(matched.type==='direct') totalDirect++;
               else totalAirbnb++;
-              if(matched.amount) totalKD+=perNight;
+              if(matched.type==='direct'){ totalKD+=paidPerNight; totalPending+=pendPerNight; }
               var guestDisplay=matched.name||(matched.phone?fmtGuestPhone(matched.phone):'')||'';
               list+=emoji+' '+apt.label+' - '+guestDisplay+kdStr+pendingSuffix+nightsSuffix+'\n';
             } else {
@@ -9701,8 +9713,20 @@ function renderBookings(){
         list+='\u2705 -   '+totalAvail+'\n';
         list+=(dayExtras&&dayExtras.length?'\uD83D\uDCB5 -   '+dayExtras.length+'\n':'');
         list+='Today\'s incentive - NIL\n\n';
-        dayExtras.forEach(function(ex){totalKD+=(parseFloat(ex.amount)||0);});
-        list+='Total \uD83D\uDCB0 :  '+_kd(totalKD)+' KD\n';
+        dayExtras.forEach(function(ex){
+          var exNights=(ex.nights&&ex.nights>1)?ex.nights:1;
+          var exPaid=(ex.status==='pending')?0:(parseFloat((ex.status==='partial'||(ex.paidAmount>0&&ex.pendingAmount>0))?ex.paidAmount:ex.amount)||0);
+          var exPend=(ex.status==='pending')?(parseFloat(ex.pendingAmount)||parseFloat(ex.amount)||0):(parseFloat(ex.pendingAmount)||0);
+          totalKD+=(exNights>1?Math.round((exPaid/exNights)*10)/10:exPaid);
+          totalPending+=(exNights>1?Math.round((exPend/exNights)*10)/10:exPend);
+        });
+        totalKD=Math.round(totalKD*10)/10; totalPending=Math.round(totalPending*10)/10;
+        var _grand=Math.round((totalKD+totalPending)*10)/10;
+        if(totalPending>0){
+          list+='Total \uD83D\uDCB0 :  '+_kd(totalKD)+' KD ( \u203C\uFE0F '+_kd(totalPending)+' KD ) = '+_kd(_grand)+' KD\n\n';
+        } else {
+          list+='Total \uD83D\uDCB0 :  '+_kd(totalKD)+' KD\n\n';
+        }
         list+='Reserved  -  '+totalReserved+' \uD83D\uDE0E\n';
         list+='Available  -  '+totalAvail+' ‼️';
 
