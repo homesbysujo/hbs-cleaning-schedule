@@ -3076,7 +3076,7 @@ try{
   if(b62.order.length){
     a62txt+=numSort(b62.order).map(function(a){
       var booked=b62.apts[a]&&b62.apts[a].status==='booked';
-      return '62-'+a+' - '+(booked?R+' (KD 2.5)':X);
+      return '62-'+a+' - '+(booked?'Will Update':'Vacant');
     }).join('\n');
   } else { a62txt+='No cleans today \u2705'; }
   a62txt+='\n\nToday - '+t62d+' kd\nIncluding today - '+S.t62.toFixed(1)+' kd';
@@ -3088,7 +3088,7 @@ try{
   if(b60.order.length){
     a60txt+=numSort(b60.order).map(function(a){
       var booked=b60.apts[a]&&b60.apts[a].status==='booked';
-      return '60-'+a+' - '+(booked?R+' (KD 2.5)':X);
+      return '60-'+a+' - '+(booked?'Will Update':'Vacant');
     }).join('\n');
   } else { a60txt+='No cleans today \u2705'; }
   a60txt+='\n\nToday - '+t60d+' kd\nIncluding today - '+S.t60.toFixed(1)+' kd';
@@ -8142,7 +8142,7 @@ try{
   if(b62.order.length){
     a62txt+=numSort(b62.order).map(function(a){
       var booked=b62.apts[a]&&b62.apts[a].status==='booked';
-      return '62-'+a+' - '+(booked?R+' (KD 2.5)':X);
+      return '62-'+a+' - '+(booked?'Will Update':'Vacant');
     }).join('\n');
   } else { a62txt+='No cleans today \u2705'; }
   a62txt+='\n\nToday - '+t62d+' kd\nIncluding today - '+S.t62.toFixed(1)+' kd';
@@ -8154,7 +8154,7 @@ try{
   if(b60.order.length){
     a60txt+=numSort(b60.order).map(function(a){
       var booked=b60.apts[a]&&b60.apts[a].status==='booked';
-      return '60-'+a+' - '+(booked?R+' (KD 2.5)':X);
+      return '60-'+a+' - '+(booked?'Will Update':'Vacant');
     }).join('\n');
   } else { a60txt+='No cleans today \u2705'; }
   a60txt+='\n\nToday - '+t60d+' kd\nIncluding today - '+S.t60.toFixed(1)+' kd';
