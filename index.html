@@ -127,6 +127,18 @@ body.dark .mcard2-title{color:#D4AE5E}
 @media print{.mcard2{display:none!important}}
 
 ._pkl{font-size:10px;font-weight:700;color:#7A66B0;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+
+._bkel{font-size:10px;font-weight:700;color:#A07830;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+._bkesb{padding:11px 6px;border-radius:11px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;border:2px solid #E8DDD0;background:#FAF7F2;color:#888}
+
+@keyframes bkeFieldIn{0%{opacity:0;transform:translateY(14px)}100%{opacity:1;transform:none}}
+@keyframes bkeStatusPop{0%{transform:scale(1)}45%{transform:scale(1.09)}100%{transform:scale(1)}}
+#_bkeOv input{transition:border-color .2s,box-shadow .2s,transform .12s}
+#_bkeOv input:focus{border-color:#1B7A40!important;box-shadow:0 0 0 3px rgba(27,122,64,.13);transform:scale(1.01)}
+#_bkeOv button:active{transform:scale(.95)}
+#_bkeOv ._bkesb:hover,#_bkeOv #_bke-bldg-pills button:hover,#_bkeOv #_bke-apt-grid button:hover{filter:brightness(.97)}
+
+._pkgsb{padding:11px 6px;border-radius:11px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;border:2px solid #D8CCF0;background:#F7F4FC;color:#888}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
@@ -1018,6 +1030,11 @@ button{-webkit-user-select:none;user-select:none}
             <option value="airbnb">&#127344;&#65039; Airbnb</option>
           </select>
         </div>
+      </div>
+      <div style="margin-bottom:10px">
+        <div style="font-size:10px;font-weight:600;color:var(--gd);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px">&#128274; Block the Date (on Airbnb)</div>
+        <input type="hidden" id="bk-blockedby" value="">
+        <button type="button" onclick="_bkOpenBlockPicker()" id="bk-blockedby-btn" style="width:100%;background:var(--cr);border:1.5px solid var(--gl);border-radius:9px;color:var(--t3);font-family:'DM Sans',sans-serif;font-size:13px;padding:11px 12px;outline:none;cursor:pointer;text-align:left;display:flex;align-items:center;justify-content:space-between">Not blocked yet <span style="font-size:11px;color:var(--t3)">&#9656;</span></button>
       </div>
       <button onclick="addBookingManual()" style="width:100%;background:var(--br);color:#fff;border:none;border-radius:12px;padding:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:6px">&#10003; Save Reservation</button>
       </div>
@@ -2976,7 +2993,7 @@ try{
       var nm=line.match(/\b(\d{3,4})\b/);
       if(nm){
         var num=nm[1];
-        var isAvail=line.indexOf('\u2705')!==-1; // ✅ = available/clean, not a clean needed
+        var isAvail=line.indexOf('\u2705')!==-1||line.indexOf('\uD83E\uDDF9')!==-1; // ✅ or 🧹 = available/already cleaned
         if(!bld.apts[num]){bld.apts[num]={status:'empty',emoji:'',guest:'',kd:0,cash:false,rawLine:''};}
         if(bld.order.indexOf(num)===-1) bld.order.push(num);
         if(isAvail){
@@ -2990,7 +3007,7 @@ try{
       }
     } else {
       // Flat building: extract label as first token after stripping emojis/prefix
-      var isAvailFlat=line.indexOf('\u2705')!==-1; // ✅ = available, skip cleaning
+      var isAvailFlat=line.indexOf('\u2705')!==-1||line.indexOf('\uD83E\uDDF9')!==-1; // ✅ or 🧹 = available/already cleaned
       var lb=line.replace(/\uD83C\uDD70\uFE0F/g,'').replace(/\uD83C\uDD70/g,'').replace(/\uD83D\uDCB0/g,'').replace(/\u203C\uFE0F/g,'').replace(/\u203C/g,'').replace(/\uD83D\uDD01/g,'').replace(/\u2705/g,'').replace(/\uD83D\uDCB8/g,'').replace(/\uD83D\uDCB5/g,'').replace(/\uD83D\uDCB6/g,'').replace(/\uD83D\uDCB7/g,'').replace(/\u2B1C/g,'').replace(/^[-\s]+/,'').trim();
       // Strip known building name prefixes (sel, selena, r&a, jassem, fatema, fat, etc.)
       var cl=lb.replace(/^(sel(ena)?|r&a|r\s*and\s*a|jassem|fatema|fat|[a-z]+\s+apartments?)\s*/i,'').trim();
@@ -3800,6 +3817,8 @@ function saveBookings(){ try{localStorage.setItem('hbs_bookings',JSON.stringify(
 function bkid(){ return 'bk'+Date.now()+Math.floor(Math.random()*9999); }
 function _bkPrefillDates(){
   try{
+    var _bbi=document.getElementById('bk-blockedby'),_bbt=document.getElementById('bk-blockedby-btn');
+    if(_bbi&&!_bbi.value&&_bbt){_bbt.innerHTML='Not blocked yet <span style="font-size:11px;color:var(--t3)">\u25b8</span>';_bbt.style.color='var(--t3)';_bbt.style.borderColor='var(--gl)';_bbt.style.background='var(--cr)';}
     var ci=document.getElementById('bk-checkin'),co=document.getElementById('bk-checkout');
     if(!ci&&!co)return;
     var n=(typeof kwNow==='function')?kwNow():new Date();
@@ -4366,7 +4385,7 @@ function sendShortCheckoutWA(id){
     if(phone.length<7)phone='';
   }
   var firstName=b.name?b.name.split(' ')[0]:'';
-  var msg='Good morning \u2600\uFE0F'+(firstName?' '+firstName:'')+'!\nHope you had a great stay. Please let me know once you check out so I can arrange housekeeping.\nThank you \uD83D\uDE0A\uD83C\uDF38';
+  var msg='Good Morning'+(firstName?' '+firstName:'')+' \uD83C\uDF1E\nHope you had a great evening. Please let me know once you check out so I can arrange housekeeping.\nThank you \uD83D\uDE0A';
   window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(msg),'_blank');
 }
 
@@ -4527,7 +4546,8 @@ function addBookingManual(){
   var nights=0;
   if(cin&&cout){ var d1=new Date(cin+'T12:00:00'),d2=new Date(cout+'T12:00:00'); if(!isNaN(d1)&&!isNaN(d2)) nights=Math.round((d2-d1)/(86400000)); }
 
-  var bk={id:bkid(),apt:apt.trim(),name:name.trim(),phone:phone.trim(),amount:amount,checkin:checkin,checkout:checkout,nights:nights,type:type,status:initialStatus,blocked:false,blockedBy:'',notYetBlocked:type==='direct',lateMark:_lateMarkFor(checkin)};
+  var _bkBlockBy=((document.getElementById('bk-blockedby')||{}).value||'').trim();
+  var bk={id:bkid(),apt:apt.trim(),name:name.trim(),phone:phone.trim(),amount:amount,checkin:checkin,checkout:checkout,nights:nights,type:type,status:initialStatus,blocked:!!_bkBlockBy,blockedBy:_bkBlockBy,notYetBlocked:(type==='direct'&&!_bkBlockBy),lateMark:_lateMarkFor(checkin)};
   var _dupM=BOOKINGS.filter(function(b){return b.apt===bk.apt&&b.checkin===bk.checkin&&b.status!=='cancelled';});
   if(_dupM.length){if(!confirm('⚠️ Duplicate!\n'+bk.apt+' already has a booking on '+bk.checkin+'.\n\nAdd anyway?'))return;}
   BOOKINGS.push(bk);
@@ -4568,7 +4588,7 @@ function cancelBk(id){
   var refundType='';
   var refundAmt=0;
   var choice=prompt(
-    'Refund type:\n\n1 - Full refund (KD '+parseFloat(b.amount||0).toFixed(1)+')\n2 - Partial refund\n3 - No refund\n\nType 1, 2 or 3:',
+    'Refund type:\n\n1 - Full refund (KD '+parseFloat(b.amount||0).toFixed(1)+')\n2 - Partial refund\n3 - No refund\n4 - Edit amount (type any amount)\n\nType 1, 2, 3 or 4:',
     '1'
   );
   if(choice===null) return; // cancelled prompt
@@ -4580,6 +4600,11 @@ function cancelBk(id){
     if(partial===null) return;
     refundAmt=parseFloat(partial)||0;
     refundType='Partial';
+  } else if(choice==='4'){
+    var custom=prompt('Enter the refund amount to send (KD):', '');
+    if(custom===null) return;
+    refundAmt=parseFloat(custom)||0;
+    refundType='Custom';
   } else {
     refundType='No Refund';
     refundAmt=0;
@@ -4899,16 +4924,29 @@ function renderBookings(){
                 kdStr=paidPerNight?' / '+paidPerNight+'kd':'';
               }
               var pendingSuffix = pendPerNight>0 ? ' / \u203C\uFE0F '+pendPerNight+' KD' : '';
-              var nightsSuffix = nightsNum>1?' / '+nightsNum+' nights \uD83D\uDD01':'';
+              var _isLastNight=false;
+              if(nightsNum>1){
+                try{
+                  var _cp=(matched.checkin||'').split(' ');
+                  if(_cp.length>=3){
+                    var _cin=new Date(_cp[0]+' '+_cp[1]+' '+_cp[2]);
+                    var _lastNight=new Date(_cin); _lastNight.setDate(_lastNight.getDate()+(nightsNum-1));
+                    var _selD=new Date(_bkCalYear,_bkCalMonth,_bkSelDay);
+                    if(_lastNight.getFullYear()===_selD.getFullYear()&&_lastNight.getMonth()===_selD.getMonth()&&_lastNight.getDate()===_selD.getDate())_isLastNight=true;
+                  }
+                }catch(e){}
+              }
+              var nightsSuffix = (nightsNum>1&&!_isLastNight)?' / '+nightsNum+' nights \uD83D\uDD01':'';
               if(matched.type==='direct') totalDirect++;
               else totalAirbnb++;
-              /* For package stays, the reservation-list total uses the REAL booking amount
-                 (full lump on first stay, 0 on the rest) so the package isn't overcounted. */
+              /* Package stays: count the per-stay amount (total ÷ stays) in the daily total. */
               var _realPaidNight = matched.isPkgStay
-                ? (nightsNum>1?Math.round(((parseFloat(matched.amount)||0)/nightsNum)*10)/10:(parseFloat(matched.amount)||0))
+                ? (nightsNum>1?Math.round(((parseFloat(matched.perStayDisplay)||0)/nightsNum)*10)/10:(parseFloat(matched.perStayDisplay)||0))
                 : paidPerNight;
               if(matched.type==='direct'){ totalKD+=_realPaidNight; totalPending+=pendPerNight; }
-              var guestDisplay=matched.name||(matched.phone?fmtGuestPhone(matched.phone):'')||'';
+              var _gName=(matched.name||'').trim();
+              var _gPhone=matched.phone?fmtGuestPhone(matched.phone):'';
+              var guestDisplay=(_gName&&_gPhone)?(_gName+' '+_gPhone):(_gName||_gPhone||'');
               var lateSuffix=matched.lateMark?' \uD83D\uDC48\uD83C\uDFFB':'';
               list+=emoji+' '+apt.label+' - '+guestDisplay+kdStr+pendingSuffix+nightsSuffix+lateSuffix+'\n';
             } else {
@@ -4940,7 +4978,8 @@ function renderBookings(){
           dayExtras.forEach(function(ex){
             var kdAmt = ex.amount ? ex.amount+'kd' : '';
             var phoneStr = ex.phone ? ' '+ex.phone : '';
-            list+='\uD83D\uDCB5 '+ex.apt+' -'+ex.name+(phoneStr?' '+phoneStr:'')+(kdAmt?' / '+kdAmt:'')+'\n';
+            var cleanSuffix = ex.sameDayCleaned ? ' \uD83E\uDDF9' : '';
+            list+='\uD83D\uDCB5 '+ex.apt+' -'+ex.name+(phoneStr?' '+phoneStr:'')+(kdAmt?' / '+kdAmt:'')+cleanSuffix+'\n';
           });
           list+='\n';
         }
@@ -5044,6 +5083,8 @@ function makeBkCard(b){
     amtHtml='<div style="margin-bottom:12px"><span style="font-family:\'DM Serif Display\',serif;font-size:16px;color:var(--gn)">KD '+parseFloat(b.amount).toFixed(1)+' booked</span> <span style="font-size:13px;color:#2E7D32;font-weight:700;background:#E8F5E9;padding:2px 8px;border-radius:8px">+KD '+parseFloat(b.creditAmount).toFixed(1)+' credit</span></div>';
   } else if(b.pendingAmount>0&&b.amount>b.pendingAmount){
     amtHtml='<div style="margin-bottom:12px"><span style="font-family:\'DM Serif Display\',serif;font-size:16px;color:var(--gn)">KD '+parseFloat(b.paidAmount||0).toFixed(1)+' paid</span> <span style="font-size:13px;color:#c44;font-weight:600">+ KD '+parseFloat(b.pendingAmount).toFixed(1)+' pending</span> <span style="font-size:11px;color:var(--t3)">/ KD '+parseFloat(b.amount).toFixed(1)+' total</span></div>';
+  } else if(b.isPkgStay&&b.perStayDisplay){
+    amtHtml='<div style="font-family:\'DM Serif Display\',serif;font-size:20px;color:#4A2D82;margin-bottom:12px">KD '+parseFloat(b.perStayDisplay).toFixed(1)+' <span style="font-size:12px;font-weight:600;color:#7A66B0">/ stay</span></div>';
   } else if(b.amount){
     amtHtml='<div style="font-family:\'DM Serif Display\',serif;font-size:20px;color:var(--gn);margin-bottom:12px">KD '+parseFloat(b.amount).toFixed(1)+'</div>';
   }
@@ -5053,8 +5094,23 @@ function makeBkCard(b){
   var nightsBar='<div class="night-pill-wrap"><div class="night-tooltip">'+nights+' night stay</div><span class="night-pill" onclick="this.style.animation=\'none\';void this.offsetWidth;this.style.animation=\'pillPop 0.4s cubic-bezier(.34,1.56,.64,1)\'"><span class="npshimmer"></span>'+nights+' nights</span></div>';
 
   // Status color for left border
-  var borderColor=(b.type==='airbnb')?'#FF385C':(isPaid?'#4CAF50':'#FF9800');
+  var borderColor=b.isPkgStay?'#5A3D9E':((b.type==='airbnb')?'#FF385C':(isPaid?'#4CAF50':'#FF9800'));
   var cardId='bkcard_'+b.id;
+  /* Checkout buttons: for multi-night stays only show on the guest's LAST night
+     (check-in + nights - 1). Single-night stays always show. */
+  var _showCheckout=true;
+  try{
+    var _bn=parseInt(b.nights)||1;
+    if(_bn>1 && typeof _bkSelDay!=='undefined' && _bkSelDay){
+      var _cp=(b.checkin||'').split(' ');
+      if(_cp.length>=3){
+        var _cin=new Date(_cp[0]+' '+_cp[1]+' '+_cp[2]);
+        var _lastNight=new Date(_cin); _lastNight.setDate(_lastNight.getDate()+(_bn-1));
+        var _sel=new Date(_bkCalYear,_bkCalMonth,_bkSelDay);
+        _showCheckout=(_lastNight.getFullYear()===_sel.getFullYear()&&_lastNight.getMonth()===_sel.getMonth()&&_lastNight.getDate()===_sel.getDate());
+      }
+    }
+  }catch(e){}
 
   return '<div id="'+cardId+'" class="bk-card-anim" style="border:1.5px solid var(--gl);border-left:4px solid '+borderColor+';border-radius:16px;padding:16px;margin-bottom:12px;background:var(--wh);position:relative;overflow:hidden;transition:box-shadow 0.2s,transform 0.15s;cursor:default" '
     +'onmouseenter="this.style.boxShadow=\'0 8px 32px rgba(92,61,30,0.13)\';this.style.transform=\'translateY(-2px)\'" '
@@ -5070,7 +5126,7 @@ function makeBkCard(b){
     +(b.name?'<div style="font-size:13px;font-weight:600;color:var(--t1);margin-top:2px">&#128100; '+escH(b.name)+'</div>':'')
     +(b.phone?'<div style="font-size:12px;color:var(--t3);margin-top:1px;white-space:nowrap">&#128222; '+escH(fmtGuestPhone(b.phone))+'</div>':'')
     +'</div>'
-    +'<div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;justify-content:flex-end">'+creditBadge+pkgBadge+typeLabel+paidBadge+blockedBadge+'</div>'
+    +'<div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;justify-content:flex-end">'+(b.isPkgStay?'<span style="background:#EDE7F6;color:#4A2D82;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">\uD83D\uDCB3 Package</span>':'')+creditBadge+pkgBadge+typeLabel+paidBadge+blockedBadge+'</div>'
     +'</div>'
 
     // Date row with visual divider
@@ -5085,15 +5141,23 @@ function makeBkCard(b){
 
     // Action buttons — mobile-friendly 2-column grid
     +(b.status!=='paid'?'<button onclick="bkBtnClick(this);markBkPaid(\''+b.id+'\')" class="bk-btn" style="width:100%;background:var(--gnb);color:var(--gn);border:1.5px solid #C3E0CE;border-radius:12px;padding:13px 10px;font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;transition:all 0.15s;margin-bottom:8px">&#10003; Mark Paid</button>':'')
-    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'
-    +'<button onclick="bkBtnClick(this);sendCheckinWA(\''+b.id+'\')" class="bk-btn" style="background:#25D366;color:#fff;border:none;border-radius:12px;padding:14px 8px;font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;transition:all 0.15s">'+WA_SVG_S+' Check-in</button>'
-    +'<button onclick="bkBtnClick(this);sendCheckoutWA(\''+b.id+'\')" class="bk-btn" style="background:#c44;color:#fff;border:none;border-radius:12px;padding:14px 8px;font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;transition:all 0.15s">'+WA_SVG_S+' Checkout</button>'
+    +(_showCheckout
+      ? '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'
+        +'<button onclick="bkBtnClick(this);sendCheckinWA(\''+b.id+'\')" class="bk-btn" style="background:#25D366;color:#fff;border:none;border-radius:12px;padding:14px 8px;font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;transition:all 0.15s">'+WA_SVG_S+' Check-in</button>'
+        +'<button onclick="bkBtnClick(this);sendCheckoutWA(\''+b.id+'\')" class="bk-btn" style="background:#c44;color:#fff;border:none;border-radius:12px;padding:14px 8px;font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;transition:all 0.15s">'+WA_SVG_S+' Checkout</button>'
+        +'</div>'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'
+        +'<button onclick="bkBtnClick(this);sendShortCheckinWA(\''+b.id+'\')" class="bk-btn" style="background:#f0faf4;color:#2E7D52;border:1.5px dashed #A8D5B5;border-radius:12px;padding:13px 8px;font-size:12px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;gap:4px;transition:all 0.15s">'+WA_SVG_S+' Short Check-in</button>'
+        +'<button onclick="bkBtnClick(this);sendShortCheckoutWA(\''+b.id+'\')" class="bk-btn" style="background:#fff0f0;color:#c44;border:1.5px dashed #f5b8b8;border-radius:12px;padding:13px 8px;font-size:12px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;gap:4px;transition:all 0.15s">'+WA_SVG_S+' Short Checkout</button>'
+        +'</div>'
+      : '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'
+        +'<button onclick="bkBtnClick(this);sendCheckinWA(\''+b.id+'\')" class="bk-btn" style="background:#25D366;color:#fff;border:none;border-radius:12px;padding:14px 8px;font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;transition:all 0.15s">'+WA_SVG_S+' Check-in</button>'
+        +'<button onclick="bkBtnClick(this);sendShortCheckinWA(\''+b.id+'\')" class="bk-btn" style="background:#f0faf4;color:#2E7D52;border:1.5px dashed #A8D5B5;border-radius:12px;padding:13px 8px;font-size:12px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;gap:4px;transition:all 0.15s">'+WA_SVG_S+' Short Check-in</button>'
+        +'</div>')
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+    +'<button onclick="bkBtnClick(this);editBooking(\''+b.id+'\')" class="bk-btn" style="background:#FAF7F2;color:#5C3D1E;border:1.5px solid #E8DDD0;border-radius:12px;padding:13px 10px;font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;transition:all 0.15s">\u270F\uFE0F Edit</button>'
+    +'<button onclick="bkBtnClick(this);cancelBk(\''+b.id+'\')" class="bk-btn" style="background:#FFF3E0;color:#c44;border:1.5px solid #FECBA1;border-radius:12px;padding:13px 10px;font-size:13px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;transition:all 0.15s">&#10007; Cancel</button>'
     +'</div>'
-    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'
-    +'<button onclick="bkBtnClick(this);sendShortCheckinWA(\''+b.id+'\')" class="bk-btn" style="background:#f0faf4;color:#2E7D52;border:1.5px dashed #A8D5B5;border-radius:12px;padding:13px 8px;font-size:12px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;gap:4px;transition:all 0.15s">'+WA_SVG_S+' Short Check-in</button>'
-    +'<button onclick="bkBtnClick(this);sendShortCheckoutWA(\''+b.id+'\')" class="bk-btn" style="background:#fff0f0;color:#c44;border:1.5px dashed #f5b8b8;border-radius:12px;padding:13px 8px;font-size:12px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;gap:4px;transition:all 0.15s">'+WA_SVG_S+' Short Checkout</button>'
-    +'</div>'
-    +'<button onclick="bkBtnClick(this);cancelBk(\''+b.id+'\')" class="bk-btn" style="width:100%;background:#FFF3E0;color:#c44;border:1.5px solid #FECBA1;border-radius:12px;padding:13px 10px;font-size:13px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;transition:all 0.15s">&#10007; Cancel Booking</button>'
 
     +'</div>';  // end card
 }
@@ -7393,6 +7457,60 @@ function openGuestModal(){_gEditId=null;document.getElementById('gModalTitle').t
 function closeGuestModal(){document.getElementById('guestModal').classList.remove('open');_gEditId=null;}
 function saveGuest(){var n=document.getElementById('gName').value.trim();if(!n){alert('Enter guest name');return;}var g={id:_gEditId||gid(),name:n,phone:document.getElementById('gPhone').value.trim(),apt:document.getElementById('gApt').value.trim(),amount:parseFloat(document.getElementById('gAmount').value)||0,pendingAmount:parseFloat(document.getElementById('gPendingAmount').value)||0,checkin:document.getElementById('gCheckin').value.trim(),status:document.getElementById('gStatus').value};if(_gEditId){var i=GUESTS.findIndex(function(x){return x.id===_gEditId;});if(i>=0)GUESTS[i]=g;}else GUESTS.push(g);saveGuests();closeGuestModal();}
 loadGuests();
+function _bkOpenBlockPicker(){
+  var apt=((document.getElementById('bk-apt')||{}).value||'').trim();
+  var name=((document.getElementById('bk-name')||{}).value||'').trim();
+  var meta=(apt||'Apartment')+(name?' \u2014 '+name:'');
+  _pickBlockedBy(meta,function(person){
+    var inp=document.getElementById('bk-blockedby');if(inp)inp.value=person;
+    var btn=document.getElementById('bk-blockedby-btn');if(btn){btn.innerHTML='\u2713 Blocked by '+person+' <span style="font-size:11px;color:#1B7A40">\u25b8</span>';btn.style.color='#1B7A40';btn.style.borderColor='#1B7A40';btn.style.background='#EAF7EF';}
+  });
+}
+function _erOpenBlockPicker(){
+  var apt=(_erSelectedApt||'').trim();
+  var name=((document.getElementById('_er-name')||{}).value||'').trim();
+  var meta=(apt||'Apartment')+(name?' \u2014 '+name:'');
+  _pickBlockedBy(meta,function(person){
+    var inp=document.getElementById('_er-blockedby');if(inp)inp.value=person;
+    var btn=document.getElementById('_er-blockedby-btn');if(btn){btn.innerHTML='\u2713 Blocked by '+person+' <span style="font-size:12px;color:#1B7A40">\u25b8</span>';btn.style.color='#1B7A40';btn.style.borderColor='#1B7A40';btn.style.background='#EAF7EF';}
+  });
+}
+function _pickBlockedBy(metaText, onPick){
+  var old=document.getElementById('_dorSheet');if(old)old.remove();
+  var ov=document.createElement('div');ov.id='_dorSheet';
+  ov.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;z-index:99999;background:rgba(26,20,12,.55);backdrop-filter:blur(4px);animation:dorFade .25s ease';
+  var css=document.createElement('style');
+  css.textContent='@keyframes dorFade{from{opacity:0}to{opacity:1}}@keyframes dorUp{from{transform:translateY(100%)}to{transform:none}}@keyframes dorDown{from{transform:none}to{transform:translateY(100%)}}@keyframes dorBtnIn{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}@keyframes dorPop{0%{transform:scale(1)}45%{transform:scale(1.06)}100%{transform:scale(1)}}.dor-pbtn{background:#F8F4EE;border:1.5px solid #E5D4BC;border-radius:14px;padding:15px 10px;font-size:15px;font-weight:700;color:#3D2208;cursor:pointer;width:100%;-webkit-tap-highlight-color:transparent;display:flex;align-items:center;justify-content:center;gap:10px;animation:dorBtnIn .4s cubic-bezier(.2,.8,.3,1) both;transition:transform .15s ease,border-color .2s,box-shadow .2s,background .2s}.dor-pbtn:hover{transform:translateY(-2px);border-color:#5C3D1E;box-shadow:0 6px 16px rgba(92,61,30,.15)}.dor-pbtn:active{transform:scale(.96)}.dor-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0}';
+  ov.appendChild(css);
+  var sh=document.createElement('div');
+  sh.style.cssText='position:absolute;bottom:0;left:0;right:0;background:#fff;border-radius:22px 22px 0 0;padding:20px 20px 40px;animation:dorUp .35s cubic-bezier(.2,.8,.3,1)';
+  function closeSheet(){sh.style.animation='dorDown .3s cubic-bezier(.5,0,.8,.4) both';ov.style.animation='dorFade .3s ease reverse both';setTimeout(function(){ov.remove();},290);}
+  var hnd=document.createElement('div');hnd.style.cssText='width:36px;height:4px;background:#ccc;border-radius:4px;margin:0 auto 18px';sh.appendChild(hnd);
+  var t=document.createElement('div');t.style.cssText='font-size:18px;font-weight:700;color:#3D2208;margin-bottom:4px';t.textContent='\ud83d\udd12 Block the Date';sh.appendChild(t);
+  if(metaText){var info=document.createElement('div');info.style.cssText='font-size:13px;color:#888;margin-bottom:20px';info.textContent=metaText;sh.appendChild(info);}
+  var lbl=document.createElement('div');lbl.style.cssText='font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#999;margin-bottom:14px';lbl.textContent='WHO IS BLOCKING?';sh.appendChild(lbl);
+  var grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px';
+  var PEOPLE=[{n:'Sujo',c:'#5C3D1E'},{n:'Angelo',c:'#1B7A40'},{n:'Alan',c:'#1A5276'},{n:'Munira',c:'#8E44AD'},{n:'Mary',c:'#C0392B'}];
+  var picked=false;
+  PEOPLE.forEach(function(p,i){
+    var btn=document.createElement('button');btn.className='dor-pbtn';btn.style.animationDelay=(i*55)+'ms';
+    btn.innerHTML='<span class="dor-av" style="background:'+p.c+'">'+p.n[0]+'</span>'+p.n;
+    btn.onclick=(function(person){return function(){
+      if(picked)return;picked=true;
+      btn.style.background='#1B7A40';btn.style.borderColor='#1B7A40';btn.style.color='#fff';btn.style.animation='dorPop .35s ease';
+      btn.innerHTML='\u2713 Blocked by '+person;
+      setTimeout(function(){closeSheet();try{onPick(person);}catch(e){}},450);
+    };})(p.n);
+    grid.appendChild(btn);
+  });
+  sh.appendChild(grid);
+  var cancel=document.createElement('button');cancel.textContent='Cancel';
+  cancel.style.cssText='width:100%;background:#fff;border:1.5px solid #ddd;border-radius:14px;padding:14px;font-size:14px;font-weight:600;color:#888;cursor:pointer';
+  cancel.onclick=closeSheet;sh.appendChild(cancel);
+  ov.onclick=function(e){if(e.target===ov)closeSheet();};
+  ov.appendChild(sh);document.body.appendChild(ov);
+}
+
 function markBkBlocked(id){
   loadBookings();
   var b=BOOKINGS.find(function(x){return x.id===id;});
@@ -8088,7 +8206,7 @@ try{
       var nm=line.match(/\b(\d{3,4})\b/);
       if(nm){
         var num=nm[1];
-        var isAvail=line.indexOf('\u2705')!==-1; // ✅ = available/clean, not a clean needed
+        var isAvail=line.indexOf('\u2705')!==-1||line.indexOf('\uD83E\uDDF9')!==-1; // ✅ or 🧹 = available/already cleaned
         if(!bld.apts[num]){bld.apts[num]={status:'empty',emoji:'',guest:'',kd:0,cash:false,rawLine:''};}
         if(bld.order.indexOf(num)===-1) bld.order.push(num);
         if(isAvail){
@@ -8102,7 +8220,7 @@ try{
       }
     } else {
       // Flat building: extract label as first token after stripping emojis/prefix
-      var isAvailFlat=line.indexOf('\u2705')!==-1; // ✅ = available, skip cleaning
+      var isAvailFlat=line.indexOf('\u2705')!==-1||line.indexOf('\uD83E\uDDF9')!==-1; // ✅ or 🧹 = available/already cleaned
       var lb=line.replace(/\uD83C\uDD70\uFE0F/g,'').replace(/\uD83C\uDD70/g,'').replace(/\uD83D\uDCB0/g,'').replace(/\u203C\uFE0F/g,'').replace(/\u203C/g,'').replace(/\uD83D\uDD01/g,'').replace(/\u2705/g,'').replace(/\uD83D\uDCB8/g,'').replace(/\uD83D\uDCB5/g,'').replace(/\uD83D\uDCB6/g,'').replace(/\uD83D\uDCB7/g,'').replace(/\u2B1C/g,'').replace(/^[-\s]+/,'').trim();
       // Strip known building name prefixes (sel, selena, r&a, jassem, fatema, fat, etc.)
       var cl=lb.replace(/^(sel(ena)?|r&a|r\s*and\s*a|jassem|fatema|fat|[a-z]+\s+apartments?)\s*/i,'').trim();
@@ -9364,7 +9482,8 @@ function addBookingManual(){
   var nights=0;
   if(cin&&cout){ var d1=new Date(cin+'T12:00:00'),d2=new Date(cout+'T12:00:00'); if(!isNaN(d1)&&!isNaN(d2)) nights=Math.round((d2-d1)/(86400000)); }
 
-  var bk={id:bkid(),apt:apt.trim(),name:name.trim(),phone:phone.trim(),amount:amount,checkin:checkin,checkout:checkout,nights:nights,type:type,status:initialStatus,blocked:false,blockedBy:'',notYetBlocked:type==='direct',lateMark:_lateMarkFor(checkin)};
+  var _bkBlockBy=((document.getElementById('bk-blockedby')||{}).value||'').trim();
+  var bk={id:bkid(),apt:apt.trim(),name:name.trim(),phone:phone.trim(),amount:amount,checkin:checkin,checkout:checkout,nights:nights,type:type,status:initialStatus,blocked:!!_bkBlockBy,blockedBy:_bkBlockBy,notYetBlocked:(type==='direct'&&!_bkBlockBy),lateMark:_lateMarkFor(checkin)};
   var _dupM=BOOKINGS.filter(function(b){return b.apt===bk.apt&&b.checkin===bk.checkin&&b.status!=='cancelled';});
   if(_dupM.length){if(!confirm('⚠️ Duplicate!\n'+bk.apt+' already has a booking on '+bk.checkin+'.\n\nAdd anyway?'))return;}
   BOOKINGS.push(bk);
@@ -9405,7 +9524,7 @@ function cancelBk(id){
   var refundType='';
   var refundAmt=0;
   var choice=prompt(
-    'Refund type:\n\n1 - Full refund (KD '+parseFloat(b.amount||0).toFixed(1)+')\n2 - Partial refund\n3 - No refund\n\nType 1, 2 or 3:',
+    'Refund type:\n\n1 - Full refund (KD '+parseFloat(b.amount||0).toFixed(1)+')\n2 - Partial refund\n3 - No refund\n4 - Edit amount (type any amount)\n\nType 1, 2, 3 or 4:',
     '1'
   );
   if(choice===null) return; // cancelled prompt
@@ -9417,6 +9536,11 @@ function cancelBk(id){
     if(partial===null) return;
     refundAmt=parseFloat(partial)||0;
     refundType='Partial';
+  } else if(choice==='4'){
+    var custom=prompt('Enter the refund amount to send (KD):', '');
+    if(custom===null) return;
+    refundAmt=parseFloat(custom)||0;
+    refundType='Custom';
   } else {
     refundType='No Refund';
     refundAmt=0;
@@ -9736,16 +9860,29 @@ function renderBookings(){
                 kdStr=paidPerNight?' / '+paidPerNight+'kd':'';
               }
               var pendingSuffix = pendPerNight>0 ? ' / \u203C\uFE0F '+pendPerNight+' KD' : '';
-              var nightsSuffix = nightsNum>1?' / '+nightsNum+' nights \uD83D\uDD01':'';
+              var _isLastNight=false;
+              if(nightsNum>1){
+                try{
+                  var _cp=(matched.checkin||'').split(' ');
+                  if(_cp.length>=3){
+                    var _cin=new Date(_cp[0]+' '+_cp[1]+' '+_cp[2]);
+                    var _lastNight=new Date(_cin); _lastNight.setDate(_lastNight.getDate()+(nightsNum-1));
+                    var _selD=new Date(_bkCalYear,_bkCalMonth,_bkSelDay);
+                    if(_lastNight.getFullYear()===_selD.getFullYear()&&_lastNight.getMonth()===_selD.getMonth()&&_lastNight.getDate()===_selD.getDate())_isLastNight=true;
+                  }
+                }catch(e){}
+              }
+              var nightsSuffix = (nightsNum>1&&!_isLastNight)?' / '+nightsNum+' nights \uD83D\uDD01':'';
               if(matched.type==='direct') totalDirect++;
               else totalAirbnb++;
-              /* For package stays, the reservation-list total uses the REAL booking amount
-                 (full lump on first stay, 0 on the rest) so the package isn't overcounted. */
+              /* Package stays: count the per-stay amount (total ÷ stays) in the daily total. */
               var _realPaidNight = matched.isPkgStay
-                ? (nightsNum>1?Math.round(((parseFloat(matched.amount)||0)/nightsNum)*10)/10:(parseFloat(matched.amount)||0))
+                ? (nightsNum>1?Math.round(((parseFloat(matched.perStayDisplay)||0)/nightsNum)*10)/10:(parseFloat(matched.perStayDisplay)||0))
                 : paidPerNight;
               if(matched.type==='direct'){ totalKD+=_realPaidNight; totalPending+=pendPerNight; }
-              var guestDisplay=matched.name||(matched.phone?fmtGuestPhone(matched.phone):'')||'';
+              var _gName=(matched.name||'').trim();
+              var _gPhone=matched.phone?fmtGuestPhone(matched.phone):'';
+              var guestDisplay=(_gName&&_gPhone)?(_gName+' '+_gPhone):(_gName||_gPhone||'');
               var lateSuffix=matched.lateMark?' \uD83D\uDC48\uD83C\uDFFB':'';
               list+=emoji+' '+apt.label+' - '+guestDisplay+kdStr+pendingSuffix+nightsSuffix+lateSuffix+'\n';
             } else {
@@ -9777,7 +9914,8 @@ function renderBookings(){
           dayExtras.forEach(function(ex){
             var kdAmt = ex.amount ? ex.amount+'kd' : '';
             var phoneStr = ex.phone ? ' '+ex.phone : '';
-            list+='\uD83D\uDCB5 '+ex.apt+' -'+ex.name+(phoneStr?' '+phoneStr:'')+(kdAmt?' / '+kdAmt:'')+'\n';
+            var cleanSuffix = ex.sameDayCleaned ? ' \uD83E\uDDF9' : '';
+            list+='\uD83D\uDCB5 '+ex.apt+' -'+ex.name+(phoneStr?' '+phoneStr:'')+(kdAmt?' / '+kdAmt:'')+cleanSuffix+'\n';
           });
           list+='\n';
         }
@@ -9874,6 +10012,8 @@ function makeBkCard(b){
     amtHtml='<div style="margin-bottom:12px"><span style="font-family:\'DM Serif Display\',serif;font-size:16px;color:var(--gn)">KD '+parseFloat(b.amount).toFixed(1)+' booked</span> <span style="font-size:13px;color:#2E7D32;font-weight:700;background:#E8F5E9;padding:2px 8px;border-radius:8px">+KD '+parseFloat(b.creditAmount).toFixed(1)+' credit</span></div>';
   } else if(b.pendingAmount>0&&b.amount>b.pendingAmount){
     amtHtml='<div style="margin-bottom:12px"><span style="font-family:\'DM Serif Display\',serif;font-size:16px;color:var(--gn)">KD '+parseFloat(b.paidAmount||0).toFixed(1)+' paid</span> <span style="font-size:13px;color:#c44;font-weight:600">+ KD '+parseFloat(b.pendingAmount).toFixed(1)+' pending</span> <span style="font-size:11px;color:var(--t3)">/ KD '+parseFloat(b.amount).toFixed(1)+' total</span></div>';
+  } else if(b.isPkgStay&&b.perStayDisplay){
+    amtHtml='<div style="font-family:\'DM Serif Display\',serif;font-size:20px;color:#4A2D82;margin-bottom:12px">KD '+parseFloat(b.perStayDisplay).toFixed(1)+' <span style="font-size:12px;font-weight:600;color:#7A66B0">/ stay</span></div>';
   } else if(b.amount){
     amtHtml='<div style="font-family:\'DM Serif Display\',serif;font-size:20px;color:var(--gn);margin-bottom:12px">KD '+parseFloat(b.amount).toFixed(1)+'</div>';
   }
@@ -9883,8 +10023,23 @@ function makeBkCard(b){
   var nightsBar='<div class="night-pill-wrap"><div class="night-tooltip">'+nights+' night stay</div><span class="night-pill" onclick="this.style.animation=\'none\';void this.offsetWidth;this.style.animation=\'pillPop 0.4s cubic-bezier(.34,1.56,.64,1)\'"><span class="npshimmer"></span>'+nights+' nights</span></div>';
 
   // Status color for left border
-  var borderColor=(b.type==='airbnb')?'#FF385C':(isPaid?'#4CAF50':'#FF9800');
+  var borderColor=b.isPkgStay?'#5A3D9E':((b.type==='airbnb')?'#FF385C':(isPaid?'#4CAF50':'#FF9800'));
   var cardId='bkcard_'+b.id;
+  /* Checkout buttons: for multi-night stays only show on the guest's LAST night
+     (check-in + nights - 1). Single-night stays always show. */
+  var _showCheckout=true;
+  try{
+    var _bn=parseInt(b.nights)||1;
+    if(_bn>1 && typeof _bkSelDay!=='undefined' && _bkSelDay){
+      var _cp=(b.checkin||'').split(' ');
+      if(_cp.length>=3){
+        var _cin=new Date(_cp[0]+' '+_cp[1]+' '+_cp[2]);
+        var _lastNight=new Date(_cin); _lastNight.setDate(_lastNight.getDate()+(_bn-1));
+        var _sel=new Date(_bkCalYear,_bkCalMonth,_bkSelDay);
+        _showCheckout=(_lastNight.getFullYear()===_sel.getFullYear()&&_lastNight.getMonth()===_sel.getMonth()&&_lastNight.getDate()===_sel.getDate());
+      }
+    }
+  }catch(e){}
 
   return '<div id="'+cardId+'" class="bk-card-anim" style="border:1.5px solid var(--gl);border-left:4px solid '+borderColor+';border-radius:16px;padding:16px;margin-bottom:12px;background:var(--wh);position:relative;overflow:hidden;transition:box-shadow 0.2s,transform 0.15s;cursor:default" '
     +'onmouseenter="this.style.boxShadow=\'0 8px 32px rgba(92,61,30,0.13)\';this.style.transform=\'translateY(-2px)\'" '
@@ -9900,7 +10055,7 @@ function makeBkCard(b){
     +(b.name?'<div style="font-size:13px;font-weight:600;color:var(--t1);margin-top:2px">&#128100; '+escH(b.name)+'</div>':'')
     +(b.phone?'<div style="font-size:12px;color:var(--t3);margin-top:1px;white-space:nowrap">&#128222; '+escH(fmtGuestPhone(b.phone))+'</div>':'')
     +'</div>'
-    +'<div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;justify-content:flex-end">'+creditBadge+pkgBadge+typeLabel+paidBadge+blockedBadge+'</div>'
+    +'<div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;justify-content:flex-end">'+(b.isPkgStay?'<span style="background:#EDE7F6;color:#4A2D82;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">\uD83D\uDCB3 Package</span>':'')+creditBadge+pkgBadge+typeLabel+paidBadge+blockedBadge+'</div>'
     +'</div>'
 
     // Date row with visual divider
@@ -9915,15 +10070,23 @@ function makeBkCard(b){
 
     // Action buttons — mobile-friendly 2-column grid
     +(b.status!=='paid'?'<button onclick="bkBtnClick(this);markBkPaid(\''+b.id+'\')" class="bk-btn" style="width:100%;background:var(--gnb);color:var(--gn);border:1.5px solid #C3E0CE;border-radius:12px;padding:13px 10px;font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;transition:all 0.15s;margin-bottom:8px">&#10003; Mark Paid</button>':'')
-    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'
-    +'<button onclick="bkBtnClick(this);sendCheckinWA(\''+b.id+'\')" class="bk-btn" style="background:#25D366;color:#fff;border:none;border-radius:12px;padding:14px 8px;font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;transition:all 0.15s">'+WA_SVG_S+' Check-in</button>'
-    +'<button onclick="bkBtnClick(this);sendCheckoutWA(\''+b.id+'\')" class="bk-btn" style="background:#c44;color:#fff;border:none;border-radius:12px;padding:14px 8px;font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;transition:all 0.15s">'+WA_SVG_S+' Checkout</button>'
+    +(_showCheckout
+      ? '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'
+        +'<button onclick="bkBtnClick(this);sendCheckinWA(\''+b.id+'\')" class="bk-btn" style="background:#25D366;color:#fff;border:none;border-radius:12px;padding:14px 8px;font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;transition:all 0.15s">'+WA_SVG_S+' Check-in</button>'
+        +'<button onclick="bkBtnClick(this);sendCheckoutWA(\''+b.id+'\')" class="bk-btn" style="background:#c44;color:#fff;border:none;border-radius:12px;padding:14px 8px;font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;transition:all 0.15s">'+WA_SVG_S+' Checkout</button>'
+        +'</div>'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'
+        +'<button onclick="bkBtnClick(this);sendShortCheckinWA(\''+b.id+'\')" class="bk-btn" style="background:#f0faf4;color:#2E7D52;border:1.5px dashed #A8D5B5;border-radius:12px;padding:13px 8px;font-size:12px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;gap:4px;transition:all 0.15s">'+WA_SVG_S+' Short Check-in</button>'
+        +'<button onclick="bkBtnClick(this);sendShortCheckoutWA(\''+b.id+'\')" class="bk-btn" style="background:#fff0f0;color:#c44;border:1.5px dashed #f5b8b8;border-radius:12px;padding:13px 8px;font-size:12px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;gap:4px;transition:all 0.15s">'+WA_SVG_S+' Short Checkout</button>'
+        +'</div>'
+      : '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'
+        +'<button onclick="bkBtnClick(this);sendCheckinWA(\''+b.id+'\')" class="bk-btn" style="background:#25D366;color:#fff;border:none;border-radius:12px;padding:14px 8px;font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;transition:all 0.15s">'+WA_SVG_S+' Check-in</button>'
+        +'<button onclick="bkBtnClick(this);sendShortCheckinWA(\''+b.id+'\')" class="bk-btn" style="background:#f0faf4;color:#2E7D52;border:1.5px dashed #A8D5B5;border-radius:12px;padding:13px 8px;font-size:12px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;gap:4px;transition:all 0.15s">'+WA_SVG_S+' Short Check-in</button>'
+        +'</div>')
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+    +'<button onclick="bkBtnClick(this);editBooking(\''+b.id+'\')" class="bk-btn" style="background:#FAF7F2;color:#5C3D1E;border:1.5px solid #E8DDD0;border-radius:12px;padding:13px 10px;font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;transition:all 0.15s">\u270F\uFE0F Edit</button>'
+    +'<button onclick="bkBtnClick(this);cancelBk(\''+b.id+'\')" class="bk-btn" style="background:#FFF3E0;color:#c44;border:1.5px solid #FECBA1;border-radius:12px;padding:13px 10px;font-size:13px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;transition:all 0.15s">&#10007; Cancel</button>'
     +'</div>'
-    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'
-    +'<button onclick="bkBtnClick(this);sendShortCheckinWA(\''+b.id+'\')" class="bk-btn" style="background:#f0faf4;color:#2E7D52;border:1.5px dashed #A8D5B5;border-radius:12px;padding:13px 8px;font-size:12px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;gap:4px;transition:all 0.15s">'+WA_SVG_S+' Short Check-in</button>'
-    +'<button onclick="bkBtnClick(this);sendShortCheckoutWA(\''+b.id+'\')" class="bk-btn" style="background:#fff0f0;color:#c44;border:1.5px dashed #f5b8b8;border-radius:12px;padding:13px 8px;font-size:12px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;gap:4px;transition:all 0.15s">'+WA_SVG_S+' Short Checkout</button>'
-    +'</div>'
-    +'<button onclick="bkBtnClick(this);cancelBk(\''+b.id+'\')" class="bk-btn" style="width:100%;background:#FFF3E0;color:#c44;border:1.5px solid #FECBA1;border-radius:12px;padding:13px 10px;font-size:13px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;display:flex;align-items:center;justify-content:center;transition:all 0.15s">&#10007; Cancel Booking</button>'
 
     +'</div>';  // end card
 }
@@ -11432,6 +11595,13 @@ function openAddExtraReservation(){
     +'<div id="_er-partial-hint" style="font-size:11px;color:#A07830;margin-top:8px;font-weight:600">Enter the paid and not-paid amounts \u2014 total fills in automatically</div>'
     +'</div>'
     +'<input type="hidden" id="_er-status" value="paid">'
+    +'<label style="display:flex;align-items:center;gap:10px;margin-top:6px;padding:11px 14px;background:#F0FAF4;border:1.5px solid #B2DFCA;border-radius:12px;cursor:pointer;-webkit-tap-highlight-color:transparent">'
+    +'<input type="checkbox" id="_er-cleaned" style="width:18px;height:18px;accent-color:#1B7A40;cursor:pointer">'
+    +'<span style="font-size:13px;font-weight:700;color:#1A5C36">🧹 Same-day checkout + already cleaned</span>'
+    +'</label>'
+    +'<div style="margin-top:10px"><div style="font-size:10px;font-weight:700;color:#B8913A;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">🔒 Block the Date (on Airbnb)</div>'
+    +'<input type="hidden" id="_er-blockedby" value="">'
+    +'<button type="button" onclick="_erOpenBlockPicker()" id="_er-blockedby-btn" style="width:100%;background:#FAF4EC;border:1.5px solid #E5D4BC;border-radius:12px;color:#A8987F;font-family:\'DM Sans\',sans-serif;font-size:14px;padding:13px 14px;outline:none;box-sizing:border-box;cursor:pointer;text-align:left;display:flex;align-items:center;justify-content:space-between">Not blocked yet <span style="font-size:12px">\u25b8</span></button></div>'
     +'</div>'
     +'<button onclick="addExtraReservation()" style="width:100%;background:linear-gradient(145deg,#1A3A2A,#2A5C3E);color:#fff;border:none;border-radius:14px;padding:15px;font-size:15px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;margin-top:4px">💵 Save Extra Reservation</button>'
     +'</div></div>';
@@ -11590,7 +11760,9 @@ function addExtraReservation(){
   loadBookings();
   var erType=(status==='airbnb')?'airbnb':'direct';
   var erStatus=(status==='airbnb')?'paid':status;
-  var bk={id:bkid(),apt:apt,name:name,phone:phone,amount:amount,checkin:fmtD(cin),checkout:fmtD(cout),nights:nights,type:erType,status:erStatus,isExtra:true,blocked:false,blockedBy:'',notYetBlocked:erType==='direct'};
+  var _erCleaned=!!(document.getElementById('_er-cleaned')&&document.getElementById('_er-cleaned').checked);
+  var _erBlockBy=((document.getElementById('_er-blockedby')||{}).value||'').trim();
+  var bk={id:bkid(),apt:apt,name:name,phone:phone,amount:amount,checkin:fmtD(cin),checkout:fmtD(cout),nights:nights,type:erType,status:erStatus,isExtra:true,sameDayCleaned:_erCleaned,blocked:!!_erBlockBy,blockedBy:_erBlockBy,notYetBlocked:(erType==='direct'&&!_erBlockBy)};
   if(status==='partial'){bk.paidAmount=paidAmt;bk.pendingAmount=pendAmt;}
   BOOKINGS.push(bk);
   saveBookings();
@@ -11645,15 +11817,18 @@ function renderExtraReservations(){
   section.style.display='block';
   var fmt=typeof _kd==='function'?_kd:function(v){var n=parseFloat(v)||0,r=Math.round(n*10)/10;return r===0?'0':r===Math.round(r)?String(Math.round(r)):r.toFixed(1);};
   var fmtPhone=typeof fmtGuestPhone==='function'?fmtGuestPhone:function(p){return p;};
+  var _exColl=localStorage.getItem('hbs_extra_collapsed')==='1';
   section.innerHTML='<div style="background:linear-gradient(135deg,#F0FAF5,#E6F5EC);border:1.5px solid #B2DFCA;border-radius:20px;padding:16px 16px 10px">'
-    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'
+    +'<div onclick="toggleExtraCollapse()" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:'+(_exColl?'0':'12px')+';cursor:pointer;-webkit-tap-highlight-color:transparent">'
     +'<div><div style="font-size:10px;font-weight:700;letter-spacing:2px;color:#1A5C36;text-transform:uppercase">💵 Extra Reservations</div>'
     +'<div style="font-size:10px;color:#4A7A5E;margin-top:2px">Today \u00b7 '+today+'</div></div>'
     +'<div style="display:flex;gap:6px;align-items:center">'
-    +'<button onclick="showExtraHistory()" style="background:#fff;border:1.5px solid #B2DFCA;color:#1A5C36;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif">\ud83d\udcca History ('+allExtras.length+')</button>'
+    +'<button onclick="event.stopPropagation();showExtraHistory()" style="background:#fff;border:1.5px solid #B2DFCA;color:#1A5C36;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif">\ud83d\udcca History ('+allExtras.length+')</button>'
     +'<div style="background:#1A3A2A;color:#fff;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700">'+extras.length+'</div>'
+    +'<span style="font-size:12px;color:#1A5C36;transition:transform .25s;display:inline-block;transform:rotate('+(_exColl?'-90deg':'0')+')">\u25bc</span>'
     +'</div>'
     +'</div>'
+    +'<div style="display:'+(_exColl?'none':'block')+'">'
     +extras.map(function(b,i){
       var isPaid=b.status==='paid';
       var isAirbnb=b.type==='airbnb';
@@ -11710,7 +11885,13 @@ function renderExtraReservations(){
         +'</div>'
         +'</div>';
     }).join('')
+    +'</div>'
     +'</div>';
+}
+function toggleExtraCollapse(){
+  var c=localStorage.getItem('hbs_extra_collapsed')==='1';
+  localStorage.setItem('hbs_extra_collapsed',c?'0':'1');
+  renderExtraReservations();
 }
 
 function markExtraPaid(id){
@@ -13521,9 +13702,27 @@ function openAddPackage(){
     +'<div><div class="_pkl">Package #</div><input id="_pkg-num" type="number" min="1" placeholder="1" style="width:100%;background:#F7F4FC;border:1.5px solid #D8CCF0;border-radius:12px;color:#2A1E4A;font-family:\'DM Sans\',sans-serif;font-size:14px;padding:12px 10px;outline:none;box-sizing:border-box"></div>'
     +'</div>'
     +'<div><div class="_pkl">📅 Paid On</div><input id="_pkg-paid" type="date" value="'+iso+'" style="width:100%;background:#F7F4FC;border:1.5px solid #D8CCF0;border-radius:12px;color:#2A1E4A;font-family:\'DM Sans\',sans-serif;font-size:14px;padding:11px 14px;outline:none;box-sizing:border-box"></div>'
+    +'<div><div class="_pkl">Payment Status</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">'
+    +'<button type="button" id="_pkg-s-paid" onclick="_pkgSetStatus(\'paid\')" class="_pkgsb">✅ Paid</button>'
+    +'<button type="button" id="_pkg-s-pending" onclick="_pkgSetStatus(\'pending\')" class="_pkgsb">⏳ Pending</button>'
+    +'<button type="button" id="_pkg-s-partial" onclick="_pkgSetStatus(\'partial\')" class="_pkgsb">➗ Partial</button>'
+    +'</div><input type="hidden" id="_pkg-status" value="paid"></div>'
+    +'<div id="_pkg-pp-wrap" style="display:none"><div class="_pkl">Already Paid (KD) — rest goes to Payment Pending</div><input id="_pkg-paidamt" type="number" min="0" placeholder="e.g. 100" style="width:100%;background:#FFF8F0;border:1.5px solid #F0C896;border-radius:12px;color:#2A1E4A;font-family:\'DM Sans\',sans-serif;font-size:14px;padding:12px 14px;outline:none;box-sizing:border-box"></div>'
     +'<button onclick="savePackage()" style="width:100%;background:linear-gradient(145deg,#3C2A6B,#5A3D9E);color:#fff;border:none;border-radius:14px;padding:15px;font-size:15px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;margin-top:6px">💳 Create Package</button>'
     +'</div></div>';
   document.body.appendChild(ov);
+  _pkgSetStatus('paid');
+}
+function _pkgSetStatus(s){
+  var inp=document.getElementById('_pkg-status'); if(inp)inp.value=s;
+  var map={paid:['#1B7A40','#EAF7EF'],pending:['#C45400','#FFF3E0'],partial:['#8B6914','#FFF8E1']};
+  ['paid','pending','partial'].forEach(function(k){
+    var btn=document.getElementById('_pkg-s-'+k); if(!btn)return;
+    var on=(k===s);var c=map[k];
+    btn.style.cssText='padding:11px 6px;border-radius:11px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;transition:transform .14s,background .2s,border-color .2s,color .2s;border:2px solid '+(on?c[0]:'#D8CCF0')+';background:'+(on?c[1]:'#F7F4FC')+';color:'+(on?c[0]:'#888');
+    if(on){btn.style.animation='none';void btn.offsetWidth;btn.style.animation='bkeStatusPop .35s cubic-bezier(.34,1.56,.64,1)';}
+  });
+  var pw=document.getElementById('_pkg-pp-wrap'); if(pw)pw.style.display=(s==='partial')?'block':'none';
 }
 
 function savePackage(){
@@ -13533,21 +13732,29 @@ function savePackage(){
   var stays=parseInt((document.getElementById('_pkg-stays')||{}).value)||0;
   var num=parseInt((document.getElementById('_pkg-num')||{}).value)||(PACKAGES.length+1);
   var paid=(document.getElementById('_pkg-paid')||{}).value||'';
+  var pstatus=(document.getElementById('_pkg-status')||{}).value||'paid';
+  var paidAmt=parseFloat((document.getElementById('_pkg-paidamt')||{}).value)||0;
   if(!name){alert('Enter the guest name.');return;}
   if(!amount){alert('Enter the package amount.');return;}
   if(!stays||stays<1){alert('Enter the number of stays.');return;}
   if(!paid){alert('Enter the paid date.');return;}
+  if(pstatus==='partial'){ if(paidAmt<=0){alert('Enter how much was already paid.');return;} if(paidAmt>=amount){alert('Paid amount must be less than total. If fully paid, choose ✅ Paid.');return;} }
+  var pPaid = pstatus==='paid'?amount:(pstatus==='partial'?paidAmt:0);
+  var pPend = amount-pPaid;
   var slots=[];
   for(var i=0;i<stays;i++)slots.push({date:'',apt:''});
   loadPackages();
-  var pk={id:pkgId(),name:name,phone:phone,amount:amount,stays:stays,num:num,paid:paid,slots:slots};
+  var pk={id:pkgId(),name:name,phone:phone,amount:amount,stays:stays,num:num,paid:paid,slots:slots,payStatus:pstatus,paidAmount:pPaid,pendingAmount:pPend};
   PACKAGES.unshift(pk);
   savePackages();
-  /* Lump revenue: one paid guest entry on the paid date (full amount, counts once) */
+  /* Revenue/pending: lump guest entry reflecting the payment status. Paid portion = revenue,
+     pending portion shows in the Payment Pending tab. */
   try{
     if(typeof loadGuests==='function'){loadGuests();
-      GUESTS.push({id:pk.id,name:name,phone:phone,apt:'Package',amount:amount,pendingAmount:0,checkin:_pkgTrackerDate(paid),status:'paid-cash',type:'direct',isCash:true,isPackage:true,isPkgLump:true,packageInfo:num+' stays'});
+      var gStatus = pstatus==='paid'?'paid-cash':(pstatus==='partial'?'partial':'pending');
+      GUESTS.push({id:pk.id,name:name,phone:phone,apt:'Package',amount:amount,paidAmount:pPaid,pendingAmount:pPend,checkin:_pkgTrackerDate(paid),status:gStatus,type:'direct',isCash:(pstatus==='paid'),isPackage:true,isPkgLump:true,packageInfo:num+' stays'});
       if(typeof saveGuests==='function')saveGuests();
+      if(typeof renderPending==='function')renderPending();
     }
   }catch(e){}
   var ov=document.getElementById('_pkgOv'); if(ov)ov.remove();
@@ -13666,6 +13873,37 @@ function deletePackage(pid){
   try{if(typeof loadBookings==='function'){loadBookings();BOOKINGS=BOOKINGS.filter(function(b){return !(b.isPkgStay&&b.pkgId===pid);});if(typeof saveBookings==='function')saveBookings();if(typeof renderBkCalendar==='function')renderBkCalendar();}}catch(e){}
   renderPackages();
 }
+function cancelPackage(pid){
+  loadPackages();
+  var pk=PACKAGES.find(function(p){return p.id===pid;}); if(!pk)return;
+  if(!confirm('Cancel '+(pk.name||'this package')+'?\n\nThis removes the package and logs a refund.'))return;
+  var choice=prompt('Refund type:\n\n1 - Full refund (KD '+_kd(pk.paidAmount!=null?pk.paidAmount:pk.amount)+')\n2 - Partial refund\n3 - No refund\n4 - Edit amount (type any amount)\n\nType 1, 2, 3 or 4:','1');
+  if(choice===null)return;
+  var refundType='', refundAmt=0;
+  var collected=parseFloat(pk.paidAmount!=null?pk.paidAmount:pk.amount)||0;
+  if(choice==='1'){ refundType='Full'; refundAmt=collected; }
+  else if(choice==='2'){ var p=prompt('Enter partial refund amount (KD):',''); if(p===null)return; refundAmt=parseFloat(p)||0; refundType='Partial'; }
+  else if(choice==='4'){ var p4=prompt('Enter the refund amount to send (KD):',''); if(p4===null)return; refundAmt=parseFloat(p4)||0; refundType='Custom'; }
+  else { refundType='No Refund'; refundAmt=0; }
+  /* log to cancellation history */
+  try{
+    loadCancellations();
+    var MOS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var nw=kwNow();
+    CANCELLATIONS.unshift({id:'cx'+Date.now(),apt:'Package ('+(pk.num||1)+')',name:pk.name,phone:pk.phone,checkin:_pkgFmtPaid(pk.paid),amount:pk.amount,refundType:refundType,refundAmt:refundAmt,cancelDate:MOS[nw.getMonth()]+' '+nw.getDate()+' '+nw.getFullYear(),synced:true});
+    saveCancellations();
+  }catch(e){}
+  /* remove package, its stays, and guest/pending entries */
+  PACKAGES=PACKAGES.filter(function(p){return p.id!==pid;});
+  savePackages();
+  try{if(typeof loadGuests==='function'){loadGuests();GUESTS=GUESTS.filter(function(g){return g.id!==pid;});if(typeof saveGuests==='function')saveGuests();}}catch(e){}
+  try{if(typeof loadBookings==='function'){loadBookings();BOOKINGS=BOOKINGS.filter(function(b){return !(b.isPkgStay&&b.pkgId===pid);});if(typeof saveBookings==='function')saveBookings();}}catch(e){}
+  if(typeof renderBkCalendar==='function')renderBkCalendar();
+  if(typeof renderPending==='function')renderPending();
+  if(typeof renderCancellations==='function')renderCancellations();
+  renderPackages();
+  alert('\u2705 Package cancelled.\nRefund: '+refundType+(refundAmt>0?' \u2014 KD '+_kd(refundAmt):'')+'.');
+}
 
 /* ---- ordinal helper ---- */
 function _pkgOrd(n){var s=['th','st','nd','rd'],v=n%100;return n+(s[(v-20)%10]||s[v]||s[0]);}
@@ -13713,15 +13951,24 @@ function renderPackages(){
   if(badge){if(PACKAGES.length){badge.style.display='inline-block';badge.textContent=PACKAGES.length;}else{badge.style.display='none';}}
   if(!PACKAGES.length){sec.style.display='none';sec.innerHTML='';return;}
   sec.style.display='block';
+  var _pkColl=localStorage.getItem('hbs_pkg_collapsed')==='1';
   var html='<div style="background:#FBFAFF;border:1.5px solid #D8CCF0;border-radius:18px;padding:16px 16px 10px">'
-    +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;color:#4A2D82;text-transform:uppercase;margin-bottom:10px">💳 Package Plans</div>';
+    +'<div onclick="togglePkgCollapse()" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:'+(_pkColl?'0':'10px')+';cursor:pointer;-webkit-tap-highlight-color:transparent">'
+    +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;color:#4A2D82;text-transform:uppercase">💳 Package Plans</div>'
+    +'<div style="display:flex;gap:6px;align-items:center">'
+    +'<div style="background:#4A2D82;color:#fff;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700">'+PACKAGES.length+'</div>'
+    +'<span style="font-size:12px;color:#4A2D82;display:inline-block;transition:transform .25s;transform:rotate('+(_pkColl?'-90deg':'0')+')">\u25bc</span>'
+    +'</div></div>'
+    +'<div style="display:'+(_pkColl?'none':'block')+'">';
   PACKAGES.forEach(function(pk){
     var used=pk.slots.filter(function(s){return s.date;}).length;
     var emojis=['1️⃣','2️⃣','3️⃣','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟'];
     html+='<div style="background:#fff;border:1.5px solid #E3DAF5;border-radius:16px;padding:14px 15px;margin-bottom:12px">'
       +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:10px">'
         +'<div style="min-width:0"><div style="font-size:15px;font-weight:800;color:#3C2A6B">'+_pkgEsc(pk.name)+' <span style="font-size:12px;color:#7A66B0">· '+_pkgOrd(pk.num||1)+' Package</span></div>'
-        +'<div style="font-size:11px;color:#888;margin-top:2px">KD '+_kd(pk.amount)+' · Paid '+_pkgFmtPaid(pk.paid)+'</div></div>'
+        +'<div style="font-size:11px;color:#888;margin-top:2px">KD '+_kd(pk.amount)+' · Paid '+_pkgFmtPaid(pk.paid)
+        +(pk.payStatus==='pending'?' · <span style="color:#C45400;font-weight:700">‼️ '+_kd(pk.amount)+' KD pending</span>':(pk.payStatus==='partial'?' · <span style="color:#C45400;font-weight:700">‼️ '+_kd(pk.pendingAmount)+' KD pending</span>':''))
+        +'</div></div>'
         +'<span style="background:'+(used>=pk.stays?'#EAF7EF':'#F3EFFA')+';color:'+(used>=pk.stays?'#1B7A40':'#4A2D82')+';border-radius:20px;padding:3px 11px;font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0">'+used+'/'+pk.stays+' stays</span>'
       +'</div>';
     /* stay slots */
@@ -13739,14 +13986,184 @@ function renderPackages(){
     html+='<div style="display:flex;gap:8px">'
       +'<button onclick="pkgCopyMessage(\''+pk.id+'\',this)" style="flex:1;background:#F3EFFA;border:1.5px solid #C3B0E8;color:#4A2D82;border-radius:11px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif">Copy</button>'
       +(pk.phone?'<button onclick="pkgWhatsApp(\''+pk.id+'\')" style="flex:1;background:#25D366;border:none;color:#fff;border-radius:11px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif">WhatsApp</button>':'')
+      +'<button onclick="cancelPackage(\''+pk.id+'\')" style="background:#FFF8EC;border:1.5px solid #FECBA1;color:#c44;border-radius:11px;padding:9px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif">✗ Cancel</button>'
       +'<button onclick="deletePackage(\''+pk.id+'\')" style="background:#FFF3E0;border:1.5px solid #FECBA1;color:#c44;border-radius:11px;padding:9px 13px;font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif">🗑</button>'
     +'</div>';
     html+='</div>';
   });
   html+='</div>';
+  html+='</div>';
   sec.innerHTML=html;
 }
+function togglePkgCollapse(){
+  var c=localStorage.getItem('hbs_pkg_collapsed')==='1';
+  localStorage.setItem('hbs_pkg_collapsed',c?'0':'1');
+  renderPackages();
+}
 setTimeout(function(){try{renderPackages();}catch(e){}},900);
+
+
+
+/* ============================================================
+   EDIT BOOKING — full edit screen for any reservation
+   ============================================================ */
+var _bkEditId=null, _bkEditApt='';
+function _bkeBuildPills(){
+  var wrap=document.getElementById('_bke-bldg-pills'); if(!wrap)return; wrap.innerHTML='';
+  var bldgs=[{k:'t60',l:'Tower 60'},{k:'t62',l:'Tower 62'},{k:'sel',l:'Seleena'},{k:'rna',l:'R&A'},{k:'jas',l:'Jassem'},{k:'fat',l:'Fatema'}];
+  try{ if(typeof loadBldgCfg==='function')loadBldgCfg();
+    if(typeof BUILDINGS_CFG!=='undefined')BUILDINGS_CFG.forEach(function(b){ if(!bldgs.some(function(x){return x.k===b.key;})) bldgs.push({k:b.key,l:b.label||b.key}); });
+  }catch(e){}
+  bldgs.forEach(function(b){
+    var pill=document.createElement('button');pill.type='button';pill.setAttribute('data-bk',b.k);
+    pill.style.cssText='padding:8px 14px;border-radius:20px;border:1.5px solid #E8DDD0;background:#FAF7F2;color:#5C3D1E;font-size:12px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap';
+    pill.textContent=b.l;
+    pill.onclick=(function(bk,bl){return function(){_bkeRenderApts(bk,bl);};})(b.k,b.l);
+    wrap.appendChild(pill);
+  });
+}
+function _bkeRenderApts(bk,bl){
+  var pills=document.querySelectorAll('#_bke-bldg-pills button');
+  pills.forEach(function(p){var a=p.getAttribute('data-bk')===bk;p.style.background=a?'#5C3D1E':'#FAF7F2';p.style.color=a?'#fff':'#5C3D1E';});
+  var grid=document.getElementById('_bke-apt-grid'); if(!grid)return; grid.style.display='flex';grid.innerHTML='';
+  var apts=(typeof KNOWN_APTS_PICKER!=='undefined'&&KNOWN_APTS_PICKER[bk])||[];
+  if(!apts.length){try{var _ca=JSON.parse(localStorage.getItem('hbs_custom_apts')||'[]');apts=_ca.filter(function(a){return a.buildingKey===bk;}).map(function(a){return a.apt;});}catch(e){}}
+  apts.forEach(function(a){
+    var label=typeof buildAptLabel==='function'?buildAptLabel(bk,a):(bl+' '+a);
+    var btn=document.createElement('button');btn.type='button';
+    btn.style.cssText='padding:9px 15px;border-radius:11px;border:1.5px solid #E8DDD0;background:#FAF7F2;color:#3D2208;font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;min-width:56px';
+    btn.textContent=a;
+    btn.onclick=(function(lbl){return function(){
+      grid.querySelectorAll('button').forEach(function(x){x.style.background='#FAF7F2';x.style.color='#3D2208';});
+      btn.style.background='#1A3A2A';btn.style.color='#fff';
+      _bkEditApt=lbl;
+      var d=document.getElementById('_bke-apt-display'); if(d){d.textContent=lbl;d.style.color='#1B7A40';d.style.fontWeight='700';}
+    };})(label);
+    grid.appendChild(btn);
+  });
+}
+function _bkeIso(checkinStr){
+  if(!checkinStr)return '';
+  var MS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var m=String(checkinStr).match(/([A-Za-z]+)\s+(\d{1,2})\s+(\d{4})/);
+  if(m){var mo=MS.indexOf(m[1].charAt(0).toUpperCase()+m[1].slice(1,3).toLowerCase());if(mo>=0)return m[3]+'-'+String(mo+1).padStart(2,'0')+'-'+String(parseInt(m[2],10)).padStart(2,'0');}
+  var iso=String(checkinStr).match(/(\d{4})-(\d{2})-(\d{2})/); if(iso)return iso[0];
+  return '';
+}
+function editBooking(id){
+  loadBookings();
+  var b=BOOKINGS.find(function(x){return x.id===id;}); if(!b){alert('Booking not found.');return;}
+  _bkEditId=id; _bkEditApt=b.apt||'';
+  var status = b.status==='partial' ? 'partial' : (b.type==='airbnb' ? 'airbnb' : (b.status==='pending' ? 'pending' : 'paid'));
+  var ciIso=_bkeIso(b.checkin), coIso=_bkeIso(b.checkout);
+  var old=document.getElementById('_bkeOv'); if(old)old.remove();
+  var ov=document.createElement('div');ov.id='_bkeOv';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:10000;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn .2s ease';
+  ov.innerHTML='<div style="background:#fff;border-radius:28px 28px 0 0;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;padding:24px 20px 36px">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px"><div style="font-family:\'DM Serif Display\',serif;font-size:21px;color:#5C3D1E">✏️ Edit Booking</div>'
+    +'<button onclick="document.getElementById(\'_bkeOv\').remove()" style="background:#F1EFE8;border:none;border-radius:50%;width:34px;height:34px;font-size:18px;cursor:pointer;color:#777">&times;</button></div>'
+    +'<div style="display:grid;gap:12px">'
+    +'<div><div class="_bkel">Apartment <span id="_bke-apt-display" style="color:#1B7A40;font-weight:700">'+escH(b.apt||'')+'</span></div><div id="_bke-bldg-pills" style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:8px"></div><div id="_bke-apt-grid" style="display:none;gap:8px;flex-wrap:wrap"></div></div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'
+    +'<div><div class="_bkel">Guest Name</div><input id="_bke-name" value="'+escH(b.name||'')+'" style="width:100%;background:#FAF7F2;border:1.5px solid #E8DDD0;border-radius:12px;padding:12px 14px;font-size:14px;color:#3D2208;box-sizing:border-box;outline:none"></div>'
+    +'<div><div class="_bkel">Phone</div><input id="_bke-phone" value="'+escH(b.phone||'')+'" style="width:100%;background:#FAF7F2;border:1.5px solid #E8DDD0;border-radius:12px;padding:12px 14px;font-size:14px;color:#3D2208;box-sizing:border-box;outline:none"></div>'
+    +'</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'
+    +'<div><div class="_bkel">✈️ Check-in</div><input id="_bke-ci" type="date" value="'+ciIso+'" onchange="_bkeFollow()" style="width:100%;background:#FAF7F2;border:1.5px solid #E8DDD0;border-radius:12px;padding:11px 12px;font-size:14px;color:#3D2208;box-sizing:border-box;outline:none"></div>'
+    +'<div><div class="_bkel">🏁 Check-out</div><input id="_bke-co" type="date" value="'+coIso+'" style="width:100%;background:#FAF7F2;border:1.5px solid #E8DDD0;border-radius:12px;padding:11px 12px;font-size:14px;color:#3D2208;box-sizing:border-box;outline:none"></div>'
+    +'</div>'
+    +'<div><div class="_bkel">Amount (KD)</div><input id="_bke-amount" type="number" min="0" value="'+(b.amount||0)+'" style="width:100%;background:#FAF7F2;border:1.5px solid #E8DDD0;border-radius:12px;padding:12px 14px;font-size:14px;color:#3D2208;box-sizing:border-box;outline:none"></div>'
+    +'<div id="_bke-pp-wrap" style="display:'+(status==='partial'?'block':'none')+'"><div class="_bkel">Already Paid (KD) — rest goes to Pending</div><input id="_bke-paid" type="number" min="0" value="'+(b.paidAmount||0)+'" style="width:100%;background:#FFF8F0;border:1.5px solid #F0C896;border-radius:12px;padding:12px 14px;font-size:14px;color:#3D2208;box-sizing:border-box;outline:none"></div>'
+    +'<div><div class="_bkel">Status</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+    +'<button type="button" id="_bke-s-paid" onclick="_bkeSetStatus(\'paid\')" class="_bkesb">✅ Paid</button>'
+    +'<button type="button" id="_bke-s-pending" onclick="_bkeSetStatus(\'pending\')" class="_bkesb">⏳ Pending</button>'
+    +'<button type="button" id="_bke-s-partial" onclick="_bkeSetStatus(\'partial\')" class="_bkesb">➗ Partial</button>'
+    +'<button type="button" id="_bke-s-airbnb" onclick="_bkeSetStatus(\'airbnb\')" class="_bkesb">🅰️ Airbnb</button>'
+    +'</div><input type="hidden" id="_bke-status" value="'+status+'"></div>'
+    +'<button onclick="saveBookingEdit()" style="width:100%;background:linear-gradient(145deg,#1A3A2A,#2A5C3E);color:#fff;border:none;border-radius:14px;padding:15px;font-size:15px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;margin-top:6px">✓ Save Changes</button>'
+    +'</div></div>';
+  document.body.appendChild(ov);
+  _bkeBuildPills();
+  _bkeSetStatus(status);
+  /* Interactive entrance: slide the sheet up + stagger fields in */
+  try{
+    var sheet=ov.firstChild;
+    if(sheet){
+      sheet.style.transform='translateY(100%)';
+      sheet.style.transition='transform .4s cubic-bezier(.32,.72,0,1)';
+      requestAnimationFrame(function(){sheet.style.transform='translateY(0)';});
+      var grid=sheet.querySelector('div[style*="display:grid;gap:12px"]');
+      if(grid){var kids=grid.children;for(var i=0;i<kids.length;i++){kids[i].style.animation='bkeFieldIn .4s cubic-bezier(.34,1.56,.64,1) '+(0.05+i*0.05)+'s both';}}
+    }
+  }catch(e){}
+}
+function _bkeFollow(){ /* if checkout empty or before checkin, set to next day */
+  try{
+    var ci=document.getElementById('_bke-ci'),co=document.getElementById('_bke-co');
+    if(!ci||!ci.value||!co)return;
+    if(co.value && new Date(co.value)>new Date(ci.value))return;
+    var d=new Date(ci.value+'T12:00:00');var nd=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1);
+    co.value=nd.getFullYear()+'-'+String(nd.getMonth()+1).padStart(2,'0')+'-'+String(nd.getDate()).padStart(2,'0');
+  }catch(e){}
+}
+function _bkeSetStatus(s){
+  var inp=document.getElementById('_bke-status'); if(inp)inp.value=s;
+  var map={paid:['#1B7A40','#EAF7EF'],pending:['#C45400','#FFF3E0'],partial:['#8B6914','#FFF8E1'],airbnb:['#FF385C','#FFEDF1']};
+  ['paid','pending','partial','airbnb'].forEach(function(k){
+    var btn=document.getElementById('_bke-s-'+k); if(!btn)return;
+    var on=(k===s);var c=map[k];
+    btn.style.cssText='padding:11px 6px;border-radius:11px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;transition:transform .14s,background .2s,border-color .2s,color .2s;border:2px solid '+(on?c[0]:'#E8DDD0')+';background:'+(on?c[1]:'#FAF7F2')+';color:'+(on?c[0]:'#888');
+    if(on){btn.style.animation='none';void btn.offsetWidth;btn.style.animation='bkeStatusPop .35s cubic-bezier(.34,1.56,.64,1)';}
+  });
+  var pw=document.getElementById('_bke-pp-wrap'); if(pw)pw.style.display=(s==='partial')?'block':'none';
+}
+function saveBookingEdit(){
+  if(!_bkEditId)return;
+  loadBookings();
+  var b=BOOKINGS.find(function(x){return x.id===_bkEditId;}); if(!b)return;
+  var name=((document.getElementById('_bke-name')||{}).value||'').trim();
+  var phone=((document.getElementById('_bke-phone')||{}).value||'').trim();
+  var amount=parseFloat((document.getElementById('_bke-amount')||{}).value)||0;
+  var ci=(document.getElementById('_bke-ci')||{}).value||'';
+  var co=(document.getElementById('_bke-co')||{}).value||'';
+  var status=(document.getElementById('_bke-status')||{}).value||'paid';
+  var MS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function fmtD(d){if(!d)return '';var dt=new Date(d+'T12:00:00');return isNaN(dt)?d:MS[dt.getMonth()]+' '+dt.getDate()+' '+dt.getFullYear();}
+  if(!_bkEditApt){alert('Pick an apartment.');return;}
+  if(!ci){alert('Check-in date is required.');return;}
+  var nights=1; if(ci&&co){var d1=new Date(ci+'T12:00:00'),d2=new Date(co+'T12:00:00');if(!isNaN(d1)&&!isNaN(d2))nights=Math.max(1,Math.round((d2-d1)/86400000));}
+  /* apply */
+  b.apt=_bkEditApt; b.name=name; b.phone=phone; b.checkin=fmtD(ci); b.checkout=fmtD(co); b.nights=nights;
+  b.type=(status==='airbnb')?'airbnb':'direct';
+  if(status==='partial'){
+    var paid=parseFloat((document.getElementById('_bke-paid')||{}).value)||0;
+    b.amount=amount; b.paidAmount=paid; b.pendingAmount=Math.max(0,amount-paid); b.status='partial';
+  } else if(status==='pending'){
+    b.amount=amount; b.paidAmount=0; b.pendingAmount=amount; b.status='pending';
+  } else { /* paid or airbnb */
+    b.amount=amount; b.paidAmount=amount; b.pendingAmount=0; b.status='paid';
+  }
+  saveBookings();
+  /* keep guest tracker in sync (match by booking id) */
+  try{
+    if(typeof loadGuests==='function'){loadGuests();
+      var gi=GUESTS.findIndex(function(g){return g.id===b.id;});
+      if(gi>=0){
+        var gAmt=(b.status==='partial')?b.paidAmount:(b.status==='pending'?0:b.amount);
+        GUESTS[gi].apt=b.apt;GUESTS[gi].name=b.name;GUESTS[gi].phone=b.phone;GUESTS[gi].checkin=b.checkin;
+        GUESTS[gi].amount=b.amount;GUESTS[gi].pendingAmount=b.pendingAmount;GUESTS[gi].paidAmount=b.paidAmount;
+        GUESTS[gi].status=(b.status==='pending')?'pending':(b.status==='partial'?'partial':(b.type==='airbnb'?'paid-airbnb':'paid-cash'));
+        GUESTS[gi].type=b.type;
+      }
+      if(typeof saveGuests==='function')saveGuests();
+    }
+  }catch(e){}
+  var ov=document.getElementById('_bkeOv'); if(ov)ov.remove();
+  if(typeof renderBkCalendar==='function')renderBkCalendar();
+  if(typeof updateBkPendingBadge==='function')updateBkPendingBadge();
+  if(typeof renderPending==='function')renderPending();
+  if(typeof renderDORBanner==='function')renderDORBanner();
+}
 
 </script>
 </body>
