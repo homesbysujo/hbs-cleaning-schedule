@@ -679,12 +679,18 @@ body.dark .bldg-save-btn:hover{background:#8A5E30}
 #gp-modal{position:fixed;inset:0;z-index:9999;display:none;align-items:flex-end;justify-content:center;touch-action:none}
 #gp-modal.open{display:flex}
 #gp-overlay{position:absolute;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);animation:gpFadeIn .25s ease both}
-#gp-sheet{position:relative;width:100%;max-width:600px;height:92vh;overflow-y:auto;border-radius:24px 24px 0 0;padding:0 0 60px;z-index:1;animation:gpSlideUp .4s cubic-bezier(.22,1,.36,1) both;-webkit-overflow-scrolling:touch;background:#FAFAF8;box-shadow:0 -8px 40px rgba(0,0,0,.25)}
+#gp-sheet{position:relative;width:100%;max-width:560px;height:92vh;overflow-y:auto;border-radius:24px 24px 0 0;padding:0 0 60px;z-index:1;animation:gpSlideUp .4s cubic-bezier(.22,1,.36,1) both;-webkit-overflow-scrolling:touch;background:#FAFAF8;box-shadow:0 -8px 40px rgba(0,0,0,.25)}
 @keyframes gpFadeIn{from{opacity:0}to{opacity:1}}@keyframes gpFadeOut{from{opacity:1}to{opacity:0}}
 @keyframes gpSlideUp{from{transform:translateY(100%);opacity:.4}to{transform:translateY(0);opacity:1}}
 @keyframes gpSlideDown{from{transform:translateY(0);opacity:1}to{transform:translateY(100%);opacity:0}}
 @keyframes gpItemIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 .gp-item{animation:gpItemIn .3s ease both}
+.gp-tap{transition:transform .15s cubic-bezier(.34,1.56,.64,1),box-shadow .15s ease,filter .15s ease;cursor:pointer}
+.gp-tap:hover{transform:translateY(-2px) scale(1.015);filter:brightness(1.04)}
+.gp-tap:active{transform:scale(.95);filter:brightness(.96)}
+.gp-stay{transition:transform .15s ease,box-shadow .2s ease}
+.gp-stay:hover{transform:translateX(4px);box-shadow:0 6px 18px rgba(0,0,0,.1)!important}
+
 #gp-sheet::-webkit-scrollbar{display:none}
 </style>
 
@@ -4107,7 +4113,7 @@ function parseDOR(){
     // dm2: "May 6" / "June 5th 2027" style (month first, optional ordinal + year)
     var dm2=raw.match(/(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+(\d{1,2})(?:st|nd|rd|th)?(?!\d)(?:\s*,?\s*(20\d\d))?/i);
     // dm1: "6 May" / "6 May 2027" style - only 1-2 digit day numbers (not 4-digit apt numbers)
-    var dm1=raw.match(/(?<!\d)(\d{1,2})(?!\d)\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*(?:\s*,?\s*(20\d\d))?/i);
+    var dm1=raw.match(/(?<!\d)(\d{1,2})(?:st|nd|rd|th)?(?!\d)\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*(?:\s*,?\s*(20\d\d))?/i);
     if(dm2){var mo2=dm2[1].substring(0,3);mo2=mo2[0].toUpperCase()+mo2.slice(1).toLowerCase();if(dm2[3])_explicitYr=true;checkin=mo2+' '+dm2[2]+' '+(dm2[3]||_yr);}
     else if(dm1){var mo=dm1[2].substring(0,3);mo=mo[0].toUpperCase()+mo.slice(1).toLowerCase();if(dm1[3])_explicitYr=true;checkin=mo+' '+dm1[1]+' '+(dm1[3]||_yr);}
   }
@@ -6442,7 +6448,15 @@ function pndExportPDF(){
   var pending=GUESTS.filter(function(g){return g.status==='pending'||g.status==='partial';});
   var total=pending.reduce(function(s,g){return s+(parseFloat(g.status==='partial'?(g.pendingAmount||g.amount):g.amount)||0);},0);
   var rows=pending.map(function(g){
-    return '<tr><td>'+escH(g.name)+'</td><td>'+escH(typeof fmtGuestPhone==='function'?fmtGuestPhone(g.phone):g.phone)+'</td><td style="color:#5C3D1E;font-weight:700">'+escH(g.apt)+'</td><td style="font-weight:600;color:#E65100">KD '+(parseFloat(g.amount)||0).toFixed(1)+'</td><td>'+escH(g.checkin)+'</td></tr>';
+    var amtCell;
+    if(g.status==='partial'){
+      var _pd=parseFloat(g.pendingAmount||g.amount)||0;
+      var _pa=parseFloat(g.paidAmount||0)||0;
+      amtCell='<span style="font-weight:700;color:#E65100">KD '+_pd.toFixed(1)+' pending<\/span><br><span style="font-size:11px;color:#1B7A40;font-weight:600">KD '+_pa.toFixed(1)+' paid<\/span>';
+    } else {
+      amtCell='<span style="font-weight:600;color:#E65100">KD '+(parseFloat(g.amount)||0).toFixed(1)+'<\/span>';
+    }
+    return '<tr><td>'+escH(g.name)+'</td><td>'+escH(typeof fmtGuestPhone==='function'?fmtGuestPhone(g.phone):g.phone)+'</td><td style="color:#5C3D1E;font-weight:700">'+escH(g.apt)+'</td><td>'+amtCell+'</td><td>'+escH(g.checkin)+'</td></tr>';
   }).join('');
   var w=window.open('','_blank');
   var today=kwNow();
@@ -9204,7 +9218,7 @@ function parseDOR(){
     // dm2: "May 6" / "June 5th 2027" style (month first, optional ordinal + year)
     var dm2=raw.match(/(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+(\d{1,2})(?:st|nd|rd|th)?(?!\d)(?:\s*,?\s*(20\d\d))?/i);
     // dm1: "6 May" / "6 May 2027" style - only 1-2 digit day numbers (not 4-digit apt numbers)
-    var dm1=raw.match(/(?<!\d)(\d{1,2})(?!\d)\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*(?:\s*,?\s*(20\d\d))?/i);
+    var dm1=raw.match(/(?<!\d)(\d{1,2})(?:st|nd|rd|th)?(?!\d)\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*(?:\s*,?\s*(20\d\d))?/i);
     if(dm2){var mo2=dm2[1].substring(0,3);mo2=mo2[0].toUpperCase()+mo2.slice(1).toLowerCase();if(dm2[3])_explicitYr=true;checkin=mo2+' '+dm2[2]+' '+(dm2[3]||_yr);}
     else if(dm1){var mo=dm1[2].substring(0,3);mo=mo[0].toUpperCase()+mo.slice(1).toLowerCase();if(dm1[3])_explicitYr=true;checkin=mo+' '+dm1[1]+' '+(dm1[3]||_yr);}
   }
@@ -11013,7 +11027,15 @@ function pndExportPDF(){
   var pending=GUESTS.filter(function(g){return g.status==='pending'||g.status==='partial';});
   var total=pending.reduce(function(s,g){return s+(parseFloat(g.status==='partial'?(g.pendingAmount||g.amount):g.amount)||0);},0);
   var rows=pending.map(function(g){
-    return '<tr><td>'+escH(g.name)+'</td><td>'+escH(typeof fmtGuestPhone==='function'?fmtGuestPhone(g.phone):g.phone)+'</td><td style="color:#5C3D1E;font-weight:700">'+escH(g.apt)+'</td><td style="font-weight:600;color:#E65100">KD '+(parseFloat(g.amount)||0).toFixed(1)+'</td><td>'+escH(g.checkin)+'</td></tr>';
+    var amtCell;
+    if(g.status==='partial'){
+      var _pd=parseFloat(g.pendingAmount||g.amount)||0;
+      var _pa=parseFloat(g.paidAmount||0)||0;
+      amtCell='<span style="font-weight:700;color:#E65100">KD '+_pd.toFixed(1)+' pending<\/span><br><span style="font-size:11px;color:#1B7A40;font-weight:600">KD '+_pa.toFixed(1)+' paid<\/span>';
+    } else {
+      amtCell='<span style="font-weight:600;color:#E65100">KD '+(parseFloat(g.amount)||0).toFixed(1)+'<\/span>';
+    }
+    return '<tr><td>'+escH(g.name)+'</td><td>'+escH(typeof fmtGuestPhone==='function'?fmtGuestPhone(g.phone):g.phone)+'</td><td style="color:#5C3D1E;font-weight:700">'+escH(g.apt)+'</td><td>'+amtCell+'</td><td>'+escH(g.checkin)+'</td></tr>';
   }).join('');
   var w=window.open('','_blank');
   var today=kwNow();
@@ -13116,15 +13138,16 @@ function openGuestProfile(grpData){
             +'<div style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:'+tier.tc+';opacity:.6;text-transform:uppercase;margin-top:4px">KD Paid</div>'
           +'</div>'
           +'<div style="background:rgba(255,255,255,.12);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:14px 10px;text-align:center">'
-            +'<div style="font-size:14px;font-weight:900;color:'+tier.badge+';background:rgba(255,255,255,.9);border-radius:8px;padding:4px 2px;line-height:1.2">'+tier.label+'</div>'
-            +'<div style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:'+tier.tc+';opacity:.6;text-transform:uppercase;margin-top:6px">Tier</div>'
+            +'<div style="font-size:22px;font-weight:900;color:'+tier.tc+';line-height:1">'+tier.label+'</div>'
+            +'<div style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:'+tier.tc+';opacity:.6;text-transform:uppercase;margin-top:4px">Tier</div>'
           +'</div>'
         +'</div>'
+
         // Action buttons
         +(phoneDig.length>=7
           ?'<div style="display:flex;gap:8px;margin-top:14px;animation:gpItemIn .3s ease .18s both;opacity:0">'
-            +'<a href="https://wa.me/'+phoneDig+'" target="_blank" style="flex:1;background:#25D366;color:#fff;border-radius:14px;padding:13px;font-size:13px;font-weight:700;text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px;box-shadow:0 4px 14px rgba(37,211,102,.4)">'+WA_SVG_S+' WhatsApp</a>'
-            +'<a href="tel:'+phoneDig+'" style="background:rgba(255,255,255,.15);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.25);color:'+tier.tc+';border-radius:14px;padding:13px 18px;font-size:13px;font-weight:700;text-decoration:none;display:flex;align-items:center;gap:5px">&#128222; Call</a>'
+            +'<a class="gp-tap" href="https://wa.me/'+phoneDig+'" target="_blank" style="flex:1;background:#25D366;color:#fff;border-radius:14px;padding:13px;font-size:13px;font-weight:700;text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px;box-shadow:0 4px 14px rgba(37,211,102,.4)">'+WA_SVG_S+' WhatsApp</a>'
+            +'<a class="gp-tap" href="tel:'+phoneDig+'" style="background:rgba(255,255,255,.15);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.25);color:'+tier.tc+';border-radius:14px;padding:13px 18px;font-size:13px;font-weight:700;text-decoration:none;display:flex;align-items:center;gap:5px">&#128222; Call</a>'
           +'</div>'
           :'')
       +'</div>'
@@ -13135,9 +13158,9 @@ function openGuestProfile(grpData){
       +'<div style="margin-bottom:20px;animation:gpItemIn .3s ease .22s both;opacity:0">'
         +'<div style="font-size:10px;font-weight:800;letter-spacing:2.5px;color:#B8913A;text-transform:uppercase;margin-bottom:10px">&#128221; Notes &amp; Flags</div>'
         +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:6px;margin-bottom:10px">'
-          +'<button onclick="setGuestFlagAndRefresh(\''+noteKey+'\',\'red\','+grpJSON+')" style="padding:10px 4px;border-radius:12px;border:2px solid #FF3B30;background:'+(gn.flag==='red'?'linear-gradient(135deg,#FF3B30,#CC1500)':'rgba(255,59,48,.06)')+';color:'+(gn.flag==='red'?'#fff':'#FF3B30')+';font-size:11px;font-weight:700;cursor:pointer;transition:all .2s">&#128680; Problem</button>'
-          +'<button onclick="setGuestFlagAndRefresh(\''+noteKey+'\',\'yellow\','+grpJSON+')" style="padding:10px 4px;border-radius:12px;border:2px solid #FF9500;background:'+(gn.flag==='yellow'?'linear-gradient(135deg,#FF9500,#CC7000)':'rgba(255,149,0,.06)')+';color:'+(gn.flag==='yellow'?'#fff':'#FF9500')+';font-size:11px;font-weight:700;cursor:pointer;transition:all .2s">&#9888; Watch</button>'
-          +'<button onclick="setGuestFlagAndRefresh(\''+noteKey+'\',\'green\','+grpJSON+')" style="padding:10px 4px;border-radius:12px;border:2px solid #34C759;background:'+(gn.flag==='green'?'linear-gradient(135deg,#34C759,#1A9E3F)':'rgba(52,199,89,.06)')+';color:'+(gn.flag==='green'?'#fff':'#34C759')+';font-size:11px;font-weight:700;cursor:pointer;transition:all .2s">&#10003; VIP</button>'
+          +'<button class="gp-tap" onclick="setGuestFlagAndRefresh(\''+noteKey+'\',\'red\','+grpJSON+')" style="padding:10px 4px;border-radius:12px;border:2px solid #FF3B30;background:'+(gn.flag==='red'?'linear-gradient(135deg,#FF3B30,#CC1500)':'rgba(255,59,48,.06)')+';color:'+(gn.flag==='red'?'#fff':'#FF3B30')+';font-size:11px;font-weight:700;cursor:pointer;transition:all .2s">&#128680; Problem</button>'
+          +'<button class="gp-tap" onclick="setGuestFlagAndRefresh(\''+noteKey+'\',\'yellow\','+grpJSON+')" style="padding:10px 4px;border-radius:12px;border:2px solid #FF9500;background:'+(gn.flag==='yellow'?'linear-gradient(135deg,#FF9500,#CC7000)':'rgba(255,149,0,.06)')+';color:'+(gn.flag==='yellow'?'#fff':'#FF9500')+';font-size:11px;font-weight:700;cursor:pointer;transition:all .2s">&#9888; Watch</button>'
+          +'<button class="gp-tap" onclick="setGuestFlagAndRefresh(\''+noteKey+'\',\'green\','+grpJSON+')" style="padding:10px 4px;border-radius:12px;border:2px solid #34C759;background:'+(gn.flag==='green'?'linear-gradient(135deg,#34C759,#1A9E3F)':'rgba(52,199,89,.06)')+';color:'+(gn.flag==='green'?'#fff':'#34C759')+';font-size:11px;font-weight:700;cursor:pointer;transition:all .2s">&#10003; VIP</button>'
           +'<button onclick="setGuestFlagAndRefresh(\''+noteKey+'\',\'\','+grpJSON+')" style="padding:10px 12px;border-radius:12px;border:1.5px solid #E8DDD0;background:#FAF7F2;color:#999;font-size:14px;cursor:pointer">&#10006;</button>'
         +'</div>'
         +'<textarea id="gp-note-input" placeholder="Add note about this guest — damages, issues, VIP preferences..." onblur="saveGuestNoteFromModal(\''+noteKey+'\','+grpJSON+')" onfocus="this.style.borderColor=\'#D4AE5E\';this.style.boxShadow=\'0 0 0 3px rgba(212,174,94,.15)\'" style="width:100%;background:#fff;border:1.5px solid #E8DDD0;border-radius:14px;color:#3D2208;font-family:\'DM Sans\',sans-serif;font-size:13px;padding:14px;resize:none;min-height:90px;outline:none;box-sizing:border-box;transition:border-color .2s,box-shadow .2s;line-height:1.5">'+$h(gn.note||'')+'</textarea>'
@@ -13149,7 +13172,7 @@ function openGuestProfile(grpData){
           var icon=s.status==='paid-airbnb'?'\uD83C\uDD70\uFE0F':s.status==='pending'?'\u203C\uFE0F':'\uD83D\uDCB0';
           var amt=parseFloat(s.amount)||0;
           var isAirbnb=s.status==='paid-airbnb'||s.type==='airbnb';
-          return '<div style="background:#fff;border:1.5px solid #F0E8DE;border-radius:14px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;animation:gpItemIn .25s ease '+(0.3+si*0.05)+'s both;opacity:0;box-shadow:0 2px 8px rgba(0,0,0,.04)">'
+          return '<div class="gp-stay" style="background:#fff;border:1.5px solid #F0E8DE;border-radius:14px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;animation:gpItemIn .25s ease '+(0.3+si*0.05)+'s both;opacity:0;box-shadow:0 2px 8px rgba(0,0,0,.04)">'
             +'<div style="display:flex;align-items:center;gap:10px">'
               +'<div style="width:36px;height:36px;border-radius:10px;background:'+(isAirbnb?'linear-gradient(135deg,#FF5A5F,#E31C5F)':'linear-gradient(135deg,#5C3D1E,#D4AE5E)')+';display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">'+icon+'</div>'
               +'<div>'
@@ -14164,6 +14187,9 @@ function saveBookingEdit(){
   if(typeof renderPending==='function')renderPending();
   if(typeof renderDORBanner==='function')renderDORBanner();
 }
+
+
+
 
 </script>
 </body>
